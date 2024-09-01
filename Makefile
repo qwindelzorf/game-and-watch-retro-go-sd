@@ -44,6 +44,7 @@ Core/Src/gw_malloc.c \
 Core/Src/error_screens.c \
 Core/Src/main.c \
 Core/Src/syscalls.c \
+Core/Src/save_manager.c \
 Core/Src/sha256.c \
 Core/Src/bq24072.c \
 Core/Src/porting/lib/lzma/LzmaDec.c \
@@ -61,6 +62,13 @@ Core/Src/porting/crc32.c \
 Core/Src/stm32h7xx_hal_msp.c \
 Core/Src/stm32h7xx_it.c \
 Core/Src/system_stm32h7xx.c
+
+FATFS_C_SOURCES = \
+Core/Src/porting/lib/FatFs/user_diskio.c \
+Core/Src/porting/lib/FatFs/user_diskio_spi.c \
+Core/Src/porting/lib/FatFs/ff.c \
+Core/Src/porting/lib/FatFs/ffsystem.c \
+Core/Src/porting/lib/FatFs/ffunicode.c
 
 # Add common C++ sources here
 CXX_SOURCES = \
@@ -927,8 +935,12 @@ C_INCLUDES +=  \
 -ICore/Inc \
 -ICore/Src/porting/lib \
 -ICore/Src/porting/lib/lzma \
+-ICore/Src/porting/lib/FatFs \
 -Iretro-go-stm32/components/odroid \
 -I./
+
+FATFS_INCLUDES += \
+-ICore/Src/porting/lib/FatFs
 
 MSX_C_INCLUDES += \
 -ICore/Inc \

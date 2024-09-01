@@ -487,16 +487,8 @@ bool emulator_show_file_menu(retro_emulator_file_t *file)
         emulator_start(file, true, false, 0);
     }
     if (sel == 1) { // New game
-        // To ensure efficient filesystem behavior, we make sure that there
-        // is already a savestate file for this game or that there is enough
-        // free space for a new save state
-        if (has_save) {
-            gui_save_current_tab();
-            emulator_start(file, false, false, 0);
-        } else {
-            // Inform that there is not enough free blocks for a new save
-            odroid_overlay_alert(curr_lang->s_Free_space_alert);
-        }
+        gui_save_current_tab();
+        emulator_start(file, false, false, 0);
     }
     else if (sel == 2) {
 /*
