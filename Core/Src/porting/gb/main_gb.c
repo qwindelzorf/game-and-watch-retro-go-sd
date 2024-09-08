@@ -24,7 +24,6 @@
 #include "rom_manager.h"
 #include "appid.h"
 #include "gw_malloc.h"
-#include "filesystem.h"
 
 #define NVS_KEY_SAVE_SRAM "sram"
 
@@ -366,37 +365,11 @@ static void blit_and_swap(void)
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
     printf("Saving state...\n");
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-
-    // Use GB_ROM_SRAM_CACHE (which points to _GB_ROM_UNPACK_BUFFER)
-    // as a temporary save buffer.
-    size_t size = gb_state_save(GB_ROM_SRAM_CACHE, STATE_SAVE_BUFFER_LENGTH);
-    fs_write(file, GB_ROM_SRAM_CACHE, size);
-    fs_close(file);
-
-    // Restore the cache that was overwritten above.
-    gb_loader_restore_cache();
-
     return 0;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    fs_file_t *file;
-    int savestate_size;
-
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    // Use GB_ROM_SRAM_CACHE (which points to _GB_ROM_UNPACK_BUFFER)
-    // as a temporary save buffer.
-    savestate_size = fs_read(file, GB_ROM_SRAM_CACHE, STATE_SAVE_BUFFER_LENGTH);
-    fs_close(file);
-
-    gb_state_load(GB_ROM_SRAM_CACHE, savestate_size);
-
-    // Restore the cache that was overwritten above.
-    gb_loader_restore_cache();
-
     return true;
 }
 

@@ -18,7 +18,6 @@
 #include "rg_i18n.h"
 #include "lzma.h"
 #include "gw_malloc.h"
-#include "filesystem.h"
 
 #define SMS_WIDTH 256
 #define SMS_HEIGHT 192
@@ -197,32 +196,11 @@ extern uint32 glob_bp_lut[0x10000];
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
-    uint8_t *state_save_buffer = (uint8_t *)glob_bp_lut;
-    system_save_state(state_save_buffer);
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, state_save_buffer, SAVE_STATE_BUFFER_SIZE);
-    fs_close(file);
-
-    /* restore the contents of _bp_lut */
-    render_init();
     return false;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    uint8_t *state_save_buffer = (uint8_t *)glob_bp_lut;
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, state_save_buffer, SAVE_STATE_BUFFER_SIZE);
-    fs_close(file);
-
-    system_load_state((void *)state_save_buffer);
-    /* restore the contents of _bp_lut */
-    render_init();
-
     return true;
 }
 

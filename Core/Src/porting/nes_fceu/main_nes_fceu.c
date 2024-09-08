@@ -479,13 +479,13 @@ void FCEUD_Message(char *s)
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
-    FCEUSS_Save_Fs(savePathName);
+//    FCEUSS_Save_Fs(savePathName);
     return 0;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    FCEUSS_Load_Fs(savePathName);
+//    FCEUSS_Load_Fs(savePathName);
     return true;
 }
 

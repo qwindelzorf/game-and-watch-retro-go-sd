@@ -19,7 +19,6 @@
 #include "rom_manager.h"
 #include "appid.h"
 #include "rg_i18n.h"
-#include "filesystem.h"
 
 #include "zelda3/zelda_assets.h"
 
@@ -185,73 +184,28 @@ static void HandleCommand(uint32 j, bool pressed) {
   }*/
 }
 
-static fs_file_t *savestate_file;
-static char savestate_path[255];
-
 void writeSaveStateInitImpl() {
-  savestate_file = fs_open(savestate_path, FS_WRITE, FS_COMPRESS);
 }
 void writeSaveStateImpl(uint8_t* data, size_t size) {
-  if (savestate_file)
-    fs_write(savestate_file, data, size);
 }
 void writeSaveStateFinalizeImpl() {
-  if (savestate_file) {
-    fs_close(savestate_file);
-    savestate_file = NULL;
-  }
 }
 
 void readSaveStateInitImpl() {
-  savestate_file = fs_open(savestate_path, FS_READ, FS_COMPRESS);
 }
+
 void readSaveStateImpl(uint8_t* data, size_t size) {
-  if (savestate_file != NULL) {
-    wdog_refresh();
-    fs_read(savestate_file, data, size);
-  } else {
-    memset(data, 0, size);
-  }
 }
 void readSaveStateFinalizeImpl() {
-  if (savestate_file != NULL) {
-    fs_close(savestate_file);
-    savestate_file = NULL;
-  }
 }
 
 static bool zelda3_system_SaveState(char *savePathName, char *sramPathName, int slot) {
   printf("Saving state...\n");
-  odroid_audio_mute(true);
-  strcpy(savestate_path, savePathName);
-  SaveLoadSlot(kSaveLoad_Save, 0);
-
-  // Save sram
-  fs_file_t *file = fs_open(sramPathName, FS_WRITE, FS_COMPRESS);
-  fs_write(file, ZeldaGetSram(), 8192);
-  fs_close(file);
-
-  odroid_audio_mute(false);
-  printf("Saved state\n");
   return true;
 }
 
 static bool zelda3_system_LoadState(char *savePathName, char *sramPathName, int slot) {
   printf("Loading state...\n");
-  odroid_audio_mute(true);
-
-  strcpy(savestate_path, savePathName);
-  SaveLoadSlot(kSaveLoad_Load, 0);
-
-  // Load sram
-  fs_file_t *file = fs_open(sramPathName, FS_READ, FS_COMPRESS);
-  if (file != NULL) {
-    fs_read(file, ZeldaGetSram(), 8192);
-    fs_close(file);
-    ZeldaApplySram();
-  }
-
-  odroid_audio_mute(false);
   return true;
 }
 

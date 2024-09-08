@@ -26,7 +26,6 @@
 #include "appid.h"
 #include "lzma.h"
 #include "rg_i18n.h"
-#include "filesystem.h"
 #include "gui.h"
 
 //#define PCE_SHOW_DEBUG
@@ -163,72 +162,10 @@ void osd_log(int type, const char *format, ...) {
 #define SAVE_STATE_BUFFER_SIZE (76*1024)
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot) {
-    int pos=0;
-    uint8_t *pce_save_buf = pce_framebuffer;
-    memset(pce_save_buf, 0x00, SAVE_STATE_BUFFER_SIZE); // 76K save size
-
-    uint8_t *pce_save_header=(uint8_t *)SAVESTATE_HEADER;
-    for(int i=0;i<sizeof(SAVESTATE_HEADER);i++) {
-        pce_save_buf[pos]=pce_save_header[i];
-        pos++;
-    }
-    pce_save_buf[pos]=0; pos++;
-    uint32_t *crc_ptr = (uint32_t *)(pce_save_buf + pos);
-    crc_ptr[0] = PCE.ROM_CRC; pos+=sizeof(uint32_t);
-
-    for (int i = 0; SaveStateVars[i].len > 0; i++) {
-        uint8_t *pce_save_ptr = (uint8_t *)SaveStateVars[i].ptr;
-        for(int j=0;j<SaveStateVars[i].len;j++) {
-            pce_save_buf[pos]=pce_save_ptr[j];
-            pos++;
-        }
-    }
-    assert(pos<SAVE_STATE_BUFFER_SIZE);
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, pce_save_buf, SAVE_STATE_BUFFER_SIZE);
-    fs_close(file);
-
-    sprintf(pce_log,"%08lX",PCE.ROM_CRC);
-    memset(pce_framebuffer,0,sizeof(pce_framebuffer));
     return false;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot) {
-    uint8_t *pce_save_buf = pce_framebuffer;
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, pce_save_buf, SAVE_STATE_BUFFER_SIZE);
-    fs_close(file);
-
-    pce_save_buf+=sizeof(SAVESTATE_HEADER) + 1;
-
-    uint32_t *crc_ptr = (uint32_t *)pce_save_buf;
-#pragma GCC diagnostic ignored "-Warray-bounds"
-    sprintf(pce_log,"%08lX",crc_ptr[0]);
-    if (crc_ptr[0]!=PCE.ROM_CRC) {
-        return true;
-    }
-#pragma GCC diagnostic pop
-
-    pce_save_buf+=sizeof(uint32_t);
-
-    int pos=0;
-    for (int i = 0; SaveStateVars[i].len > 0; i++) {
-        printf("Loading %s (%d)\n", SaveStateVars[i].key, SaveStateVars[i].len);
-        uint8_t *pce_save_ptr = (uint8_t *)SaveStateVars[i].ptr;
-        for(int j=0;j<SaveStateVars[i].len;j++) {
-            pce_save_ptr[j] = pce_save_buf[pos];
-            pos++;
-        }
-    }
-    for(int i = 0; i < 8; i++) {
-        pce_bank_set(i, PCE.MMR[i]);
-    }
-    gfx_reset(true);
-    osd_gfx_set_mode(IO_VDC_SCREEN_WIDTH, IO_VDC_SCREEN_HEIGHT);
     return true;
 }
 

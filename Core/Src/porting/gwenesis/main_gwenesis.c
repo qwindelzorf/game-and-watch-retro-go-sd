@@ -16,8 +16,6 @@ __contact__ = "https://github.com/bzhxx"
 __license__ = "GPLv3"
 
 */
-#include "build/config.h"
-#ifdef ENABLE_EMULATOR_MD
 
 #include <odroid_system.h>
 #include <stdint.h>
@@ -547,6 +545,7 @@ static char gwenesis_sync_mode_str[8];
 #endif
 
 static char AudioFilter_str[2];
+/*
 void gwenesis_save_local_data(fs_file_t *file) {
   fs_write(file, (unsigned char *)&ABCkeys_value, sizeof(int));
   fs_write(file, (unsigned char *)&PAD_A_def, 4);
@@ -566,32 +565,15 @@ void gwenesis_load_local_data(fs_file_t *file) {
   fs_read(file, (unsigned char *)&AudioFilter_str, sizeof(int));
   fs_read(file, (unsigned char *)&gwenesis_lpfilter, 4);
 }
+*/
 
 static bool gwenesis_system_SaveState(char *savePathName, char *sramPathName, int slot) {
   printf("Saving state...\n");
-  fs_file_t *file;
-  file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-  fs_write(file, (unsigned char *)headerString, 8);
-  gwenesis_save_state(file);
-  gwenesis_save_local_data(file);
-  fs_close(file);
   return true;
 }
 
 static bool gwenesis_system_LoadState(char *savePathName, char *sramPathName, int slot) {
   printf("Loading state...\n");
-  fs_file_t *file;
-  file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-  char header[8];
-  fs_read(file, (unsigned char *)header, sizeof(header));
-
-  // Check for header
-  if (memcmp(headerString, header, 8) == 0) {
-      gwenesis_load_state(file);
-      gwenesis_load_local_data(file);
-  }
-
-  fs_close(file);
   return true;
 }
 
@@ -851,4 +833,3 @@ int app_main_gwenesis(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 
     } // end of loop
 }
-#endif

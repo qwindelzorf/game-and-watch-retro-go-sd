@@ -16,7 +16,6 @@
 #include "appid.h"
 #include "bilinear.h"
 #include "rg_i18n.h"
-#include "filesystem.h"
 
 #include "Bios.h"
 #include "Cartridge.h"
@@ -45,33 +44,10 @@ static uint8_t *pokeyMixBuffer         = NULL;
 static uint8_t save_buffer[32832];
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot) {
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, save_buffer, sizeof(save_buffer));
-    fs_close(file);
-
-    if ((save_buffer[0] == '7') &&
-        (save_buffer[1] == '8') &&
-        (save_buffer[2] == '0') &&
-        (save_buffer[3] == '0')) {
-            printf("LoadState OK\n");
-            prosystem_Load((const char *)save_buffer+4);
-        }
     return 0;
 }
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot) {
-    save_buffer[0] = '7';
-    save_buffer[1] = '8';
-    save_buffer[2] = '0';
-    save_buffer[3] = '0';
-    int size = prosystem_Save((char *)save_buffer+4) + 4;
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, save_buffer, size);
-    fs_close(file);
-
     return 0;
 }
 

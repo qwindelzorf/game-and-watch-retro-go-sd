@@ -14,7 +14,6 @@
 #include "rom_manager.h"
 #include "appid.h"
 #include "gw_malloc.h"
-#include "filesystem.h"
 
 #include "celeste.h"
 #include "tilemap.h"
@@ -68,40 +67,11 @@ struct track_info current_track = {-1, 0, 0};
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
-    fs_file_t *file;
-    size_t size;
-    uint8_t *buffer = lcd_get_active_buffer();
-    Celeste_P8_save_state(buffer);
-
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-
-    size = Celeste_P8_get_state_size();
-    fs_write(file, buffer, size);
-    fs_write(file, (unsigned char *)&current_track, sizeof(current_track));
-    fs_close(file);
-
-    memset(buffer, 0, sizeof(framebuffer1));
-
     return true;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    fs_file_t *file;
-    size_t size;
-    uint8_t *buffer = lcd_get_active_buffer();
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    size = Celeste_P8_get_state_size();
-    fs_read(file, buffer, size);
-    fs_read(file, (unsigned char *)&current_track, sizeof(current_track));
-    fs_close(file);
-
-    Celeste_P8_load_state(buffer);
-
-    memset(buffer, 0, sizeof(framebuffer1));
-
-    celeste_api_music(current_track.index, current_track.fade, current_track.mask);
-
     return true;
 }
 

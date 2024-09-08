@@ -11,7 +11,6 @@
 #include "gw_linker.h"
 #include "gw_buttons.h"
 #include "appid.h"
-#include "filesystem.h"
 
 /* TO move elsewhere */
 #include "stm32h7xx_hal.h"
@@ -99,28 +98,12 @@ static unsigned char state_save_buffer[sizeof(gw_state_t)];
 
 static bool gw_system_SaveState(char *savePathName, char *sramPathName, int slot)
 {
-    printf("Saving state...\n");
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-
-    memset(state_save_buffer, '\x00', sizeof(state_save_buffer));
-    gw_state_save(state_save_buffer);
-
-    fs_write(file, state_save_buffer, sizeof(state_save_buffer));
-    fs_close(file);
-
-    return false;
+    return true;
 }
 
 static bool gw_system_LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    printf("Loading state...\n");
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, state_save_buffer, sizeof(state_save_buffer));
-    fs_close(file);
-    return gw_state_load((unsigned char *)state_save_buffer);
-
+    return true;
 }
 
 /* callback to get buttons state */

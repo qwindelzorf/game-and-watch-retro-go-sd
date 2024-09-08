@@ -14,7 +14,6 @@
 #include "gui.h"
 #include "main.h"
 #include "rg_rtc.h"
-#include "filesystem.h"
 
 #include "icons_tama.h"
 #include "main_tama.h"
@@ -56,7 +55,7 @@ static uint8_t tama_sound_period = 0;
 static uint8_t save_buffer[SAVE_STATE_BUFFER_SIZE];
 static int8_t  current_save_slot;
 static bool_t  current_load_state;
-static char    readSavePathName[FS_MAX_PATH_SIZE];
+static char    readSavePathName[/*FS_MAX_PATH_SIZE*/10];
 
 static state_t *state;
 static volatile bool reload;
@@ -116,52 +115,18 @@ static void load_rom() {
 
 static bool LoadStateFromFile() {
     printf("LoadState: loading %s...\n",readSavePathName);
-
-    fs_file_t *file;
-    file = fs_open(readSavePathName, FS_READ, FS_COMPRESS);
-    if (file != NULL) {
-        fs_read(file, save_buffer, SAVE_STATE_BUFFER_SIZE);
-        fs_close(file);
-
-        if (!tama_state_load(save_buffer)) {
-            printf("LoadState: failed.\n");
-            return false;
-        }
-
-        tamalib_refresh_hw();
-        printf("LoadState: done.\n");
-    }
     return true;
 }
 
 // Called by the Reload in game menu option
 static bool LoadState(char *savePathName, char *sramPathName, int slot) {
     printf("Loading : %s", savePathName);
-    strcpy(readSavePathName,savePathName);
-    current_load_state = true;
-    reload = true;
     return true;
 }
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot) {
     printf("SaveState: saving %s ...\n",savePathName);
-    bool result = false;
-
-    result = tama_state_save(save_buffer);
-
-    if (result) {
-        fs_file_t *file;
-        file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-        if (file != NULL) {
-            fs_write(file, save_buffer, SAVE_STATE_BUFFER_SIZE);
-            fs_close(file);
-            printf("SaveState: done.\n");
-        }
-    } else {
-        printf("SaveState: failed.\n");
-    }
-
-    return result;
+    return true;
 }
 
 // ************* Tamalib HAL <-> GW HAL *************

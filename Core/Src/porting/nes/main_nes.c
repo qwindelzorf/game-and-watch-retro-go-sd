@@ -22,7 +22,6 @@
 #include <assert.h>
 #include  "miniz.h"
 #include "lzma.h"
-#include "filesystem.h"
 #include "appid.h"
 
 static uint samplesPerFrame;
@@ -44,14 +43,6 @@ void nes_audio_submit(int16_t *buffer);
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
     printf("Saving state...\n");
-
-    nes_state_save(nes_save_buffer, sizeof(nes_save_buffer));
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, nes_save_buffer, sizeof(nes_save_buffer));
-    fs_close(file);
-
     return 0;
 }
 
@@ -60,13 +51,6 @@ extern int nes_state_load(uint8_t* flash_ptr, size_t size);
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, nes_save_buffer, sizeof(nes_save_buffer));
-    fs_close(file);
-
-    nes_state_load((uint8_t *) nes_save_buffer, sizeof(nes_save_buffer));
-
     return true;
 }
 

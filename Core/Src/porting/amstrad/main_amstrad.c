@@ -18,7 +18,6 @@
 #include "cap32.h"
 #include "main_amstrad.h"
 #include "amstrad_loader.h"
-#include "filesystem.h"
 
 #define AMSTRAD_FPS 50
 #define AMSTRAD_SAMPLE_RATE 22050
@@ -266,65 +265,14 @@ static const uint8_t volume_table[ODROID_AUDIO_VOLUME_MAX + 1] = {
 
 static char *headerString = "AMST0000";
 
-extern int cap32_save_state(fs_file_t *file);
-extern int cap32_load_state(fs_file_t *file);
+//extern int cap32_save_state(fs_file_t *file);
+//extern int cap32_load_state(fs_file_t *file);
 
 bool saveAmstradState(char *savePathName, char *sramPathName, int slot) {
-    // Show disk icon when saving state
-    uint16_t *dest = lcd_get_inactive_buffer();
-    uint16_t idx = 0;
-    for (uint8_t i = 0; i < 24; i++) {
-        for (uint8_t j = 0; j < 24; j++) {
-        if (IMG_DISKETTE[idx / 8] & (1 << (7 - idx % 8))) {
-            dest[274 + j + GW_LCD_WIDTH * (2 + i)] = 0xFFFF;
-        }
-        idx++;
-        }
-    }
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, (unsigned char *)headerString, 8);
-    cap32_save_state(file);
-    fs_write(file, (unsigned char *)&selected_palette_index, 4);
-    fs_write(file, (unsigned char *)&selected_disk_index, 4);
-    fs_write(file, (unsigned char *)&selected_controls_index, 4);
-    fs_write(file, (unsigned char *)&selected_key_index, 4);
-    fs_write(file, (unsigned char *)&amstrad_button_a_key, 4);
-    fs_write(file, (unsigned char *)&amstrad_button_b_key, 4);
-    fs_write(file, (unsigned char *)&amstrad_button_game_key, 4);
-    fs_write(file, (unsigned char *)&amstrad_button_time_key, 4);
-    fs_write(file, (unsigned char *)&amstrad_button_start_key, 4);
-    fs_write(file, (unsigned char *)&amstrad_button_select_key, 4);
-
-    fs_close(file);
-
     return 0;
 }
 
 bool loadAmstradState(char *savePathName, char *sramPathName, int slot) {
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    unsigned char readin_header[8] = {0};
-    fs_read(file, readin_header, 8);
-
-    // Check for header
-    if (memcmp(headerString, readin_header, sizeof(readin_header)) == 0) { 
-        cap32_load_state(file);
-
-        fs_read(file, (unsigned char *)&selected_palette_index, 4);
-        fs_read(file, (unsigned char *)&selected_disk_index, 4);
-        fs_read(file, (unsigned char *)&selected_controls_index, 4);
-        fs_read(file, (unsigned char *)&selected_key_index, 4);
-
-        fs_read(file, (unsigned char *)&amstrad_button_a_key, 4);
-        fs_read(file, (unsigned char *)&amstrad_button_b_key, 4);
-        fs_read(file, (unsigned char *)&amstrad_button_game_key, 4);
-        fs_read(file, (unsigned char *)&amstrad_button_time_key, 4);
-        fs_read(file, (unsigned char *)&amstrad_button_start_key, 4);
-        fs_read(file, (unsigned char *)&amstrad_button_select_key, 4);
-    }
-    fs_close(file);
     return true;
 }
 

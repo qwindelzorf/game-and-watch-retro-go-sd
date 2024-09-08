@@ -16,7 +16,6 @@
 #include "lzma.h"
 #include "appid.h"
 #include "gw_malloc.h"
-#include "filesystem.h"
 
 #include "audio.h"
 #include "o2em_config.h"
@@ -63,28 +62,11 @@ static void blit() {
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
-    uint8_t *save_buffer = (uint8_t *)lcd_get_active_buffer();
-    size_t save_size = savestate_size();
-
-    savestate_to_mem(save_buffer, save_size);
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, save_buffer, save_size);
-    fs_close(file);
-
     return true;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    uint8_t *save_buffer = (uint8_t *)lcd_get_active_buffer();
-    size_t save_size = savestate_size();
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, save_buffer, save_size);
-    fs_close(file);
-    loadstate_from_mem(save_buffer, save_size);
     return true;
 }
 

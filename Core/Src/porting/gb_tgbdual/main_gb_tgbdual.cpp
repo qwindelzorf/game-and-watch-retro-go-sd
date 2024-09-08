@@ -17,7 +17,6 @@ extern "C" {
 #include "rom_manager.h"
 #include "appid.h"
 #include "gw_malloc.h"
-#include "filesystem.h"
 #include "main_gb_tgbdual.h"
 
 extern void __libc_init_array(void);
@@ -61,39 +60,11 @@ bool tgb_drawFrame;
 
 static bool SaveState(char *savePathName, char *sramPathName, int slot)
 {
-    size_t size = g_gb->get_state_size();
-
-    // We store data in the not visible framebuffer
-    lcd_wait_for_vblank();
-    unsigned char *data = (unsigned char *)lcd_get_active_buffer();
-    g_gb->save_state_mem((void *)data);
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_WRITE, FS_COMPRESS);
-    fs_write(file, data, size);
-    fs_close(file);
-
-    lcd_clear_active_buffer();
-
     return true;
 }
 
 static bool LoadState(char *savePathName, char *sramPathName, int slot)
 {
-    // We store data in the not visible framebuffer
-    unsigned char *data = (unsigned char *)lcd_get_active_buffer();
-    size_t size = g_gb->get_state_size();
-
-    fs_file_t *file;
-    file = fs_open(savePathName, FS_READ, FS_COMPRESS);
-    fs_read(file, data, size);
-    fs_close(file);
-
-    if (strcmp((const char *)&(data[34]),g_gb->get_rom()->get_info()->cart_name) == 0)
-        g_gb->restore_state_mem((void *)data);
-
-    lcd_clear_active_buffer();
-
     return true;
 }
 
