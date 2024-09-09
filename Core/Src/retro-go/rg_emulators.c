@@ -120,11 +120,13 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     assert(emulators_count <= MAX_EMULATORS);
     retro_emulator_t *p = &emulators[emulators_count++];
     strcpy(p->system_name, system);
-    //strcpy(p->dirname, dirname);
-    strcpy(p->ext, ext);
+    strcpy(p->dirname, dirname);
+    snprintf(p->exts, sizeof(p->exts), " %s ", ext);
     p->partition = 0;
     p->roms.count = 0;
-    p->roms.files = NULL;
+    p->roms.maxcount = 200;
+//    p->roms.files = NULL;
+    p->roms.files = calloc(200, sizeof(retro_emulator_file_t)); // TODO SD : improve this
     p->initialized = false;
     p->crc_offset = crc_offset;
 
@@ -133,8 +135,88 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     emulator_init(p);
 }
 
+static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
+{
+    retro_emulator_t *emu = (retro_emulator_t *)arg;
+    const char *ext = rg_extension(entry->basename);
+    uint8_t is_valid = false;
+    char ext_buf[32];
+
+    // Skip hidden files
+    if (entry->basename[0] == '.')
+        return RG_SCANDIR_SKIP;
+
+    printf("name = %s\n",entry->basename);
+    if (entry->is_file && ext[0])
+    {
+        snprintf(ext_buf, sizeof(ext_buf), " %s ", ext);
+        is_valid = strstr(emu->exts, rg_strtolower(ext_buf)) != NULL;
+        printf("%d - ext_buf = '%s' ext='%s'\n",is_valid,ext_buf,emu->exts);
+    }
+    else if (entry->is_dir)
+    {
+        printf("Found subdirectory '%s'", entry->path);
+        is_valid = true;
+    }
+
+    if (!is_valid)
+        return RG_SCANDIR_CONTINUE;
+
+    if (emu->roms.count + 1 > emu->roms.maxcount)
+    {
+        size_t new_maxcount = emu->roms.maxcount * 1.5;
+        retro_emulator_file_t *new_buf = realloc(emu->roms.files, new_maxcount * sizeof(retro_emulator_file_t));
+        if (!new_buf)
+        {
+            printf("Ran out of memory, file scanning stopped at %d entries ...", emu->roms.count);
+            return RG_SCANDIR_STOP;
+        }
+        emu->roms.files = new_buf;
+        emu->roms.maxcount = new_maxcount;
+    }
+
+    emu->roms.files[emu->roms.count++] = (retro_emulator_file_t) {
+        .name = strdup(entry->basename),
+        .ext = ext,
+        .address = 0,
+        .size = entry->size,
+        .system = NULL,
+        .region = REGION_NTSC,
+        .extra = NULL,
+    };
+
+    printf("emu->roms.count %d\n",emu->roms.count);
+    return RG_SCANDIR_CONTINUE;
+}
+#if 0
+const retro_emulator_file_t gg_roms[] EMU_DATA = {
+	{
+#if CHEAT_CODES == 1
+		.id = 0,
+#endif
+		.name = "Super Off Road (USA, Europe)",
+		.ext = "gg",
+		.address = _binary__Users_sylverbruneau_Documents_dev_gnw_filesystem_sd_game_and_watch_retro_go_roms_gg_Super_Off_Road__USA__Europe__gg_start,
+		.size = 131072,
+		#if COVERFLOW != 0
+		.img_address = NULL,
+		.img_size = 0,
+		#endif
+		.system = &gg_system,
+		.region = REGION_NTSC,
+		.extra = NULL,
+#if CHEAT_CODES == 1
+		.cheat_codes = NULL,
+		.cheat_descs = 0,
+		.cheat_count = 0,
+#endif
+	},
+
+};
+#endif
 void emulator_init(retro_emulator_t *emu)
 {
+    char folder[255];
     if (emu->initialized)
         return;
 
@@ -142,12 +224,16 @@ void emulator_init(retro_emulator_t *emu)
 
     printf("Retro-Go: Initializing emulator '%s'\n", emu->system_name);
 
+    snprintf(folder, sizeof(folder), "%s/%s", RG_BASE_PATH_ROMS, emu->dirname);
 
+    rg_storage_scandir(folder, scan_folder_cb, emu, RG_SCANDIR_RECURSIVE);
+
+#if 0
     const rom_system_t *system = rom_manager_system(&rom_mgr, emu->system_name);
     if (system) {
         emu->system = system;
-        emu->roms.files = system->roms;
-        emu->roms.count = system->roms_count;
+//        emu->roms.files = system->roms;
+//        emu->roms.count = system->roms_count;
 #if COVERFLOW != 0        
         emu->cover_height = system->cover_height;
         emu->cover_width = system->cover_width;
@@ -160,6 +246,7 @@ void emulator_init(retro_emulator_t *emu)
             HAL_Delay(100);
         }
     }
+#endif
 
     // retro_emulator_file_t *file = &emu->roms.files[emu->roms.count++];
     // strcpy(file->folder, "/");
@@ -529,6 +616,7 @@ bool emulator_show_file_menu(retro_emulator_file_t *file)
 
 void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused, int8_t save_slot)
 {
+#if 0
     printf("Retro-Go: Starting game: %s\n", file->name);
     rom_manager_set_active_file(file);
 
@@ -684,11 +772,31 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
       app_main_tama(load_state, start_paused, save_slot);
 #endif
     }
-    
+#endif
 }
 
 void emulators_init()
 {
+    add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb);
+/*
+    add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb);
+    add_emulator("Nintendo Entertainment System", "nes", "nes fc fds nsf", "fceumm", 16, &pad_nes, &header_nes);
+    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, &pad_gw, &header_gw);
+    add_emulator("PC Engine", "pce", "pce", "pce-go", 0, &pad_pce, &header_pce);
+    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, &pad_gg, &header_gg);
+    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, &pad_sms, &header_sms);
+    add_emulator("Sega Genesis", "md", "md gen bin", "gwenesis", 0, &pad_gen, &header_gen);
+    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, &pad_sg1000, &header_sg1000);
+    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &pad_col, &header_col);
+    add_emulator("MSX", "msx", "rom mx1 mx2 dsk", "blueMSX", 0, &pad_msx, &header_msx);
+    add_emulator("Watara Supervision", "wsv", "wsv", "potator", 0, &pad_wsv, &header_wsv);
+//    add_emulator("Atari 2600", "a2600", "a2600", "stella2014-go", 0, &pad_a7800, &header_a7800); // TODO : add specific gfx
+    add_emulator("Atari 7800", "a7800", "a7800", "prosystem-go", 0, &pad_a7800, &header_a7800);
+    add_emulator("Amstrad CPC", "amstrad", "amstrad", "caprice32", 0, &pad_amstrad, &header_amstrad);
+//    add_emulator("Philips Vectrex", "videopac", "bin", "o2em-go", 0, &pad_gb, &header_gb); // TODO Sylver : change graphics
+    add_emulator("Tamagotchi", "tama", "b", "tamalib", 0, &pad_tama, &header_tama);*/
+//    while(1); // sylver
+#if 0
 #if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) || defined(ENABLE_EMULATOR_GW) || defined(ENABLE_EMULATOR_MSX) || defined(ENABLE_EMULATOR_WSV) || defined(ENABLE_EMULATOR_MD) || defined(ENABLE_EMULATOR_A7800) || defined(ENABLE_EMULATOR_AMSTRAD) || defined(ENABLE_EMULATOR_VIDEOPAC) || defined(ENABLE_HOMEBREW)|| defined(ENABLE_HOMEBREW_ZELDA3) || defined(ENABLE_HOMEBREW_SMW) || defined(ENABLE_EMULATOR_TAMA) || defined(ENABLE_EMULATOR_A2600))
     // Add gameboy as a placeholder in case no emulator is built.
     add_emulator("Nintendo Gameboy", "gb", "gb", "tgbdual-go", 0, &pad_gb, &header_gb);
@@ -776,6 +884,7 @@ void emulators_init()
     // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
     // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);
     // add_emulator("Atari 2600", "a26", "a26", "stella-go", 0, logo_a26, header_a26);
+#endif
 }
 
 bool emulator_is_file_valid(retro_emulator_file_t *file)

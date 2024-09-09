@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_TAMA
 #if OFF_SAVESTATE == 1
 #include <gw_linker.h>
 #endif
@@ -488,5 +485,3 @@ _Noreturn void app_main_tama(uint8_t load_state, uint8_t start_paused, int8_t sa
         start_paused = false;
     }
 }
-
-#endif

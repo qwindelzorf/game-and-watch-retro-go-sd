@@ -55,6 +55,7 @@ rg_app_desc_t *odroid_system_get_app()
     return &currentApp;
 }
 
+#if 0
 const char OFF_SAVESTATE_PATH[] = "savestate/common";
 const char OFF_GNW_DATA_PATH[] = "savestate/common.gnw";
 const char OFF_SRAM_PATH[] = "savestate/common.srm";
@@ -109,6 +110,8 @@ void odroid_system_get_sram_path(char *path, size_t size, int slot)
                  slot);
     }
 }
+#endif
+
 /* Return true on successful load.
  * Slot -1 is for the OFF_SAVESTATE
  * */
@@ -258,7 +261,7 @@ void odroid_system_sleep(void)
     {
         sleep_hook();
     }
-    odroid_settings_StartupFile_set(ACTIVE_FILE);
+//    odroid_settings_StartupFile_set(ACTIVE_FILE);
 
     // odroid_settings_commit();
     gui_save_current_tab();

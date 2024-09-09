@@ -1,6 +1,3 @@
-#include "build/config.h"
-#ifdef ENABLE_HOMEBREW_SMW
-
 #include <odroid_system.h>
 #include <stdint.h>
 #include <string.h>
@@ -401,4 +398,3 @@ int app_main_smw(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     common_emu_sound_sync(false);
   }
 }
-#endif

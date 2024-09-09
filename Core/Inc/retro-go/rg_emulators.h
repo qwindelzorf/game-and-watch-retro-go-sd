@@ -52,8 +52,8 @@ typedef struct {
 
 typedef struct {
     char system_name[32];
-    //char dirname[16];
-    char ext[4];
+    char dirname[16];
+    char exts[16];
     uint16_t crc_offset;
     uint16_t partition;
 	#if COVERFLOW != 0
@@ -61,8 +61,9 @@ typedef struct {
     size_t cover_height;
 	#endif
     struct {
-        const retro_emulator_file_t *files;
+        retro_emulator_file_t *files;
         int count;
+        int maxcount;
     } roms;
     bool initialized;
     const rom_system_t *system;

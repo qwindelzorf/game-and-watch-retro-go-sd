@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_VIDEOPAC
 #include <odroid_system.h>
 #include <string.h>
 #include <assert.h>
@@ -547,5 +544,3 @@ void app_main_videopac(uint8_t load_state, uint8_t start_paused, int8_t save_slo
         common_emu_sound_sync(false);
     }
 }
-
-#endif

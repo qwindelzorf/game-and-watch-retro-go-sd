@@ -36,9 +36,6 @@
  *
  ****************************************************************************************/
 
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_AMSTRAD
 #include "amstrad_format.h"
 
 //#define FORMAT_DEBUG
@@ -208,4 +205,3 @@ bool format_probe_hexagon (t_drive *drive)
 
    return result;
 }
-#endif

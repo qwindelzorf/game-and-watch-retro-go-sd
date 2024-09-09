@@ -1,6 +1,3 @@
-#include "build/config.h"
-#ifdef ENABLE_EMULATOR_MSX
-
 #include <odroid_system.h>
 #include <string.h>
 #include <stdio.h>
@@ -2110,6 +2107,4 @@ void archSoundDestroy(void) {}
 void update_cheats_msx() {
     msxUpdateCheatInfo();
 }
-#endif
-
 #endif

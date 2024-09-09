@@ -13,7 +13,7 @@ endif
 ROMS_A2600 := $(filter-out roms/a2600/.keep, $(wildcard roms/a2600/*))
 ROMS_A7800 := $(filter-out roms/a7800/.keep, $(wildcard roms/a7800/*))
 ROMS_AMSTRAD := $(filter-out roms/amstrad/.keep, $(wildcard roms/amstrad/*))
-ROMS_GB := $(filter-out roms/gb/.keep, $(wildcard roms/gb/*))
+ROMS_GB := true # $(filter-out roms/gb/.keep, $(wildcard roms/gb/*))
 ROMS_GW := $(filter-out roms/gw/.keep, $(wildcard roms/gw/*))
 ROMS_MD := $(filter-out roms/md/.keep, $(wildcard roms/md/*))
 ROMS_NES := $(filter-out roms/nes/.keep, $(wildcard roms/nes/*))
@@ -41,6 +41,7 @@ Core/Src/gw_flash.c \
 Core/Src/gw_lcd.c \
 Core/Src/gw_audio.c \
 Core/Src/gw_malloc.c \
+Core/Src/gw_sdcard.c \
 Core/Src/error_screens.c \
 Core/Src/main.c \
 Core/Src/syscalls.c \

@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_PCE
 // sound.c - Sound emulation
 //
 #include "sound_pce.h"
@@ -234,5 +231,3 @@ void pce_snd_update(int16_t *output, unsigned length) {
         }
     }
 }
-
-#endif

@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_AMSTRAD
 #include <odroid_system.h>
 
 #include <assert.h>
@@ -1088,4 +1085,3 @@ void app_main_amstrad(uint8_t load_state, uint8_t start_paused, int8_t save_slot
         common_emu_sound_sync(false);
     }
 }
-#endif

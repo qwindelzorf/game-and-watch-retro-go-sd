@@ -1,7 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_GB
-
 extern "C" {
 #include <odroid_system.h>
 #include <string.h>
@@ -507,5 +503,3 @@ extern "C" void app_main_gb_tgbdual(uint8_t load_state, uint8_t start_paused, ui
 
  	app_main_gb_tgbdual_cpp(load_state, start_paused,save_slot);
  }
-
-#endif

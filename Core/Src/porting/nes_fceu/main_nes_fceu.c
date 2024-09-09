@@ -1,6 +1,4 @@
-#include "build/config.h"
-
-#if defined(ENABLE_EMULATOR_NES) && FORCE_NOFRENDO == 0
+#if FORCE_NOFRENDO == 0
 
 #include <string.h>
 #include <ctype.h>

@@ -1,6 +1,3 @@
-#include "build/config.h"
-#ifdef ENABLE_EMULATOR_MSX
-
 #include <odroid_system.h>
 
 #include "main.h"
@@ -160,5 +157,3 @@ void saveStateCreateForRead(const char* fileName)
 {
     // Nothing to do, file is previously opened in loadMsxState()
 }
-
-#endif

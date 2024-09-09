@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_WSV
 #include <odroid_system.h>
 
 #include <assert.h>
@@ -514,5 +511,3 @@ int app_main_wsv(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 
     return 0;
 }
-
-#endif

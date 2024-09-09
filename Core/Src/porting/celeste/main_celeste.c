@@ -1,5 +1,3 @@
-#include "build/config.h"
-
 #include <odroid_system.h>
 #include <string.h>
 #include <assert.h>

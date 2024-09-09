@@ -301,7 +301,8 @@ Core/Src/porting/gw_alloc.c \
 Core/Src/retro-go/rg_main.c \
 Core/Src/retro-go/rg_rtc.c \
 Core/Src/retro-go/rg_emulators.c \
-Core/Src/retro-go/rom_manager.c \
+Core/Src/retro-go/rg_storage.c \
+Core/Src/retro-go/rg_utils.c \
 Core/Src/porting/odroid_settings.c \
 Core/Src/retro-go/i18n/rg_i18n.c \
 Core/Src/retro-go/rg_logos.c
@@ -544,8 +545,7 @@ C_INCLUDES +=  \
 
 CXX_INCLUDES += \
 
-# Force include the configuration
-CFLAGS += $(CFLAGS_EXTRA) -include $(BUILD_DIR)/config.h
+CFLAGS += $(CFLAGS_EXTRA)
 
 # compile gcc flags
 ASFLAGS += $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
@@ -598,6 +598,7 @@ LIBS = -lc -lm -lnosys
 CXXLIBS = -lstdc++
 LIBDIR +=
 LDFLAGS += $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) $(CXXLIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS += -Wl,--wrap=fflush
 
 # default action: build all
 all: CheckTools CheckDirtySubmodules $(BUILD_DIR) $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET)_extflash.bin $(BUILD_DIR)/$(TARGET)_intflash.bin $(BUILD_DIR)/$(TARGET)_intflash2.bin
@@ -641,8 +642,6 @@ vpath %.cxx $(sort $(dir $(A2600_CXX_SOURCES) ))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(SDK_ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(SDK_ASM_SOURCES)))
 
-OBJECTS += $(addprefix $(BUILD_DIR)/,roms.a)
-
 # function used to generate prerequisite rules for SDK objects
 define sdk_obj_prereq_gen
 $(BUILD_DIR)/$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(notdir $1))): $1
@@ -666,25 +665,6 @@ $(BUILD_DIR)/core/rg_main.o: Core/Inc/githash.h
 # Run parse_roms.py to generate information about the roms
 $(BUILD_DIR)/rom_files.txt: FORCE | $(BUILD_DIR)
 	$(V)$(ECHO) [ BASH ] Checking for updated roms
-	$(V)./scripts/update_rom_files.sh build/rom_files.txt roms/gb roms/nes roms/sms roms/gg roms/col roms/pce roms/sg roms/msx roms/gw roms/wsv roms/md roms/a2600 roms/a7800 roms/amstrad roms/videopac roms/homebrew roms/tama
-
-$(BUILD_DIR)/roms.a: $(BUILD_DIR)/rom_files.txt parse_roms.py
-	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) parse_roms.py \
-		--flash-size=$(EXTFLASH_SIZE) \
-		$(SAVE_PARAM) \
-		$(COMPRESS_PARAM) \
-		$(CODEPAGE_PARAM) \
-		$(COVERFLOW_PARAM) \
-		$(JPG_QUALITY_PARAM) \
-		$(NOFRENDO_PARAM) 
-
-$(BUILD_DIR)/config.h $(BUILD_DIR)/cacheflash.ld &: $(BUILD_DIR)/roms.a
-	$(V)/bin/sh -c true
-STM32H7B0VBTx_FLASH.ld: $(BUILD_DIR)/cacheflash.ld
-
-# rom_manager.c depends on the different *_roms.c files but they only change when roms.a changes
-$(BUILD_DIR)/core/rom_manager.o: Core/Src/retro-go/rom_manager.c $(BUILD_DIR)/roms.a
 
 ifeq (${CHECK_DIRTY_SUBMODULE},1)
 CheckDirtySubmodules:
@@ -737,7 +717,7 @@ CheckTools:
 endif
 .PHONY: CheckTools
 
-$(BUILD_DIR)/%.o: %.s Makefile.common Makefile $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile.common Makefile | $(BUILD_DIR)
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
@@ -746,88 +726,88 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(FATFS_OBJECTS) $(A2600_OBJECTS) $(A7800
 	$(V)$(CC) $(OBJECTS) $(FATFS_OBJECTS) $(A2600_OBJECTS) $(A7800_OBJECTS) $(NES_OBJECTS) $(NES_FCEU_OBJECTS) $(GNUBOY_OBJECTS) $(TGBDUAL_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(MSX_OBJECTS) $(GW_OBJECTS) $(WSV_OBJECTS) $(MD_OBJECTS) $(AMSTRAD_OBJECTS) $(VIDEOPAC_OBJECTS) $(CELESTE_OBJECTS) $(CXX_OBJECTS) $(TGBDUAL_CXX_OBJECTS) $(A2600_CXX_OBJECTS) $(ZELDA3_OBJECTS) $(SMW_OBJECTS) $(TAMA_OBJECTS) $(LDFLAGS) -o $@
 	$(V)./scripts/extflash_size.sh $@
 
-$(BUILD_DIR)/core/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/core/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC core ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/core/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/fatfs/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/fatfs/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC FatFs ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(FATFS_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/fatfs/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/nes/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/nes/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC nes ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(NES_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/nes/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/nes_fceu/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/nes_fceu/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC nes-fceu ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(NES_FCEU_C_INCLUDES) -Wno-sequence-point -Wno-parentheses -Wa,-a,-ad,-alms=$(BUILD_DIR)/nes_fceu/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gnuboy/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/gnuboy/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC gb ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(GNUBOY_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gnuboy/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/tgbdual/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/tgbdual/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC GB TGB Dual ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(TGBDUAL_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/tgbdual/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/smsplusgx/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC sms ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(SMSPLUSGX_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/smsplusgx/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/pce/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/pce/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC pce ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(PCE_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/pce/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/msx/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/msx/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC msx ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(MSX_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/msx/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/gw/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/gw/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC gw ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(GW_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/gw/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/wsv/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/wsv/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC wsv ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(WSV_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/wsv/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/md/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/md/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC md ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(MD_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/md/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/a7800/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/a7800/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC a7800 ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(A7800_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/a7800/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/a2600/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/a2600/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC a2600 ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(A2600_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/a2600/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/amstrad/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/amstrad/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC amstrad CPC ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(AMSTRAD_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/amstrad/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/videopac/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/videopac/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC o2em ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(VIDEOPAC_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/videopac/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/celeste/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/celeste/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC celeste ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(CELESTE_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/celeste/$(notdir $(<:.c=.lst)) $< -o $@
 
-$(BUILD_DIR)/tama/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/tama/%.o: %.c Makefile.common Makefile $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CC tama ] $(notdir $<)
 	$(V)$(CC) -c $(CFLAGS) $(TAMA_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/tama/$(notdir $(<:.c=.lst)) $< -o $@
 
 # CXX
-$(BUILD_DIR)/core/%.o: %.cpp Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/core/%.o: %.cpp Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CXX core ] $(notdir $<)
 	$(V)$(CXX) -c $(CXXFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/core/$(notdir $(<:.cpp=.lst)) $< -o $@
 
-$(BUILD_DIR)/tgbdual/%.o: %.cpp Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/tgbdual/%.o: %.cpp Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CXX GB TGB Dual ] $(notdir $<)
 	$(V)$(CXX) -c $(CXXFLAGS) $(TGBDUAL_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/tgbdual/$(notdir $(<:.cpp=.lst)) $< -o $@
 
-$(BUILD_DIR)/a2600/%.o: %.cxx Makefile Makefile.common $(SDK_HEADERS) $(BUILD_DIR)/config.h | $(BUILD_DIR)
+$(BUILD_DIR)/a2600/%.o: %.cxx Makefile Makefile.common $(SDK_HEADERS) | $(BUILD_DIR)
 	$(V)$(ECHO) [ CXX a2600 ] $(notdir $<)
 	$(V)$(CXX) -c $(CXXFLAGS) $(A2600_C_INCLUDES) -Wa,-a,-ad,-alms=$(BUILD_DIR)/a2600/$(notdir $(<:.cxx=.lst)) $< -o $@
 
@@ -909,7 +889,7 @@ C_DEFS_ZELDA3 =  \
 
 # function used to generate prerequisite rules for zelda3 objects
 define zelda3_obj_prereq_gen
-$$(BUILD_DIR)/zelda3/$(patsubst %.c,%.o,$(notdir $1)): $1 Makefile.common Makefile $$(SDK_HEADERS) $$(BUILD_DIR)/config.h | $$(BUILD_DIR)
+$$(BUILD_DIR)/zelda3/$(patsubst %.c,%.o,$(notdir $1)): $1 Makefile.common Makefile $$(SDK_HEADERS) | $$(BUILD_DIR)
 	$$(V)$$(ECHO) [ CC zelda3 ] $$(notdir $$<)
 	$$(V)$$(CC) -c $$(CFLAGS) $$(C_DEFS_ZELDA3) $$(ZELDA3_C_INCLUDES)-Wa,-a,-ad,-alms=$$(BUILD_DIR)/zelda3/$$(notdir $$(<:.c=.lst)) $$< -o $$@ \
 	-Wno-parentheses -Wno-unknown-pragmas -Wno-incompatible-pointer-types -Wno-unused-const-variable -Wno-strict-aliasing -Wno-comment -Wno-unused-function -Wno-stack-usage -Wno-int-in-bool-context -Wno-unused-variable -Wno-unused-but-set-variable
@@ -981,7 +961,7 @@ C_DEFS_SMW =  \
 
 # function used to generate prerequisite rules for smw objects
 define smw_obj_prereq_gen
-$$(BUILD_DIR)/smw/$(patsubst %.c,%.o,$(notdir $1)): $1 Makefile.common Makefile $$(SDK_HEADERS) $$(BUILD_DIR)/config.h | $$(BUILD_DIR)
+$$(BUILD_DIR)/smw/$(patsubst %.c,%.o,$(notdir $1)): $1 Makefile.common Makefile $$(SDK_HEADERS) | $$(BUILD_DIR)
 	$$(V)$$(ECHO) [ CC smw ] $$(notdir $$<)
 	$$(V)$$(CC) -c $$(CFLAGS) $$(C_DEFS_SMW) $$(SMW_C_INCLUDES) -Wa,-a,-ad,-alms=$$(BUILD_DIR)/smw/$$(notdir $$(<:.c=.lst)) $$< -o $$@ \
 	-Wno-parentheses -Wno-unknown-pragmas -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-int-in-bool-context -Wno-unused-value -Wno-unused-function -Wno-incompatible-pointer-types -Wno-implicit-function-declaration -Wno-format -Wno-array-bounds -Wno-strict-aliasing -Wno-maybe-uninitialized
@@ -1227,23 +1207,10 @@ help:
 	@echo "  gdb_intflash      - Flashes intflash and then starts gdb and attaches to gdbserver"
 	@echo "  reset_dbgmcu      - Resets the unit and turns off DBGMCU (lowers battery drain)"
 	@echo "  reset_mcu         - Resets the unit"
-	@echo "  romdef            - Dumps all rom info to roms.json in roms directory to custom display name and"
 	@echo "                      publish property under edit that file before make flash "
 	@echo "  size              - Prints size information for all sections"
 	@echo ""
 .PHONY: help
-
-#######################################
-# Define rom's display name and publish property
-#######################################
-romdef:
-	$(V)$(ECHO) [ PYTHON3 ] $(notdir $<)
-	$(V)$(PYTHON3) parse_romdef.py
-	$(V)$(ECHO) [ RM ] $(BUILD_DIR)/roms.a
-	$(V)rm -rf $(BUILD_DIR)/roms.a
-	$(V)$(ECHO) [ RM ] $(BUILD_DIR)/core/rom_manager.*
-	$(V)rm -rf $(BUILD_DIR)/core/rom_manager.*
-.PHONY: romdef
 
 #######################################
 # download SDK files

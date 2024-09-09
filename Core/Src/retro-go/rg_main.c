@@ -14,6 +14,7 @@
 #include "gw_lcd.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
+#include "gw_sdcard.h"
 #include "rg_rtc.h"
 #include "rg_i18n.h"
 #include "bitmaps.h"
@@ -820,7 +821,7 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
     //check data;
     app_check_data_loop();
 
-//    fs_init();
+    sdcard_init();
     // Re-initialize system now that the filesystem is mounted.
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     uint8_t oc = odroid_settings_cpu_oc_level_get();

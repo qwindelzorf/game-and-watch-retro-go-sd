@@ -86,7 +86,7 @@ __RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 __RAM_END__         = __RAM_START__ + 1024K;
 
-INCLUDE build/cacheflash.ld
+__CACHEFLASH_LENGTH__ = 0;
 
 /****
  * External Flash Layout
@@ -242,8 +242,6 @@ SECTIONS
     __extflash_game_rom_start__ = .;
     *(.extflash_game_rom)
     __extflash_game_rom_end__ = .;
-    INCLUDE build/zelda3_extflash.ld
-    INCLUDE build/smw_extflash.ld
   } > EXTFLASH
 
   .overlay_nes __RAM_EMU_START__ : {

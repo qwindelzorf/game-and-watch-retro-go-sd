@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_A2600
 extern "C"
 {
 #include <odroid_system.h>
@@ -453,5 +450,3 @@ extern "C" int app_main_a2600(uint8_t load_state, uint8_t start_paused, int8_t s
 
     return 0;
 }
-
-#endif

@@ -35,9 +35,6 @@
  *
  ****************************************************************************************/
 
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_AMSTRAD
 #include <stdio.h>
 
 #define LOADER_MAX_SIZE 256
@@ -245,4 +242,3 @@ void loader_run (char * key_buffer)
 
    _loader_run(key_buffer, test_format, current_drive);
 }
-#endif

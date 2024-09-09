@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_A7800
 #include <odroid_system.h>
 
 #include <assert.h>
@@ -274,5 +271,3 @@ int app_main_a7800(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 
     return 0;
 }
-
-#endif

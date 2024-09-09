@@ -1,6 +1,4 @@
-#include "build/config.h"
-
-#if defined(ENABLE_EMULATOR_NES) && FORCE_NOFRENDO == 1
+#if FORCE_NOFRENDO == 1
 #include <odroid_system.h>
 
 #include <string.h>

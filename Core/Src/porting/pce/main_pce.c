@@ -1,6 +1,3 @@
-#include "build/config.h"
-
-#ifdef ENABLE_EMULATOR_PCE
 #include <odroid_system.h>
 #include <string.h>
 
@@ -595,5 +592,3 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused, int8_t save_slot) {
     rg_free(active_cheat_codes); // No need to clean up the objects in the array as they're allocated in read only space
 #endif
 }
-
-#endif

@@ -13,29 +13,8 @@ saveflash.ld
 
 rom_hashes.txt
 
-Core/Src/retro-go/amstrad_roms.c
-Core/Src/retro-go/col_roms.c
-Core/Src/retro-go/gb_roms.c
-Core/Src/retro-go/gg_roms.c
-Core/Src/retro-go/nes_roms.c
-Core/Src/retro-go/nes_bios.c
-Core/Src/retro-go/pce_roms.c
-Core/Src/retro-go/gw_roms.c
-Core/Src/retro-go/sg1000_roms.c
-Core/Src/retro-go/sms_roms.c
-Core/Src/retro-go/msx_roms.c
-Core/Src/retro-go/msx_bios.c
-Core/Src/retro-go/wsv_roms.c
-Core/Src/retro-go/md_roms.c
-Core/Src/retro-go/a7800_roms.c
-Core/Src/retro-go/zelda3_roms.c
 Core/Src/porting/zelda3/zelda_assets.c
-Core/Src/retro-go/smw_roms.c
 Core/Src/porting/smw/smw_assets.c
-Core/Src/retro-go/videopac_roms.c
-Core/Src/retro-go/homebrew_roms.c
-Core/Src/retro-go/tama_roms.c
-Core/Src/retro-go/a2600_roms.c
 
 linux/loaded_gb_rom.c
 linux/loaded_nes_rom.c
