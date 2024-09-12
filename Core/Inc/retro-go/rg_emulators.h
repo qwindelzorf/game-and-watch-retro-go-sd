@@ -29,7 +29,7 @@ typedef struct {
 #endif
     const char *name;
     const char *ext;
-    // char folder[32];
+    char *path;
     const uint8_t *address;
     uint32_t size;
 	#if COVERFLOW != 0

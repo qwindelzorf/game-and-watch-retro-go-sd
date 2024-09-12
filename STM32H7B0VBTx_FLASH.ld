@@ -86,7 +86,7 @@ __RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 __RAM_END__         = __RAM_START__ + 1024K;
 
-__CACHEFLASH_LENGTH__ = 0;
+__CACHEFLASH_LENGTH__ = 3M;
 
 /****
  * External Flash Layout
@@ -110,19 +110,12 @@ __CACHEFLASH_LENGTH__ = 0;
  *            |          Reserved space          |
  *            |    to decompress Roms not        |
  *            |         fitting in RAM           |
- *            +----------------------------------+  __CACHEFLASH_END__ __FILESYSTEM_START__
- *            |                                  |
- *            |            Filesystem            |
- *            |                                  |
- *            +----------------------------------+  __FILESYSTEM_END__ __EXTFLASH_END__
+ *            +----------------------------------+  __CACHEFLASH_END__ __EXTFLASH_END__
  */
 __EXTFLASH_LENGTH__ = __EXTFLASH_TOTAL_LENGTH__ - __CACHEFLASH_LENGTH__;
 __EXTFLASH_END__ = __EXTFLASH_START__ + __EXTFLASH_LENGTH__;
 __CACHEFLASH_START__ = __EXTFLASH_END__;
 __CACHEFLASH_END__   = __CACHEFLASH_START__ + __CACHEFLASH_LENGTH__;
-
-__FILESYSTEM_START__ = __EXTFLASH_START__ + __FILESYSTEM_OFFSET__;
-__FILESYSTEM_END__ = __FILESYSTEM_START__ + __FILESYSTEM_LENGTH__;
 
 
 __INTFLASH__ = DEFINED(__INTFLASH__) ? __INTFLASH__ : 0x08000000;
@@ -144,7 +137,6 @@ MEMORY
   FLASH2   (xr ) : ORIGIN = 0x08100000,          LENGTH = __FLASH2_LENGTH__
   EXTFLASH   (xr ) : ORIGIN = __EXTFLASH_START__,  LENGTH = __EXTFLASH_LENGTH__
   CACHEFLASH (xr ) : ORIGIN = __CACHEFLASH_START__,  LENGTH = __CACHEFLASH_LENGTH__
-  FILESYSTEM (xr ) : ORIGIN = __FILESYSTEM_START__, LENGTH = __FILESYSTEM_LENGTH__
 }
 
 
@@ -669,14 +661,6 @@ SECTIONS
     __cacheflash_end__ = .;
   } > CACHEFLASH
 
-  ._filesystem (NOLOAD):
-  {
-    . = ALIGN(4K);
-    __filesystem_start__ = .;
-    *(.filesystem)
-    __filesystem_end__ = .;
-  } > FILESYSTEM
-
   ._ram (NOLOAD) :
   {
     . = ALIGN(4);
@@ -783,7 +767,6 @@ SECTIONS
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
-    *(.filesystem_cfg)
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
 

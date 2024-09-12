@@ -10,25 +10,25 @@ ifneq ($(strip $(VERBOSE)),1)
 V = @
 endif
 
-ROMS_A2600 := $(filter-out roms/a2600/.keep, $(wildcard roms/a2600/*))
-ROMS_A7800 := $(filter-out roms/a7800/.keep, $(wildcard roms/a7800/*))
-ROMS_AMSTRAD := $(filter-out roms/amstrad/.keep, $(wildcard roms/amstrad/*))
-ROMS_GB := true # $(filter-out roms/gb/.keep, $(wildcard roms/gb/*))
-ROMS_GW := $(filter-out roms/gw/.keep, $(wildcard roms/gw/*))
-ROMS_MD := $(filter-out roms/md/.keep, $(wildcard roms/md/*))
-ROMS_NES := $(filter-out roms/nes/.keep, $(wildcard roms/nes/*))
-ROMS_MSX := $(filter-out roms/msx/.keep, $(wildcard roms/msx/*))
-ROMS_PCE := $(filter-out roms/pce/.keep, $(wildcard roms/pce/*))
-ROMS_VIDEOPAC := $(filter-out roms/videopac/.keep, $(wildcard roms/videopac/*))
-ROMS_WSV := $(filter-out roms/wsv/.keep, $(wildcard roms/wsv/*))
-ROMS_TAMA := $(filter-out roms/tama/.keep, $(wildcard roms/tama/*))
+ROMS_A2600 := 
+ROMS_A7800 := 
+ROMS_AMSTRAD := 
+ROMS_GB := true
+ROMS_GW :=
+ROMS_MD :=
+ROMS_NES := 
+ROMS_MSX :=
+ROMS_PCE :=
+ROMS_VIDEOPAC := 
+ROMS_WSV := 
+ROMS_TAMA := 
 
-ROMS_COL := $(filter-out roms/col/.keep, $(wildcard roms/col/*))
-ROMS_GG := $(filter-out roms/gg/.keep, $(wildcard roms/gg/*))
-ROMS_SG := $(filter-out roms/sg/.keep, $(wildcard roms/sg/*))
-ROMS_SMS := $(filter-out roms/sms/.keep, $(wildcard roms/sms/*))
+ROMS_COL := 
+ROMS_GG :=
+ROMS_SG := 
+ROMS_SMS := 
 
-HOMEBREW_CELESTE := $(wildcard roms/homebrew/celeste.png roms/homebrew/Celeste.png)
+HOMEBREW_CELESTE := 
 
 ######################################
 # source
@@ -48,8 +48,6 @@ Core/Src/syscalls.c \
 Core/Src/save_manager.c \
 Core/Src/sha256.c \
 Core/Src/bq24072.c \
-Core/Src/porting/lib/lzma/LzmaDec.c \
-Core/Src/porting/lib/lzma/lzma.c \
 Core/Src/porting/lib/hw_jpeg_decoder.c \
 Core/Src/porting/common.c \
 Core/Src/porting/odroid_audio.c \
@@ -580,8 +578,12 @@ GW_C_SOURCES =
 
 ifneq ($(strip $(ROMS_GW)),)
 CORE_GW = external/LCD-Game-Emulator
+#TODO : change linking so lz4/lzma libraries are in LCD emulator section
+#       and not in internal flash
 GW_C_SOURCES += \
 Core/Src/porting/lib/lz4_depack.c \
+Core/Src/porting/lib/lzma/LzmaDec.c \
+Core/Src/porting/lib/lzma/lzma.c \
 $(CORE_GW)/src/cpus/sm500op.c \
 $(CORE_GW)/src/cpus/sm510op.c \
 $(CORE_GW)/src/cpus/sm500core.c \

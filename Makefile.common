@@ -121,47 +121,7 @@ EXTFLASH_END = $(shell echo $$(($(EXTFLASH_OFFSET) + $(EXTFLASH_SIZE))))
 
 EXTFLASH_FORCE_SPI ?= 0
 
-# Heuristic: if not set; 10% of your extflash should be good for filesystem.
-# Rounded down to the nearest 4096.
-FILESYSTEM_SIZE := $(shell \
-				   if [ -z "$$FILESYSTEM_SIZE" ]; then \
-				       echo $$(($(EXTFLASH_SIZE) / 10 / 4096 * 4096)); \
-				   else \
-				   	   echo $$FILESYSTEM_SIZE; \
-				   fi)
-FILESYSTEM_OFFSET ?= $(shell echo $$(($(EXTFLASH_SIZE) - $(FILESYSTEM_SIZE))))
-FILESYSTEM_END = $(shell echo $$(($(FILESYSTEM_OFFSET) + $(FILESYSTEM_SIZE))))
-FILESYSTEM_OFFSET_FROM_END ?= $(shell echo $$(($(EXTFLASH_SIZE) - $(FILESYSTEM_END))))
-
-
-# Check to see if the filesystem is within specified extflash
-FILESYSTEM_START_IN_EXTFLASH_RANGE := $(shell \
-	if [ $(FILESYSTEM_OFFSET) -ge $(EXTFLASH_OFFSET) \
-		     -a $(FILESYSTEM_OFFSET) -lt $(EXTFLASH_END) ]; then \
-        echo "1"; \
-    else \
-        echo "0"; \
-    fi)
-
-FILESYSTEM_END_IN_EXTFLASH_RANGE := $(shell \
-	if [ $(FILESYSTEM_END) -gt $(EXTFLASH_OFFSET) \
-		     -a $(FILESYSTEM_END) -le $(EXTFLASH_END) ]; then \
-        echo "1"; \
-    else \
-        echo "0"; \
-    fi)
-
-ifneq ($(FILESYSTEM_START_IN_EXTFLASH_RANGE), $(FILESYSTEM_END_IN_EXTFLASH_RANGE))
-$(error Filesystem partition must be completely inside, or outside of EXTFLASH_SIZE.)
-endif
-FILESYSTEM_IN_EXTFLASH_RANGE = $(FILESYSTEM_START_IN_EXTFLASH_RANGE)
-
-# If the filesystem is external, we don't need to include it in size computation.
-ifeq ($(FILESYSTEM_IN_EXTFLASH_RANGE),0)
 EXTFLASH_TOTAL_LENGTH := $(EXTFLASH_SIZE)
-else ifeq ($(FILESYSTEM_START_IN_EXTFLASH_RANGE),1)
-EXTFLASH_TOTAL_LENGTH := $(shell echo $$(($(EXTFLASH_SIZE) - $(FILESYSTEM_SIZE))))
-endif
 
 ENABLE_SCREENSHOT ?= 1
 # Set to 1 to add game genie support
@@ -574,8 +534,6 @@ CXXFLAGS = $(CFLAGS) $(CXX_INCLUDES) \
 LDFLAGS += -Wl,--defsym=__EXTFLASH_OFFSET__=$(EXTFLASH_OFFSET)
 LDFLAGS += -Wl,--defsym=__EXTFLASH_TOTAL_LENGTH__=$(EXTFLASH_TOTAL_LENGTH)
 LDFLAGS += -Wl,--defsym=ENABLE_SCREENSHOT=$(ENABLE_SCREENSHOT)
-LDFLAGS += -Wl,--defsym=__FILESYSTEM_OFFSET__=$(FILESYSTEM_OFFSET)
-LDFLAGS += -Wl,--defsym=__FILESYSTEM_LENGTH__=$(FILESYSTEM_SIZE)
 
 LDFLAGS += -Wl,--defsym=__INTFLASH__=$(INTFLASH_ADDRESS)
 
@@ -1033,9 +991,6 @@ erase_all:
 	@echo "Erasing Complete!"
 .PHONY: erase_all
 
-format:
-	@$(GNWMANAGER) format --offset=$(FILESYSTEM_OFFSET_FROM_END)
-
 start_bank_1:
 	$(GNWMANAGER) start bank1
 .PHONY: start_bank_1
@@ -1062,7 +1017,6 @@ flash_extflash: $(BUILD_DIR)/$(TARGET)_extflash.bin
 flash: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin $(BUILD_DIR)/$(TARGET)_extflash.bin
 	@$(GNWMANAGER) flash $(INTFLASH_ADDRESS) $(BUILD_DIR)/$(TARGET)_intflash.bin \
 		-- flash ext $(BUILD_DIR)/$(TARGET)_extflash.bin --offset=$(EXTFLASH_OFFSET) \
-		-- format $(FILESYSTEM_SIZE) --offset=$(FILESYSTEM_OFFSET_FROM_END) --only-if-shrinking \
 		-- start $(INTFLASH_ADDRESS) \
 		$(RESET_DBGMCU_CMD)
 .PHONY: flash
@@ -1125,10 +1079,6 @@ help:
 	@echo "  EXTFLASH_FORCE_SPI  - Forces the use of legacy SPI mode for the external flash driver"
 	@echo "  EXTFLASH_SIZE_MB    - Sets the external flash size in megabytes"
 	@echo "  EXTFLASH_SIZE       - Sets the external flash size in bytes (has precedence over EXTFLASH_SIZE_MB)"
-	@echo "  FILESYSTEM_SIZE     - Sets the filesystem flash size in bytes. Defaults to 10% of flash."
-	@echo "  FILESYSTEM_OFFSET   - Places the filesystem at a specified offset in the external flash. "
-	@echo "                        Defaults to placing the filesystem at the end of flash."
-	@echo "						   This value is offset from EXTFLASH_OFFSET."
 	@echo "  LARGE_FLASH         - Sets the external flash size to 16MB  (deprecated)"
 	@echo "  EXTFLASH_OFFSET     - Places the data at an offset in the external flash (useful for dual boot)"
 	@echo "  INTFLASH_BANK       - Sets the internal flash bank. Valid values {1,2} (default=1)."
@@ -1166,7 +1116,6 @@ help:
 	@echo "  EXTFLASH_FORCE_SPI=$(EXTFLASH_FORCE_SPI)"
 	@echo "  EXTFLASH_SIZE_MB=$(EXTFLASH_SIZE_MB)"
 	@echo "  EXTFLASH_SIZE=$(EXTFLASH_SIZE)"
-	@echo "  FILESYSTEM_SIZE=$(FILESYSTEM_SIZE)"
 	@echo "  LARGE_FLASH=$(LARGE_FLASH)"
 	@echo "  EXTFLASH_OFFSET=$(EXTFLASH_OFFSET)"
 	@echo "  INTFLASH_BANK=$(INTFLASH_BANK)"

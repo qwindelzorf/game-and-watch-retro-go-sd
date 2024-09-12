@@ -18,7 +18,6 @@
 #include "rg_i18n.h"
 
 #include <assert.h>
-#include "lzma.h"
 
 #include "MSX.h"
 #include "Properties.h"
@@ -863,7 +862,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 0;
             machine->slotInfo[i].pageCount = 4;
             machine->slotInfo[i].romType = ROM_CASPATCH;
-            strcpy(machine->slotInfo[i].name, "MSX.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX.rom");
             i++;
 
             if (msx_game_type == MSX_GAME_DISK) {
@@ -877,9 +876,9 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
                 // forcing disabling second floppy controller without having
                 // to press ctrl key at boot
                 if (ctrl_needed) {
-                    strcpy(machine->slotInfo[i].name, "PANASONICDISK_.rom");
+                    strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/PANASONICDISK_.rom");
                 } else {
-                    strcpy(machine->slotInfo[i].name, "PANASONICDISK.rom");
+                    strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/PANASONICDISK.rom");
                 }
                 i++;
             }
@@ -921,7 +920,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 0;
             machine->slotInfo[i].pageCount = 4;
             machine->slotInfo[i].romType = ROM_CASPATCH;
-            strcpy(machine->slotInfo[i].name, "MSX2.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX2.rom");
             i++;
 
             machine->slotInfo[i].slot = 3;
@@ -929,7 +928,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 0;
             machine->slotInfo[i].pageCount = 2;
             machine->slotInfo[i].romType = ROM_NORMAL;
-            strcpy(machine->slotInfo[i].name, "MSX2EXT.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX2EXT.rom");
             i++;
 
             if (msx_game_type == MSX_GAME_DISK) {
@@ -943,9 +942,9 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
                 // forcing disabling second floppy controller without having
                 // to press ctrl key at boot
                 if (ctrl_needed) {
-                    strcpy(machine->slotInfo[i].name, "PANASONICDISK_.rom");
+                    strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/PANASONICDISK_.rom");
                 } else {
-                    strcpy(machine->slotInfo[i].name, "PANASONICDISK.rom");
+                    strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/PANASONICDISK.rom");
                 }
                 i++;
             } else if (msx_game_type == MSX_GAME_HDIDE) {
@@ -954,7 +953,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
                 machine->slotInfo[i].startPage = 0;
                 machine->slotInfo[i].pageCount = 16;
                 machine->slotInfo[i].romType = ROM_MSXDOS2;
-                strcpy(machine->slotInfo[i].name, "MSXDOS23.ROM");
+                strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSXDOS23.ROM");
                 i++;
             }
 
@@ -963,7 +962,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 2;
             machine->slotInfo[i].pageCount = 2;
             machine->slotInfo[i].romType = ROM_MSXMUSIC; // FMPAC
-            strcpy(machine->slotInfo[i].name, "MSX2PMUS.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX2PMUS.rom");
             i++;
 
             machine->slotInfoCount = i;
@@ -1011,7 +1010,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 0;
             machine->slotInfo[i].pageCount = 4;
             machine->slotInfo[i].romType = ROM_CASPATCH;
-            strcpy(machine->slotInfo[i].name, "MSX2P.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX2P.rom");
             i++;
 
             machine->slotInfo[i].slot = 3;
@@ -1019,7 +1018,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 0;
             machine->slotInfo[i].pageCount = 2;
             machine->slotInfo[i].romType = ROM_NORMAL;
-            strcpy(machine->slotInfo[i].name, "MSX2PEXT.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX2PEXT.rom");
             i++;
 
             if (msx_game_type == MSX_GAME_DISK) {
@@ -1033,9 +1032,9 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
                 // forcing disabling second floppy controller without having
                 // to press ctrl key at boot
                 if (ctrl_needed) {
-                    strcpy(machine->slotInfo[i].name, "PANASONICDISK_.rom");
+                    strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/PANASONICDISK_.rom");
                 } else {
-                    strcpy(machine->slotInfo[i].name, "PANASONICDISK.rom");
+                    strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/PANASONICDISK.rom");
                 }
                 i++;
             } else if (msx_game_type == MSX_GAME_HDIDE) {
@@ -1044,7 +1043,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
                 machine->slotInfo[i].startPage = 0;
                 machine->slotInfo[i].pageCount = 16;
                 machine->slotInfo[i].romType = ROM_MSXDOS2;
-                strcpy(machine->slotInfo[i].name, "MSXDOS23.ROM");
+                strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSXDOS23.ROM");
                 i++;
             }
 
@@ -1053,7 +1052,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 2;
             machine->slotInfo[i].pageCount = 2;
             machine->slotInfo[i].romType = ROM_MSXMUSIC; // FMPAC
-            strcpy(machine->slotInfo[i].name, "MSX2PMUS.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSX2PMUS.rom");
             i++;
 
             machine->slotInfo[i].slot = 3;
@@ -1061,7 +1060,7 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
             machine->slotInfo[i].startPage = 2;
             machine->slotInfo[i].pageCount = 4;
             machine->slotInfo[i].romType = ROM_0x4000;
-            strcpy(machine->slotInfo[i].name, "MSXKANJI.rom");
+            strcpy(machine->slotInfo[i].name, RG_BASE_PATH_BIOS"/msx/MSXKANJI.rom");
             i++;
 
             machine->slotInfoCount = i;
@@ -1909,27 +1908,6 @@ static void blit(uint8_t *msx_fb, uint16_t *framebuffer)
     }
 }
 
-size_t msx_getromdata(uint8_t **data, uint8_t *src_data, size_t src_size, const char *ext)
-{
-    /* src pointer to the ROM data in the external flash (raw or LZ4) */
-    unsigned char *dest = (unsigned char *)&_MSX_ROM_UNPACK_BUFFER;
-    uint32_t available_size = (uint32_t)&_MSX_ROM_UNPACK_BUFFER_SIZE;
-
-    wdog_refresh();
-    if(strcmp(ext, "lzma") == 0){
-        size_t n_decomp_bytes;
-        n_decomp_bytes = lzma_inflate(dest, available_size, src_data, src_size);
-        *data = dest;
-        return n_decomp_bytes;
-    }
-    else
-    {
-        *data = (unsigned char *)src_data;
-
-        return src_size;
-    }
-}
-
 void app_main_msx(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 {
     odroid_gamepad_state_t joystick;
@@ -1991,20 +1969,7 @@ void app_main_msx(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     
     audio_clear_buffers();
 
-    /* To reserve correct amount of RAM for decompressing game   */
-    /* We have to decompress game ROM in ram now (if compressed) */
-    /* It will allow to correctly dynamically allocate ram for   */
-    /* different usages (like MSX RAM)                           */
-    if(strcmp(ROM_EXT, "lzma") == 0) {
-        unsigned char *dest = (unsigned char *)&_MSX_ROM_UNPACK_BUFFER;
-        rom_decompress_size = lzma_inflate((unsigned char *)&_MSX_ROM_UNPACK_BUFFER,
-                                           (uint32_t)&_MSX_ROM_UNPACK_BUFFER_SIZE,
-                                           (uint8_t *)ROM_DATA,
-                                           ROM_DATA_LENGTH);
-        ram_start = (uint32_t)dest + rom_decompress_size;
-    } else {
-        ram_start = (uint32_t)&_MSX_ROM_UNPACK_BUFFER;
-    }
+    ram_start = (uint32_t)&_MSX_ROM_UNPACK_BUFFER;
 
     setupEmulatorRessources(selected_msx_index);
 

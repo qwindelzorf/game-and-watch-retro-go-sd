@@ -27,7 +27,6 @@ __license__ = "GPLv3"
 #include "gw_linker.h"
 #include "gw_buttons.h"
 #include "gw_flash.h"
-#include "lzma.h"
 
 /* TO move elsewhere */
 #include "stm32h7xx_hal.h"
@@ -61,89 +60,6 @@ static const uint8_t IMG_DISKETTE[] = {
 };
 
 static char *headerString = "Gene0000";
-
-static void load_rom_from_flash() {
-  /* check if it's compressed */
-
-  if (strcmp(ROM_EXT, "lzma") == 0) {
-
-    assert((&__CACHEFLASH_END__ - &__CACHEFLASH_START__) > 0);
-
-    /* check header  */
-    assert(memcmp((uint8_t *)ROM_DATA, "SMS+", 4) == 0);
-
-    unsigned int nb_banks = 0;
-    unsigned int lzma_bank_size = 0;
-    unsigned int lzma_bank_offset = 0;
-    unsigned int uncompressed_rom_size = 0;
-
-    memcpy(&nb_banks, &ROM_DATA[4], sizeof(nb_banks));
-
-    lzma_bank_offset = 4 + 4 + 4 * nb_banks;
-
-    for (int i = 0; i < nb_banks; i++) {
-      wdog_refresh();
-      memcpy(&lzma_bank_size, &ROM_DATA[8 + 4 * i], sizeof(lzma_bank_size));
-      lcd_clear_inactive_buffer();
-
-      uint16_t *dest = lcd_get_inactive_buffer();
-
-      /* uncompressed in lcd framebuffer */
-      size_t n_decomp_bytes;
-      n_decomp_bytes =
-          lzma_inflate((uint8_t *)lcd_get_active_buffer(), 2 * 320 * 240,
-                       &ROM_DATA[lzma_bank_offset], lzma_bank_size);
-
-      assert((&__CACHEFLASH_END__ - &__CACHEFLASH_START__) >=
-             ((uint32_t)n_decomp_bytes + uncompressed_rom_size));
-
-      int diff = memcmp((void *)(&__CACHEFLASH_START__ + uncompressed_rom_size),
-                        (uint8_t *)lcd_get_active_buffer(), n_decomp_bytes);
-      if (diff != 0) {
-        wdog_refresh();
-        OSPI_DisableMemoryMappedMode();
-
-        /* display diskette during flash erase */
-        uint16_t idx = 0;
-        for (uint8_t i = 0; i < 24; i++) {
-          for (uint8_t j = 0; j < 24; j++) {
-            if (IMG_DISKETTE[idx / 8] & (1 << (7 - idx % 8))) {
-              dest[286 + j + GW_LCD_WIDTH * (10 + i)] = 0xFFFF;
-            }
-            idx++;
-          }
-        }
-
-        /* erase the cache */
-        OSPI_EraseSync((&__CACHEFLASH_START__ - &__EXTFLASH_BASE__) +
-                           uncompressed_rom_size,
-                       (uint32_t)n_decomp_bytes);
-
-        /* blink diskette icon during flash program */
-        for (short y = 0; y < 24; y++) {
-          uint16_t *dest_row = &dest[(y + 10) * GW_LCD_WIDTH + 286];
-          memset(dest_row, 0x0, 24 * sizeof(uint16_t));
-        }
-
-        /* program the cache */
-        wdog_refresh();
-        OSPI_Program(
-            (&__CACHEFLASH_START__ - &__EXTFLASH_BASE__) + uncompressed_rom_size,
-            (uint8_t *)lcd_get_active_buffer(), (uint32_t)n_decomp_bytes);
-
-        OSPI_EnableMemoryMappedMode();
-        wdog_refresh();
-      }
-
-      lzma_bank_offset += lzma_bank_size;
-      uncompressed_rom_size += (uint32_t)n_decomp_bytes;
-    }
-
-    /* set the rom pointer and size */
-    ROM_DATA = &__CACHEFLASH_START__;
-    ROM_DATA_LENGTH = uncompressed_rom_size;
-  }
-}
 
 static unsigned int gwenesis_show_debug_bar = 0;
 
@@ -596,7 +512,6 @@ int app_main_gwenesis(uint8_t load_state, uint8_t start_paused, int8_t save_slot
     }
 
     /*** load ROM  */
-    load_rom_from_flash();
     load_cartridge();
 
     gwenesis_system_init();
