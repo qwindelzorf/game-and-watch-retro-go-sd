@@ -13,7 +13,7 @@ endif
 ROMS_A2600 := 
 ROMS_A7800 := 
 ROMS_AMSTRAD := 
-ROMS_GB := true
+ROMS_GB := yes
 ROMS_GW :=
 ROMS_MD :=
 ROMS_NES := 
@@ -28,7 +28,7 @@ ROMS_GG :=
 ROMS_SG := 
 ROMS_SMS := 
 
-HOMEBREW_CELESTE := 
+HOMEBREW_CELESTE := yes
 
 ######################################
 # source

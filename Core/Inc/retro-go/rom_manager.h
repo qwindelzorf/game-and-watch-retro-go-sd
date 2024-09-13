@@ -9,13 +9,14 @@
 
 struct rom_system_t {
     char *system_name;
-    const retro_emulator_file_t *roms;
+    retro_emulator_file_t *roms;
     char *extension;
 	#if COVERFLOW != 0
     size_t cover_width;
     size_t cover_height;
 	#endif    
     uint32_t roms_count;
+    bool load_rom;
 };
 
 typedef struct {

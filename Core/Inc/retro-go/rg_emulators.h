@@ -66,7 +66,7 @@ typedef struct {
         int maxcount;
     } roms;
     bool initialized;
-    const rom_system_t *system;
+    rom_system_t *system;
 } retro_emulator_t;
 
 
