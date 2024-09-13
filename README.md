@@ -188,9 +188,9 @@ export ADAPTER=stlink
 
 # Clone this repo with submodules:
 
-git clone --recurse-submodules https://github.com/sylverb/game-and-watch-retro-go
+git clone --recurse-submodules https://github.com/sylverb/game-and-watch-retro-go-sd
 
-cd game-and-watch-retro-go
+cd game-and-watch-retro-go-sd
 
 # Install python dependencies
 python3 -m pip install -r requirements.txt
@@ -232,10 +232,10 @@ If you need to change the project settings and generate c-code from stm32cubemx,
 
   ```bash
   # Clone this repo
-  git clone --recursive https://github.com/sylverb/game-and-watch-retro-go
+  git clone --recursive https://github.com/sylverb/game-and-watch-retro-go-sd
 
   # cd into it
-  cd game-and-watch-retro-go
+  cd game-and-watch-retro-go-sd
 
   # Place roms in the appropriate directory inside ./roms/
 
