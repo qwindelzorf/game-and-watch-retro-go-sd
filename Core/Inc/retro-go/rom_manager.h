@@ -7,6 +7,12 @@
 #define COVERFLOW 0
 #endif /* COVERFLOW */
 
+typedef enum {
+    NO_GAME_DATA,
+    GAME_DATA,
+    GAME_DATA_BYTESWAP_16
+} game_data_type_t;
+
 struct rom_system_t {
     char *system_name;
     retro_emulator_file_t *roms;
@@ -16,7 +22,7 @@ struct rom_system_t {
     size_t cover_height;
 	#endif    
     uint32_t roms_count;
-    bool load_rom;
+    game_data_type_t game_data_type;
 };
 
 typedef struct {

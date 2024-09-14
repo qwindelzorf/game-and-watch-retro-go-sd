@@ -59,7 +59,7 @@ const unsigned int extflash_magic_sign __attribute__((section(".extflash_emu_dat
 static retro_emulator_file_t *CHOSEN_FILE = NULL;
 
 /* Copy file into flash "cache" section */
-static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size) {
+static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool byte_swap) {
     FIL file;
     FRESULT fr;
     UINT bytes_read;
@@ -90,6 +90,14 @@ static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size) {
         fr = f_read(&file, buffer, sizeof(buffer), &bytes_read);
         if (fr != FR_OK || bytes_read == 0) {
             break;
+        }
+        if (byte_swap) {
+            for (int i=0; i < sizeof(buffer); i+=2)
+            {
+                char temp = buffer[i];
+                buffer[i]=buffer[i+1];
+                buffer[i+1]=temp;
+            }
         }
 
         OSPI_Program(address_in_flash + total_written, buffer, bytes_read);
@@ -190,7 +198,7 @@ static void event_handler(gui_event_t event, tab_t *tab)
 }
 
 static void add_emulator(const char *system, const char *dirname, const char* ext, const char *part,
-                          uint16_t crc_offset, const void *logo, const void *header, bool load_rom)
+                          uint16_t crc_offset, const void *logo, const void *header, game_data_type_t game_data_type)
 {
     assert(emulators_count <= MAX_EMULATORS);
     retro_emulator_t *p = &emulators[emulators_count];
@@ -212,7 +220,7 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     s->roms = p->roms.files;
     s->roms_count = p->roms.count;
     s->system_name = (char *)system;
-    s->load_rom = load_rom;
+    s->game_data_type = game_data_type;
 
     gui_add_tab(dirname, logo, header, p, event_handler);
 
@@ -705,21 +713,6 @@ bool emulator_show_file_menu(retro_emulator_file_t *file)
 void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused, int8_t save_slot)
 {
     printf("Retro-Go: Starting game: %s\n", file->name);
-    // TODO : do things better
-    // Copy rom from SD card to flash
-    uint32_t rounded_size = 1;
-    while (rounded_size < file->size) {
-        rounded_size <<= 1; // Décale les bits vers la gauche pour obtenir la prochaine puissance de 2
-    }
-
-    if (file->system->load_rom) {
-        file->address = copy_file_to_cache(file->path,rounded_size);
-        ACTIVE_FILE = file;
-        ROM_DATA = file->address;
-        ROM_EXT = file->ext;
-        ROM_DATA_LENGTH = file->size;
-    }
-
     // odroid_settings_StartAction_set(load_state ? ODROID_START_ACTION_RESUME : ODROID_START_ACTION_NEWGAME);
     // odroid_settings_commit();
 
@@ -730,6 +723,20 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
     const char *system_name = file->system->system_name;
     printf("system_name %s\n",system_name);
 
+    // Copy game data from SD card to flash if needed
+    if (file->system->game_data_type != NO_GAME_DATA) {
+        uint32_t rounded_size = 1;
+        while (rounded_size < file->size) {
+            rounded_size <<= 1; // Décale les bits vers la gauche pour obtenir la prochaine puissance de 2
+        }
+
+        file->address = copy_file_to_cache(file->path,rounded_size,
+                                           file->system->game_data_type == GAME_DATA_BYTESWAP_16);
+        ACTIVE_FILE = file;
+        ROM_DATA = file->address;
+        ROM_EXT = file->ext;
+        ROM_DATA_LENGTH = file->size;
+    }
 
     if(strcmp(system_name, "Nintendo Gameboy") == 0) {
 #if FORCE_GNUBOY == 1
@@ -805,19 +812,11 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 #endif
     } else if(strcmp(system_name, "Sega Genesis") == 0)  {
 #ifdef ENABLE_EMULATOR_MD
-      // Swap rom bytes for genesys roms
-      uint8_t *genesys_data = (uint8_t *)ROM_DATA;
-      for (int i=0; i < ROM_DATA_LENGTH; i+=2)
-      {
-        char temp = genesys_data[i];
-        genesys_data[i]=genesys_data[i+1];
-        genesys_data[i+1]=temp;
-      }
       memcpy(&__RAM_EMU_START__, &_OVERLAY_MD_LOAD_START, (size_t)&_OVERLAY_MD_SIZE);
       memset(&_OVERLAY_MD_BSS_START, 0x0, (size_t)&_OVERLAY_MD_BSS_SIZE);
       SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_MD_SIZE);
       app_main_gwenesis(load_state, start_paused, save_slot);
- #endif
+#endif
     } else if(strcmp(system_name, "Atari 2600") == 0) {
 #ifdef ENABLE_EMULATOR_A2600
         memcpy(&__RAM_EMU_START__, &_OVERLAY_A2600_LOAD_START, (size_t)&_OVERLAY_A2600_SIZE);
@@ -881,9 +880,10 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
 void emulators_init()
 {
-    add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb, true);
-//    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, &pad_gw, &header_gw, true);
-    add_emulator("Homebrew", "homebrew", "bin", "", 0, &pad_homebrew, &header_homebrew, false);
+    add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb, GAME_DATA);
+//    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, &pad_gw, &header_gw, GAME_DATA);
+    add_emulator("Homebrew", "homebrew", "bin", "", 0, &pad_homebrew, &header_homebrew, NO_GAME_DATA);
+//    add_emulator("Sega Genesis", "md", "md gen bin", "gwenesis", 0, &pad_gen, &header_gen, GAME_DATA_BYTESWAP_16);
 /*
     add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb);
     add_emulator("Nintendo Entertainment System", "nes", "nes fc fds nsf", "fceumm", 16, &pad_nes, &header_nes);
