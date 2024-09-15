@@ -1,5 +1,6 @@
 #include <odroid_system.h>
 #include "rg_utils.h"
+#include "gw_malloc.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -164,32 +165,7 @@ IRAM_ATTR uint32_t rg_hash(const char *data, size_t len)
 
 const char *const_string(const char *str)
 {
-    static const rg_str_t **strings = NULL;
-    static size_t strings_count = 0;
-
-    if (!str)
-        return NULL;
-
-    size_t len = strlen(str);
-
-    for (int i = 0; i < strings_count; i++)
-    {
-        if (strings[i]->length != len)
-            continue;
-        if (memcmp(strings[i]->data, str, len + 1) == 0)
-            return strings[i]->data;
-    }
-
-    rg_str_t *obj = malloc(sizeof(rg_str_t) + len + 1);
-
-    strings = realloc(strings, (strings_count + 1) * sizeof(char *));
-//    RG_ASSERT(strings && obj, "alloc failed");
-
-    memcpy(obj->data, str, len + 1);
-    obj->capacity = len;
-    obj->length = len;
-
-    strings[strings_count++] = obj;
-
-    return obj->data;
+    char *data = ram_malloc(strlen(str)+1);
+    strcpy(data,str);
+    return (const char *)data;
 }

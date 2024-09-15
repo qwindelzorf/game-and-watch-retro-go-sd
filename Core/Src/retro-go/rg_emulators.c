@@ -191,16 +191,13 @@ static void event_handler(gui_event_t event, tab_t *tab)
     }
     else if (event == TAB_IDLE)
     {
-        if (file->checksum == 0)
-            emulator_crc32_file(file);
-
     }
     else if (event == TAB_REDRAW)
     {
     }
 }
 
-static void add_emulator(const char *system, const char *dirname, const char* ext, int16_t crc_offset,
+static void add_emulator(const char *system, const char *dirname, const char* ext,
                          const void *logo, const void *header, game_data_type_t game_data_type)
 {
     assert(emulators_count <= MAX_EMULATORS);
@@ -212,10 +209,9 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     strcpy(p->dirname, dirname);
     snprintf(p->exts, sizeof(p->exts), " %s ", ext);
     p->roms.count = 0;
-    p->roms.maxcount = 20;
-    p->roms.files = calloc(p->roms.maxcount, sizeof(retro_emulator_file_t)); // TODO SD : improve this
+    p->roms.maxcount = 100;
+    p->roms.files = ram_calloc(p->roms.maxcount, sizeof(retro_emulator_file_t)); // TODO SD : improve this
     p->initialized = false;
-    p->crc_offset = crc_offset;
     p->system = s;
 
     s->extension = (char *)ext;
@@ -258,21 +254,7 @@ static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
 
     if (emu->roms.count + 1 > emu->roms.maxcount)
     {
-        size_t new_maxcount = emu->roms.maxcount * 1.5;
-        retro_emulator_file_t *new_buf = realloc(emu->roms.files, new_maxcount * sizeof(retro_emulator_file_t));
-        if (!new_buf)
-        {
-            printf("Ran out of memory, file scanning stopped at %d entries ...", emu->roms.count);
-            return RG_SCANDIR_STOP;
-        }
-        emu->roms.files = new_buf;
-        emu->system->roms = new_buf;
-        emu->roms.maxcount = new_maxcount;
-    }
-
-    uint32_t checksum = 0;
-    if (emu->crc_offset < 0) {
-        checksum = 1; // CRC32 is useless for this system
+        return RG_SCANDIR_STOP;
     }
 
     emu->roms.files[emu->roms.count++] = (retro_emulator_file_t) {
@@ -283,9 +265,6 @@ static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
         .size = entry->size,
         .system = emu->system,
         .region = REGION_NTSC,
-        .extra = NULL,
-        .checksum = checksum,
-        .crc_offset = emu->crc_offset,
     };
     emu->system->roms_count = emu->roms.count;
 
@@ -293,36 +272,10 @@ static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
     return RG_SCANDIR_CONTINUE;
 }
 
-#if 0
-const retro_emulator_file_t gg_roms[] EMU_DATA = {
-	{
-#if CHEAT_CODES == 1
-		.id = 0,
-#endif
-		.name = "Super Off Road (USA, Europe)",
-		.ext = "gg",
-		.address = _binary__Users_sylverbruneau_Documents_dev_gnw_filesystem_sd_game_and_watch_retro_go_roms_gg_Super_Off_Road__USA__Europe__gg_start,
-		.size = 131072,
-		#if COVERFLOW != 0
-		.img_address = NULL,
-		.img_size = 0,
-		#endif
-		.system = &gg_system,
-		.region = REGION_NTSC,
-		.extra = NULL,
-#if CHEAT_CODES == 1
-		.cheat_codes = NULL,
-		.cheat_descs = 0,
-		.cheat_count = 0,
-#endif
-	},
-
-};
-#endif
-
 void emulator_init(retro_emulator_t *emu)
 {
-    char folder[255];
+    char folder[RG_PATH_MAX];
+
     if (emu->initialized)
         return;
 
@@ -330,82 +283,14 @@ void emulator_init(retro_emulator_t *emu)
 
     printf("Retro-Go: Initializing emulator '%s'\n", emu->system_name);
 
+    sprintf(folder, ODROID_BASE_PATH_SAVES "/%s", emu->dirname);
+    rg_storage_mkdir(folder);
+
+    sprintf(folder, ODROID_BASE_PATH_ROMS "/%s", emu->dirname);
+    rg_storage_mkdir(folder);
+
     snprintf(folder, sizeof(folder), "%s/%s", RG_BASE_PATH_ROMS, emu->dirname);
-
-    char path[128];
-
-    if (emu->crc_offset >=0) {
-        sprintf(path, ODROID_BASE_PATH_CRC_CACHE "/%s", emu->dirname);
-        rg_storage_mkdir(path);
-    }
-
-    sprintf(path, ODROID_BASE_PATH_SAVES "/%s", emu->dirname);
-    rg_storage_mkdir(path);
-
-    sprintf(path, ODROID_BASE_PATH_ROMS "/%s", emu->dirname);
-    rg_storage_mkdir(path);
-
     rg_storage_scandir(folder, scan_folder_cb, emu, RG_SCANDIR_RECURSIVE);
-}
-
-void emulator_crc32_file(retro_emulator_file_t *file)
-{
-    if (file == NULL || file->checksum > 0)
-         return;
-
-    const int chunk_size = 512;
-    char *cache_path = odroid_system_get_path(ODROID_PATH_CRC_CACHE, file->path);
-
-    FILE *fp, *fp2;
-
-//    file->missing_cover = 0;
-
-    if ((fp = fopen(cache_path, "rb")) != NULL)
-    {
-        fread(&file->checksum, 4, 1, fp);
-        fclose(fp);
-    }
-    else if ((fp = fopen(file->path, "rb")) != NULL)
-    {
-        void *buffer = malloc(chunk_size);
-        uint32_t crc_tmp = 0;
-        uint32_t count = 0;
-
-//        gui_draw_notice("        CRC32", C_GREEN);
-
-        fseek(fp, file->crc_offset, SEEK_SET);
-        while (true)
-        {
-            odroid_input_read_gamepad(&gui.joystick);
-            if (gui.joystick.bitmask > 0) break;
-            count = fread(buffer, 1, chunk_size, fp);
-            if (count == 0) break;
-
-            crc_tmp = crc32_le(crc_tmp, buffer, count);
-            if (count < chunk_size) break;
-        }
-
-        free(buffer);
-
-        if (feof(fp))
-        {
-            file->checksum = crc_tmp;
-            if ((fp2 = fopen(cache_path, "wb")) != NULL)
-            {
-                fwrite(&file->checksum, 4, 1, fp2);
-                fclose(fp2);
-            }
-        }
-        fclose(fp);
-    }
-    else
-    {
-        file->checksum = 1;
-    }
-
-    free(cache_path);
-
-//    gui_draw_notice(" ", C_RED);
 }
 
 void emulator_show_file_info(retro_emulator_file_t *file)
@@ -586,26 +471,27 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
     // odroid_settings_StartAction_set(load_state ? ODROID_START_ACTION_RESUME : ODROID_START_ACTION_NEWGAME);
     // odroid_settings_commit();
 
-    // Reinit AHB & ITC RAM memory allocation
-    ahb_init();
-    itc_init();
+    retro_emulator_file_t *newfile = calloc(sizeof(retro_emulator_file_t),1);
+    memcpy(newfile,file,sizeof(retro_emulator_file_t));
+    newfile->name=calloc(strlen(file->name)+1,1);
+    strcpy((char *)newfile->name,file->name);
+    newfile->path=calloc(strlen(file->path)+1,1);
+    strcpy(newfile->path,file->path);
 
-    const char *system_name = file->system->system_name;
-    printf("system_name %s\n",system_name);
+    const char *system_name = newfile->system->system_name;
 
     // Copy game data from SD card to flash if needed
-    if (file->system->game_data_type != NO_GAME_DATA) {
+    if (newfile->system->game_data_type != NO_GAME_DATA) {
         uint32_t rounded_size = 1;
-        while (rounded_size < file->size) {
+        while (rounded_size < newfile->size) {
             rounded_size <<= 1; // Décale les bits vers la gauche pour obtenir la prochaine puissance de 2
         }
-
-        file->address = copy_file_to_cache(file->path,rounded_size,
-                                           file->system->game_data_type == GAME_DATA_BYTESWAP_16);
-        ACTIVE_FILE = file;
-        ROM_DATA = file->address;
-        ROM_EXT = file->ext;
-        ROM_DATA_LENGTH = file->size;
+        newfile->address = copy_file_to_cache(newfile->path,rounded_size,
+                                           newfile->system->game_data_type == GAME_DATA_BYTESWAP_16);
+        ACTIVE_FILE = newfile;
+        ROM_DATA = newfile->address;
+        ROM_EXT = "";//newfile->ext;
+        ROM_DATA_LENGTH = newfile->size;
     }
 
     if(strcmp(system_name, "Nintendo Gameboy") == 0) {
@@ -734,10 +620,12 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
       app_main_videopac(load_state, start_paused, save_slot);
 #endif
     } else if(strcmp(system_name, "Homebrew") == 0)  {
+#ifdef ENABLE_EMULATOR_CELESTE
       memcpy(&__RAM_EMU_START__, &_OVERLAY_CELESTE_LOAD_START, (size_t)&_OVERLAY_CELESTE_SIZE);
       memset(&_OVERLAY_CELESTE_BSS_START, 0x0, (size_t)&_OVERLAY_CELESTE_BSS_SIZE);
       SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_CELESTE_SIZE);
       app_main_celeste(load_state, start_paused, save_slot);
+#endif
     } else if(strcmp(system_name, "Tamagotchi") == 0) {
 #ifdef ENABLE_EMULATOR_TAMA
       memcpy(&__RAM_EMU_START__, &_OVERLAY_TAMA_LOAD_START, (size_t)&_OVERLAY_TAMA_SIZE);
@@ -750,9 +638,13 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
 void emulators_init()
 {
-    add_emulator("Nintendo Gameboy", "gb", "gb gbc", -1, &pad_gb, &header_gb, GAME_DATA);
-//    add_emulator("Game & Watch", "gw", "gw", -1, &pad_gw, &header_gw, GAME_DATA);
-    add_emulator("Homebrew", "homebrew", "bin", -1, &pad_homebrew, &header_homebrew, NO_GAME_DATA);
+    add_emulator("Nintendo Gameboy", "gb", "gb gbc", &pad_gb, &header_gb, GAME_DATA);
+    add_emulator("Game & Watch", "gw", "gw", &pad_gw, &header_gw, GAME_DATA);
+    add_emulator("PC Engine", "pce", "pce", &pad_pce, &header_pce, GAME_DATA);
+    add_emulator("Sega Game Gear", "gg", "gg", &pad_gg, &header_gg, GAME_DATA);
+    add_emulator("Sega Master System", "sms", "sms", &pad_sms, &header_sms, GAME_DATA);
+    add_emulator("Sega Genesis", "md", "md gen bin", &pad_gen, &header_gen, GAME_DATA_BYTESWAP_16);
+    add_emulator("Homebrew", "homebrew", "bin", &pad_homebrew, &header_homebrew, NO_GAME_DATA);
 //    add_emulator("Sega Genesis", "md", "md gen bin", -1, 0, &pad_gen, &header_gen, GAME_DATA_BYTESWAP_16);
 /*
     add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb);

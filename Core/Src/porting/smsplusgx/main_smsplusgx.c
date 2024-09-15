@@ -72,11 +72,7 @@ load_rom_from_flash(uint8_t emu_engine)
 
     cart.sram = sram;
     cart.pages = cart.size / 0x4000;
-    if (ACTIVE_FILE->checksum > 0) {
-        cart.crc = ACTIVE_FILE->checksum;
-    } else {
-        cart.crc = crc32_le(0, cart.rom, cart.size);
-    }
+    cart.crc = crc32_le(0, cart.rom, cart.size);
     cart.loaded = 1;
 
     if (emu_engine == SMSPLUSGX_ENGINE_COLECO)

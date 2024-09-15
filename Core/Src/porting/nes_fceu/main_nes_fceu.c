@@ -24,8 +24,6 @@
 #define NES_WIDTH  256
 #define NES_HEIGHT 240
 
-extern uint32_t ram_start;
-
 extern CartInfo iNESCart;
 
 static uint8_t nes_framebuffer[(NES_WIDTH+16)*NES_HEIGHT];

@@ -20,6 +20,8 @@
 #include "bitmaps.h"
 #include "error_screens.h"
 #include "save_manager.h"
+#include "gw_malloc.h"
+#include "gw_linker.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0
@@ -818,6 +820,11 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
     sdcard_init();
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, ODROID_SCREEN_HEIGHT, curr_colors->bg_c);
+
+    // Init ram start for pseudo dynamic mem allocation
+    ahb_init();
+    itc_init();
+    ram_start = &__RAM_EMU_START__;
 
     //check data;
     app_check_data_loop();

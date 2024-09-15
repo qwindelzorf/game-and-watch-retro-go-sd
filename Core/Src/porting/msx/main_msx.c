@@ -47,8 +47,6 @@
 #include "gw_linker.h"
 #include "main_msx.h"
 
-extern uint32_t ram_start;
-
 extern BoardInfo boardInfo;
 static Properties* properties;
 static Machine *msxMachine;
