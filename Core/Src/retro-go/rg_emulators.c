@@ -50,9 +50,6 @@ static retro_emulator_t emulators[MAX_EMULATORS];
 static rom_system_t systems[MAX_EMULATORS];
 static int emulators_count = 0;
 
-const unsigned int intflash_magic_sign = 0xABAB;
-const unsigned int extflash_magic_sign __attribute__((section(".extflash_emu_data"))) = intflash_magic_sign;
-
 // Minimum amount of free blocks in filesystem to ensure correct behavior
 #define MIN_FREE_FS_BLOCKS 30
 

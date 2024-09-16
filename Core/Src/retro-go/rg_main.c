@@ -710,47 +710,6 @@ void retro_loop()
 
 #define ODROID_APPID_LAUNCHER 0
 
-/* Check if external flash has been programmed */
-void app_check_data_loop()
-{
-    int idle_s = uptime_get();
-
-    printf("Flash Magic Check: %x at %p & %x at %p; \n", extflash_magic_sign, &extflash_magic_sign, intflash_magic_sign, &intflash_magic_sign);
-    if (extflash_magic_sign != intflash_magic_sign)
-    {
-        //flash is not compare read;
-        draw_error_screen("DATA ERROR", "It seems you need to", "program external flash.");
-
-        while (1)
-        {
-            char s[22];
-            odroid_gamepad_state_t joystick;
-
-            wdog_refresh();
-            int steps = uptime_get() - idle_s;
-            sprintf(s, "%ds to sleep", 600 - steps);
-            odroid_overlay_draw_text_line(4, 29 * 8 - 4, strlen(s) * 8, s, C_RED, curr_colors->bg_c);
-
-            lcd_sync();
-            lcd_swap();
-            //lcd_wait_for_vblank();
-            HAL_Delay(10);
-            if (steps >= 600)
-                break;
-            odroid_input_read_gamepad(&joystick);
-            if (joystick.values[ODROID_INPUT_POWER])
-                break;
-        }
-        for (int i=0; i<10; i++){
-            wdog_refresh();
-            HAL_Delay(10);
-        }
-        app_sleep_logo();
-        GW_EnterDeepSleep();
-    }
-}
-
-
 #if DISABLE_SPLASH_SCREEN == 0
 void GLOBAL_DATA app_start_logo()
 {
@@ -825,9 +784,6 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
     ahb_init();
     itc_init();
     ram_start = &__RAM_EMU_START__;
-
-    //check data;
-    app_check_data_loop();
 
     if (fs_mounted == false) {
         sdcard_error_screen();
