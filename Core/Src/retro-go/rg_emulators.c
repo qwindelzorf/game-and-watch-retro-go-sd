@@ -439,7 +439,8 @@ bool emulator_show_file_menu(retro_emulator_file_t *file)
     else if (sel == 2) {
         while ((slot = odroid_savestate_menu(curr_lang->s_Confirm_del_save, file->path, true, &gui_redraw_callback)) != -1)
         {
-            printf("unlink %s\n",savestates->slots[slot].file);
+            if (savestates->slots[slot].preview)
+            odroid_sdcard_unlink(savestates->slots[slot].preview);
             odroid_sdcard_unlink(savestates->slots[slot].file);
             savestates->slots[slot].is_used = false;
         }
