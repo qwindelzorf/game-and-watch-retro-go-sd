@@ -489,6 +489,8 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
     const char *system_name = newfile->system->system_name;
 
+    ACTIVE_FILE = newfile;
+
     // Copy game data from SD card to flash if needed
     if (newfile->system->game_data_type != NO_GAME_DATA) {
         uint32_t rounded_size = 1;
@@ -497,7 +499,6 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
         }
         newfile->address = copy_file_to_cache(newfile->path,rounded_size,
                                            newfile->system->game_data_type == GAME_DATA_BYTESWAP_16);
-        ACTIVE_FILE = newfile;
         ROM_DATA = newfile->address;
         ROM_EXT = "";//newfile->ext; // TODO : get correct const char * for this
         ROM_DATA_LENGTH = newfile->size;

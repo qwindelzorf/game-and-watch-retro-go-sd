@@ -51,6 +51,7 @@ static SDL_Surface* font = &font_local;
 
 static int16_t audioBuffer[CELESTE_AUDIO_BUFFER_LENGTH];
 
+static void blit();
 
 // --- MAIN
 static uint16_t buttons_state = 0;
@@ -63,13 +64,63 @@ struct track_info {
 
 struct track_info current_track = {-1, 0, 0};
 
-static bool SaveState(char *savePathName, char *sramPathName, int slot)
+static bool SaveState(const char *savePathName)
 {
+    uint8_t *data = lcd_get_active_buffer();
+    size_t size;
+
+    Celeste_P8_save_state(data);
+    size = Celeste_P8_get_state_size();
+
+    FILE *file = fopen(savePathName, "wb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t written = fwrite(data, 1, size, file);
+    if (written != size) {
+        return false;
+    }
+
+    written = fwrite((unsigned char *)&current_track, 1, sizeof(current_track), file);
+    if (written != sizeof(current_track)) {
+        return false;
+    }
+
+    fclose(file);
+    
     return true;
 }
 
-static bool LoadState(char *savePathName, char *sramPathName, int slot)
+static bool LoadState(const char *savePathName)
 {
+    // We store data in the not visible framebuffer
+    unsigned char *data = (unsigned char *)lcd_get_active_buffer();
+    size_t size = Celeste_P8_get_state_size();
+
+    FILE *file = fopen(savePathName, "rb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t read = fread(data, 1, size, file);
+    if (read != size) {
+        return false;
+    }
+
+    read = fread((unsigned char *)&current_track, 1, sizeof(current_track), file);
+    if (read != sizeof(current_track)) {
+        return false;
+    }
+
+    fclose(file);
+
+    Celeste_P8_load_state(data);
+
+    celeste_api_music(current_track.index, current_track.fade, current_track.mask);
+
+    lcd_clear_active_buffer();
+
     return true;
 }
 
@@ -97,6 +148,31 @@ static uint8_t color[16];
 
 static inline uint16_t getcolorid(char idx) {
     return color[idx%16];
+}
+
+static bool Screenshot(const char *filename)
+{
+    lcd_wait_for_vblank();
+
+    lcd_clear_active_buffer();
+    blit();
+    unsigned char *data = (unsigned char *)lcd_get_active_buffer();
+    size_t size = sizeof(framebuffer1);
+
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t written = fwrite(data, 1, size, file);
+
+    fclose(file);
+
+    if (written != size) {
+        return false;
+    }
+
+    return true;
 }
 
 static void ResetPalette(void) {
@@ -591,7 +667,7 @@ void app_main_celeste(uint8_t load_state, uint8_t start_paused, int8_t save_slot
     common_emu_state.frame_time_10us = (uint16_t)(100000 / CELESTE_FPS + 0.5f);
 
     odroid_system_init(APPID_HOMEBREW, CELESTE_AUDIO_SAMPLE_RATE);
-    odroid_system_emu_init(&LoadState, &SaveState, NULL);
+    odroid_system_emu_init(&LoadState, &SaveState, &Screenshot);
 
     // Init Sound
     audio_start_playing(CELESTE_AUDIO_BUFFER_LENGTH);
