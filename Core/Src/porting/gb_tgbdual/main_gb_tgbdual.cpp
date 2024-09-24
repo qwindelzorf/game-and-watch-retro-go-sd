@@ -6,7 +6,6 @@ extern "C" {
 
 #include "main.h"
 #include "bilinear.h"
-#include "gw_lcd.h"
 #include "gw_linker.h"
 #include "rg_i18n.h"
 #include "gw_buttons.h"
@@ -111,28 +110,6 @@ static bool LoadState(const char *savePathName)
 
     lcd_clear_active_buffer();
 
-    return true;
-}
-
-bool screenshot(const char *filename) {
-    lcd_wait_for_vblank();
-    unsigned char *data = (unsigned char *)lcd_get_inactive_buffer();
-    size_t size = sizeof(framebuffer1);
-
-    FILE *file = fopen(filename, "wb");
-    if (file == NULL) {
-        printf("Error opening file\n");
-        return false;
-    }
-
-    size_t written = fwrite(data, 1, size, file);
-
-    fclose(file);
-    
-    if (written != size) {
-        printf("Error writing to file\n");
-        return false;
-    }
     return true;
 }
 
@@ -511,7 +488,7 @@ void app_main_gb_tgbdual_cpp(uint8_t load_state, uint8_t start_paused, int8_t sa
     common_emu_state.frame_time_10us = (uint16_t)(100000 / VIDEO_REFRESH_RATE + 0.5f);
 
     odroid_system_init(APPID_GB, GB_AUDIO_FREQUENCY);
-    odroid_system_emu_init(&LoadState, &SaveState, &screenshot);
+    odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
     lcd_clear_buffers();
 

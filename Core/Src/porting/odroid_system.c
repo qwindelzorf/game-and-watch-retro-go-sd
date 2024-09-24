@@ -5,6 +5,7 @@
 #include "gw_linker.h"
 #include "gui.h"
 #include "main.h"
+#include "gw_lcd.h"
 
 static rg_app_desc_t currentApp;
 static runtime_stats_t statistics;
@@ -126,22 +127,33 @@ char* odroid_system_get_path(emu_path_type_t type, const char *_romPath)
 
 bool odroid_system_emu_screenshot(const char *filename)
 {
-    if (!currentApp.handlers.screenshot)
-    {
-        printf("No handler defined...\n");
-        return false;
+    bool success = false;
+
+    rg_storage_mkdir(rg_dirname(filename));
+
+    if (currentApp.handlers.screenshot) {
+        success = (*currentApp.handlers.screenshot)(filename);
+    } else {
+        // If there is no callback for screenshot, we take it from framebuffer
+        // which is not the best as it will include menu in the middle
+        lcd_wait_for_vblank();
+        unsigned char *data = (unsigned char *)lcd_get_inactive_buffer();
+        size_t size = sizeof(framebuffer1);
+
+        FILE *file = fopen(filename, "wb");
+        if (file == NULL) {
+            return false;
+        }
+
+        size_t written = fwrite(data, 1, size, file);
+
+        fclose(file);
+        
+        if (written != size) {
+            return false;
+        }
+        success = true;
     }
-
-    printf("Saving screenshot to '%s'.\n",filename);
-
-    if (!rg_storage_mkdir(rg_dirname(filename)))
-    {
-        printf("Unable to create dir, save might fail...\n");
-    }
-
-    // FIXME: We should allocate a framebuffer to pass to the handler and ask it
-    // to fill it, then we'd resize and save to png from here...
-    bool success = (*currentApp.handlers.screenshot)(filename);
 
     rg_storage_commit();
 
