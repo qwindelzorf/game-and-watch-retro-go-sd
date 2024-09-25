@@ -93,13 +93,69 @@ static void gw_check_time() {
 }
 static unsigned char state_save_buffer[sizeof(gw_state_t)];
 
-static bool gw_system_SaveState(char *savePathName, char *sramPathName, int slot)
+static bool gw_system_SaveState(const char *savePathName)
 {
+    memset(state_save_buffer, 0x00, sizeof(state_save_buffer));
+    gw_state_save(state_save_buffer);
+
+    FILE *file = fopen(savePathName, "wb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t written = fwrite(state_save_buffer, sizeof(state_save_buffer), 1, file);
+
+    fclose(file);
+
+    if (!written) {
+        return false;
+    }
+
     return true;
 }
 
-static bool gw_system_LoadState(char *savePathName, char *sramPathName, int slot)
+static bool gw_system_LoadState(const char *savePathName)
 {
+    FILE *file = fopen(savePathName, "rb");
+    if (file == NULL) {
+        printf("failed open %s\n",savePathName);
+        while(1);
+        return false;
+    }
+
+    size_t read = fread(state_save_buffer, sizeof(state_save_buffer), 1, file);
+
+    fclose(file);
+
+    if (!read) {
+        return false;
+    }
+
+    return gw_state_load((unsigned char *)state_save_buffer);
+}
+
+static bool gw_system_Screenshot(const char *filename)
+{
+    lcd_wait_for_vblank();
+
+    lcd_clear_active_buffer();
+    gw_system_blit(lcd_get_active_buffer());
+    unsigned char *data = (unsigned char *)lcd_get_active_buffer();
+    size_t size = sizeof(framebuffer1);
+
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t written = fwrite(data, 1, size, file);
+
+    fclose(file);
+
+    if (written != size) {
+        return false;
+    }
+
     return true;
 }
 
@@ -363,7 +419,7 @@ int app_main_gw(uint8_t load_state, int8_t save_slot)
         ODROID_DIALOG_CHOICE_LAST};
 
     odroid_system_init(ODROID_APPID_GW, GW_AUDIO_FREQ);
-    odroid_system_emu_init(&gw_system_LoadState, &gw_system_SaveState, NULL);
+    odroid_system_emu_init(&gw_system_LoadState, &gw_system_SaveState, &gw_system_Screenshot);
     //rg_app_desc_t *app = odroid_system_get_app();
     static unsigned previous_m_halt = 2;
 
