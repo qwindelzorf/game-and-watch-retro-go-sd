@@ -32,7 +32,6 @@
 #include "main_a2600.h"
 #include "rg_rtc.h"
 #include "heap.hpp"
-#include "ff.h"
 #include "gw_flash.h"
 
 
@@ -54,9 +53,8 @@ static retro_emulator_file_t *CHOSEN_FILE = NULL;
 
 /* Copy file into flash "cache" section */
 static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool byte_swap) {
-    FIL file;
-    FRESULT fr;
-    UINT bytes_read;
+    FILE *file;
+    size_t bytes_read;
 
     uint32_t address_in_flash = (&__CACHEFLASH_START__ - &__EXTFLASH_BASE__);
     uint8_t *address_in_mem = (&__CACHEFLASH_START__);
@@ -69,18 +67,16 @@ static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool by
     // Check file content will fit in flash
     assert((&__CACHEFLASH_END__ - &__CACHEFLASH_START__) >= size);
 
-    fr = f_open(&file, file_path, FA_READ);
-    if (fr != FR_OK) {
+    file = fopen(file_path,"rb");
+    if (file == NULL) {
         return NULL;
-    }
+    } 
 
     // Check if content to load is different from cache content
     while (offset < size) {
         wdog_refresh();
-        fr = f_read(&file, buffer, sizeof(buffer), &bytes_read);
-        if (fr != FR_OK || bytes_read == 0) {
-            break;
-        }
+        bytes_read = fread((unsigned char *)&buffer, 1, sizeof(buffer), file);
+        if (bytes_read == 0) break;
         if (byte_swap) {
             for (int i=0; i < sizeof(buffer); i+=2)
             {
@@ -97,7 +93,7 @@ static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool by
     }
 
     if (flash_needed) {
-        f_lseek(&file, 0);
+        fseek(file, 0, SEEK_SET);
         offset = 0;
 
         OSPI_DisableMemoryMappedMode();
@@ -109,10 +105,8 @@ static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool by
         while (offset < size) {
             wdog_refresh();
 
-            fr = f_read(&file, buffer, sizeof(buffer), &bytes_read);
-            if (fr != FR_OK || bytes_read == 0) {
-                break;
-            }
+            bytes_read = fread((unsigned char *)&buffer, 1, sizeof(buffer), file);
+            if (bytes_read == 0) break;
             if (byte_swap) {
                 for (int i=0; i < sizeof(buffer); i+=2)
                 {
@@ -128,25 +122,24 @@ static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool by
         OSPI_EnableMemoryMappedMode();
     }
 
-    f_close(&file);
-
+    fclose(file);
     return address_in_mem;
 }
 
 /* copy file content into ram */
 static int copy_file_to_ram(char *file_path, char *ram_dest) {
-    FIL file;
-    FRESULT fr;
-    UINT bytes_read;
+    FILE *file;
+    size_t bytes_read;
+    uint32_t total_written;
 
-    fr = f_open(&file, file_path, FA_READ);
-    if (fr != FR_OK) {
+    file = fopen(file_path,"rb");
+    if (file == NULL) {
         return false;
-    }
+    } 
 
-    uint32_t total_written = 0;
+    total_written = 0;
 
-    while (f_read(&file, ram_dest+total_written, 32*1024, &bytes_read) == FR_OK) {
+    while (fread(ram_dest+total_written, 1, 32*1024, file)) {
         wdog_refresh();
 
         if (bytes_read == 0) {
@@ -156,7 +149,7 @@ static int copy_file_to_ram(char *file_path, char *ram_dest) {
         total_written += bytes_read;
     }
 
-    f_close(&file);
+    fclose(file);
 
     return true;
 }
@@ -656,7 +649,6 @@ void emulators_init()
 //    add_emulator("Sega Master System", "sms", "sms", &pad_sms, &header_sms, GAME_DATA);
     add_emulator("Sega Genesis", "md", "md gen bin", &pad_gen, &header_gen, GAME_DATA_BYTESWAP_16);
 //    add_emulator("Homebrew", "homebrew", "bin", &pad_homebrew, &header_homebrew, NO_GAME_DATA);
-//    add_emulator("Sega Genesis", "md", "md gen bin", -1, 0, &pad_gen, &header_gen, GAME_DATA_BYTESWAP_16);
 /*
     add_emulator("Nintendo Gameboy", "gb", "gb gbc", "tgbdual-go", 0, &pad_gb, &header_gb);
     add_emulator("Nintendo Entertainment System", "nes", "nes fc fds nsf", "fceumm", 16, &pad_nes, &header_nes);
