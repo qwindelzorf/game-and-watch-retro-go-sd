@@ -1,6 +1,6 @@
 #pragma once
 
-const char font_cp932_ja_jp[] __attribute__((section(".extflash_font"))) = {
+const char font_cp932_ja_jp[] FONT_DATA = {
 // b'\xa1' 0xa1
   0x00, //  ......
   0x00, //  ......

@@ -1,6 +1,6 @@
 #pragma once
 
-const char font_cp936_zh_cn[] __attribute__((section(".extflash_font"))) = {
+const char font_cp936_zh_cn[] FONT_DATA = {
 // b'\xa1\xa1' 0xa1a1
   0x00,0x00, //  ............
   0x00,0x00, //  ............

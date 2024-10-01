@@ -4,7 +4,7 @@
 #if !defined(BIG_BANK)
 #define BIG_BANK 1
 #endif
-#if (BIG_BANK == 1) && (EXTFLASH_SIZE <= 16*1024*1024)
+#if ((BIG_BANK == 1) && (EXTFLASH_SIZE <= 16*1024*1024)) || SD_CARD >= 1
 #define LOGO_DATA __attribute__((section(".intflash_logo")))
 #else
 #define LOGO_DATA __attribute__((section(".extflash_logo")))
