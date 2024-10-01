@@ -359,14 +359,43 @@ static void blit_and_swap(void)
 
 #define STATE_SAVE_BUFFER_LENGTH 1024 * 192
 
-static bool SaveState(char *savePathName, char *sramPathName, int slot)
+static bool SaveState(const char *savePathName)
 {
     printf("Saving state...\n");
-    return 0;
+
+    // Use GB_ROM_SRAM_CACHE (which points to _GB_ROM_UNPACK_BUFFER)
+    // as a temporary save buffer.
+    size_t size = gb_state_save((uint8_t *)&_OVERLAY_GB_BSS_END, STATE_SAVE_BUFFER_LENGTH);
+    FILE *file = fopen(savePathName, "wb");
+    if (file == NULL) {
+        printf("Error opening file\n");
+        return false;
+    }
+
+    fwrite((const void *)&_OVERLAY_GB_BSS_END, 1, size, file);
+
+    fclose(file);
+    
+    return true;
 }
 
-static bool LoadState(char *savePathName, char *sramPathName, int slot)
+static bool LoadState(const char *savePathName)
 {
+    size_t savestate_size;
+
+    // We store data in the not visible framebuffer
+    FILE *file = fopen(savePathName, "rb");
+    if (file == NULL) {
+        printf("Error opening file\n");
+        return false;
+    }
+
+    savestate_size = fread((void *)&_OVERLAY_GB_BSS_END, 1, STATE_SAVE_BUFFER_LENGTH, file);
+
+    fclose(file);
+
+    gb_state_load((const uint8_t *)_OVERLAY_GB_BSS_END, savestate_size);
+
     return true;
 }
 
