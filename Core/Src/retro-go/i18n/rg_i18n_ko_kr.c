@@ -191,12 +191,6 @@ const lang_t lang_ko_kr LANG_DATA = {
     .s_Cheat_Codes_OFF = "\x5",
 #endif
 
-    // Core\Src\save_manager.c =============================================
-    .s_Save_manager = "Save Manager",
-    .s_Next = "Next",
-    .s_Previous = "Previous",
-    //=====================================================================
-
     //=====================================================================
 
     // Core\Src\retro-go\rg_main.c =========================================

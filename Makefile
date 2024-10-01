@@ -45,7 +45,6 @@ Core/Src/gw_flash.c \
 Core/Src/error_screens.c \
 Core/Src/main.c \
 Core/Src/syscalls.c \
-Core/Src/save_manager.c \
 Core/Src/sha256.c \
 Core/Src/bq24072.c \
 Core/Src/porting/lib/hw_jpeg_decoder.c \

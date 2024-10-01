@@ -188,12 +188,6 @@ const lang_t lang_es_es LANG_DATA = {
 #endif
     //=====================================================================
 
-    // Core\Src\save_manager.c =============================================
-    .s_Save_manager = "Save Manager",
-    .s_Next = "Next",
-    .s_Previous = "Previous",
-    //=====================================================================
-
     // Core\Src\retro-go\rg_main.c =========================================
     .s_CPU_Overclock = "Overclock CPU",
     .s_CPU_Overclock_0 = "Stock",

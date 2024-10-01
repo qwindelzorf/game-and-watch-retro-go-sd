@@ -189,11 +189,6 @@ const lang_t lang_zh_tw LANG_DATA = {
 
     //=====================================================================
 
-    // Core\Src\save_manager.c =============================================
-    .s_Save_manager = "Save Manager",
-    .s_Next = "Next",
-    .s_Previous = "Previous",
-    //=====================================================================
     // Core\Src\retro-go\rg_main.c =========================================
     .s_CPU_Overclock = "¶WÀW",
     .s_CPU_Overclock_0 = "Ãö³¬",

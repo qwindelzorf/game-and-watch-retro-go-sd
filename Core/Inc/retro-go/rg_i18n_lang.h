@@ -158,11 +158,6 @@ typedef struct
     const char *s_Cheat_Codes_OFF;
 #endif    
     //=====================================================================
-    // Core\Src\save_manager.c =============================================
-    const char *s_Save_manager;
-    const char *s_Next;
-    const char *s_Previous;
-    //=====================================================================
     // Core\Src\retro-go\rg_main.c =========================================
     const char *s_CPU_Overclock;
     const char *s_CPU_Overclock_0;

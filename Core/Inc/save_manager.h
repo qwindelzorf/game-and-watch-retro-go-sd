@@ -1,1 +1,0 @@
-void handle_save_manager_menu();
