@@ -14,7 +14,9 @@ extern "C"
 #include "rom_manager.h"
 #include "appid.h"
 #include "gw_malloc.h"
+#ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
+#endif
 
 extern void __libc_init_array(void);
 }
@@ -73,6 +75,7 @@ bool a2600_fastscbios = false;
 static uint8_t rom_memory[ROM_BUFF_LENGTH];
 
 static size_t getromdata(unsigned char **data) {
+#ifndef GNW_DISABLE_COMPRESSION
     /* src pointer to the ROM data in the external flash (raw or LZ4) */
     const unsigned char *src = ROM_DATA;
     unsigned char *dest = (unsigned char *)rom_memory;
@@ -86,6 +89,10 @@ static size_t getromdata(unsigned char **data) {
         *data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }
+#else
+    *data = (unsigned char *)ROM_DATA;
+    return ROM_DATA_LENGTH;
+#endif
 }
 
 void fill_stella_config()

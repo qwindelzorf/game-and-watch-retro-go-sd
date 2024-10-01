@@ -5,6 +5,7 @@
 extern uint8_t __CACHEFLASH_START__;
 extern uint8_t __CACHEFLASH_END__;
 extern uint8_t __EXTFLASH_START__;
+extern uint8_t __EXTFLASH_END__;
 extern uint8_t __EXTFLASH_BASE__;
 extern uint32_t __INTFLASH__;  // From linker, usually value 0x08000000 for bank 1, or 0x08100000 for bank 2
 
@@ -42,6 +43,7 @@ extern void * _OVERLAY_GB_LOAD_START[];
 extern uint8_t _OVERLAY_GB_SIZE;
 extern void * _OVERLAY_GB_BSS_START[];
 extern uint8_t _OVERLAY_GB_BSS_SIZE;
+extern void * _OVERLAY_GB_BSS_END[];
 extern void * _OVERLAY_TGB_LOAD_START[];
 extern uint8_t _OVERLAY_TGB_SIZE;
 extern void * _OVERLAY_TGB_BSS_START[];
@@ -63,6 +65,7 @@ extern void * _OVERLAY_MSX_LOAD_START[];
 extern uint8_t _OVERLAY_MSX_SIZE;
 extern void * _OVERLAY_MSX_BSS_START[];
 extern uint8_t _OVERLAY_MSX_BSS_SIZE;
+extern void * _OVERLAY_MSX_BSS_END[];
 extern void * _OVERLAY_WSV_LOAD_START[];
 extern uint8_t _OVERLAY_WSV_SIZE;
 extern void * _OVERLAY_WSV_BSS_START[];
@@ -113,5 +116,7 @@ extern uint8_t _NES_FCEU_ROM_UNPACK_BUFFER_SIZE;
 
 extern void * _MSX_ROM_UNPACK_BUFFER[];
 extern uint8_t _MSX_ROM_UNPACK_BUFFER_SIZE;
+extern uint8_t *_PCE_ROM_UNPACK_BUFFER;
+extern uint8_t _PCE_ROM_UNPACK_BUFFER_SIZE;
 
 extern void * __RAM_END__[];
