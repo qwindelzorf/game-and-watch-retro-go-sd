@@ -13,6 +13,9 @@
 #include "main_smsplusgx.h"
 #include "appid.h"
 #include "rg_i18n.h"
+#ifndef GNW_DISABLE_COMPRESSION
+#include "lzma.h"
+#endif
 #include "gw_malloc.h"
 
 #define SMS_WIDTH 256
@@ -60,6 +63,7 @@ static const uint8_t IMG_DISKETTE[] = {
     0x00, 0x3E, 0x3F, 0xFF, 0xFC, 0x00, 0x00, 0x00,
 };
 
+static void blit_console();
 
 static int
 load_rom_from_flash(uint8_t emu_engine)
@@ -67,8 +71,84 @@ load_rom_from_flash(uint8_t emu_engine)
     static uint8 sram[0x8000];
     /* check if it's compressed */
 
-    cart.rom = (uint8 *)ROM_DATA;
-    cart.size = ROM_DATA_LENGTH;
+#ifndef GNW_DISABLE_COMPRESSION
+    if (strcmp(ROM_EXT, "lzma") == 0)
+    {
+        /* it can fit in ITC RAM */
+        if ((emu_engine == SMSPLUSGX_ENGINE_COLECO) || (emu_engine == SMSPLUSGX_ENGINE_SG1000))
+        {
+            size_t n_decomp_bytes;
+            ROMinRAM_DATA = itc_malloc(SMSROM_RAM_BUFFER_LENGTH);
+            n_decomp_bytes = lzma_inflate((uint8 *)ROMinRAM_DATA, SMSROM_RAM_BUFFER_LENGTH, (uint8 *)ROM_DATA, ROM_DATA_LENGTH);
+            cart.rom = (uint8 *)ROMinRAM_DATA;
+            cart.size = (uint32_t)n_decomp_bytes;
+        }
+        /* it can't fit in ITC RAM */
+        else
+        {
+            //   assert ( (&__CACHEFLASH_END__ - &__CACHEFLASH_START__) > 0);
+            /* check header  */
+            //assert(memcmp((uint8 *)ROM_DATA, "SMS+", 4) == 0);
+            unsigned int nb_banks = 0;
+            unsigned int lzma_bank_size = 0;
+            unsigned int lzma_bank_offset = 0;
+            unsigned int uncompressed_rom_size = 0;
+            memcpy(&nb_banks, &ROM_DATA[4], sizeof(nb_banks));
+            lzma_bank_offset = 4 + 4 + 4 * nb_banks;
+            for (int i = 0; i < nb_banks; i++)
+            {
+                wdog_refresh();
+                memcpy(&lzma_bank_size, &ROM_DATA[8 + 4 * i], sizeof(lzma_bank_size));
+                lcd_clear_inactive_buffer();
+                uint16_t *dest = lcd_get_inactive_buffer();
+                /* uncompressed in lcd framebuffer */
+                size_t n_decomp_bytes;
+                n_decomp_bytes = lzma_inflate((uint8 *)lcd_get_active_buffer(), 2 * 320 * 240, &ROM_DATA[lzma_bank_offset], lzma_bank_size);
+
+                //assert (  (&__CACHEFLASH_END__ - &__CACHEFLASH_START__) >= ( (uint32_t)n_decomp_bytes + uncompressed_rom_size) );
+                int diff = memcmp((void *)(&__CACHEFLASH_START__ + uncompressed_rom_size), (uint8 *)lcd_get_active_buffer(), n_decomp_bytes);
+                if (diff != 0)
+                {
+                wdog_refresh();
+                OSPI_DisableMemoryMappedMode();
+                    /* display diskette during flash erase */
+                    uint16_t idx = 0;
+                    for(uint8_t i=0; i < 24; i++) {
+                        for(uint8_t j=0; j < 24; j++) {
+                            if(IMG_DISKETTE[idx / 8] & (1 << (7 - idx % 8))){
+                                dest[286 + j +  GW_LCD_WIDTH * (10 + i)] = 0xFFFF;
+                            }
+                            idx++;
+                        }
+                    }
+                    /* erase the trunk */
+                    OSPI_EraseSync((&__CACHEFLASH_START__ - &__EXTFLASH_BASE__)+uncompressed_rom_size, (uint32_t)n_decomp_bytes);
+
+                    /* erase diskette during flash program */
+                    for (short y = 0; y < 24; y++) {
+                    uint16_t *dest_row = &dest[(y + 10) * GW_LCD_WIDTH + 286];
+                    memset(dest_row,0x0 , 24 * sizeof(uint16_t));
+                    }
+                    /* program the trunk */
+                    wdog_refresh();
+                    OSPI_Program((&__CACHEFLASH_START__ - &__EXTFLASH_BASE__)+uncompressed_rom_size, (uint8 *)lcd_get_active_buffer(), (uint32_t)n_decomp_bytes);
+                    OSPI_EnableMemoryMappedMode();
+                    wdog_refresh();
+                }
+                lzma_bank_offset += lzma_bank_size;
+                uncompressed_rom_size += (uint32_t)n_decomp_bytes;
+            }
+            /* set the rom pointer and size */
+            cart.rom = &__CACHEFLASH_START__;
+            cart.size = uncompressed_rom_size;
+        }
+    }
+    else
+#endif
+    {
+        cart.rom = (uint8 *)ROM_DATA;
+        cart.size = ROM_DATA_LENGTH;
+    }
 
     cart.sram = sram;
     cart.pages = cart.size / 0x4000;
@@ -97,14 +177,61 @@ load_rom_from_flash(uint8_t emu_engine)
 extern uint32 glob_bp_lut[0x10000];
 #define SAVE_STATE_BUFFER_SIZE (60 * 1024)
 
-static bool SaveState(char *savePathName, char *sramPathName, int slot)
+static bool SaveState(const char *savePathName)
 {
-    return false;
+    uint8_t *state_save_buffer = (uint8_t *)glob_bp_lut;
+    system_save_state(state_save_buffer);
+
+    FILE *file = fopen(savePathName, "wb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t written = fwrite(state_save_buffer, SAVE_STATE_BUFFER_SIZE, 1, file);
+
+    fclose(file);
+
+    if (!written) {
+        return false;
+    }
+
+    /* restore the contents of _bp_lut */
+    render_init();
+
+    return true;
 }
 
-static bool LoadState(char *savePathName, char *sramPathName, int slot)
+static bool LoadState(const char *savePathName)
 {
+    uint8_t *state_save_buffer = (uint8_t *)glob_bp_lut;
+
+    FILE *file = fopen(savePathName, "rb");
+    if (file == NULL) {
+        return false;
+    }
+
+    size_t read = fread(state_save_buffer, SAVE_STATE_BUFFER_SIZE, 1, file);
+
+    fclose(file);
+
+    if (!read) {
+        return false;
+    }
+
+    system_load_state((void *)state_save_buffer);
+    /* restore the contents of _bp_lut */
+    render_init();
+
     return true;
+}
+
+static void *Screenshot()
+{
+    lcd_wait_for_vblank();
+
+    lcd_clear_active_buffer();
+    blit_console();
+    return lcd_get_active_buffer();
 }
 
 static uint8_t fb_buffer[COL_WIDTH*COL_HEIGHT];
@@ -242,11 +369,15 @@ void sms_pcm_submit() {
     }
 }
 
-static void blit()
-{
+static void blit_console() {
     pixel_t* curr_framebuffer = lcd_get_active_buffer();
     if (sms.console == CONSOLE_GG)     blit_gg(&bitmap, curr_framebuffer);
     else                               blit_sms(&bitmap, curr_framebuffer);
+}
+
+static void blit()
+{
+    blit_console();
     common_ingame_overlay();
 }
 
@@ -276,6 +407,7 @@ static void sms_draw_frame()
   }
 
   blit();
+  common_ingame_overlay();
   lcd_swap();
 }
 
@@ -340,7 +472,7 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, int8_t save_slot, u
     }
 
     odroid_system_init(APPID_SMS, AUDIO_SAMPLE_RATE);
-    odroid_system_emu_init(&LoadState, &SaveState, NULL);
+    odroid_system_emu_init(&LoadState, &SaveState, &Screenshot);
 
     system_reset_config();
     load_rom_from_flash( is_coleco );
