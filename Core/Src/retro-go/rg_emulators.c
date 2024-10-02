@@ -501,6 +501,10 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
         ROM_DATA_LENGTH = newfile->size;
     }
 
+    ahb_init();
+    itc_init();
+    ram_start = 0;
+
     if(strcmp(system_name, "Nintendo Gameboy") == 0) {
 #if FORCE_GNUBOY == 1
         memcpy(&__RAM_EMU_START__, &_OVERLAY_GB_LOAD_START, (size_t)&_OVERLAY_GB_SIZE);
