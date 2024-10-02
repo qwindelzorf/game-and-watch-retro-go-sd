@@ -67,6 +67,7 @@ static bool SaveState(const char *savePathName)
 
     FILE *file = fopen(savePathName, "wb");
     if (file == NULL) {
+        fclose(file);
         return false;
     }
 
