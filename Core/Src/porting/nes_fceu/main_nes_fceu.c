@@ -8,10 +8,10 @@
 #include "common.h"
 #include "rom_manager.h"
 #include "rg_i18n.h"
-#include "lz4_depack.h"
 #include <assert.h>
-#include  "miniz.h"
+#ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
+#endif
 #include "appid.h"
 #include "fceu.h"
 #include "fceu-state.h"
@@ -749,6 +749,7 @@ static size_t nes_getromdata(unsigned char **data)
     uint32_t available_size = (uint32_t)&_NES_FCEU_ROM_UNPACK_BUFFER_SIZE;
 
     wdog_refresh();
+#ifndef GNW_DISABLE_COMPRESSION
     if(strcmp(ROM_EXT, "lzma") == 0){
         size_t n_decomp_bytes;
         n_decomp_bytes = lzma_inflate(dest, available_size, src, ROM_DATA_LENGTH);
@@ -757,6 +758,7 @@ static size_t nes_getromdata(unsigned char **data)
         return n_decomp_bytes;
     }
     else
+#endif
     {
 #ifdef FCEU_LOW_RAM
         // FDS disks has to be stored in ram for games

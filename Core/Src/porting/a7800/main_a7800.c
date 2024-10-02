@@ -7,9 +7,9 @@
 #include "gw_malloc.h"
 #include "rom_manager.h"
 #include "common.h"
-#include "lz4_depack.h"
-#include "miniz.h"
+#ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
+#endif
 #include "appid.h"
 #include "bilinear.h"
 #include "rg_i18n.h"
@@ -49,6 +49,7 @@ static bool SaveState(char *savePathName, char *sramPathName, int slot) {
 }
 
 static size_t getromdata(unsigned char **data) {
+#ifndef GNW_DISABLE_COMPRESSION
     /* src pointer to the ROM data in the external flash (raw or LZ4) */
     const unsigned char *src = ROM_DATA;
     unsigned char *dest = (unsigned char *)rom_memory;
@@ -58,7 +59,10 @@ static size_t getromdata(unsigned char **data) {
         n_decomp_bytes = lzma_inflate(dest, ROM_BUFF_LENGTH, src, ROM_DATA_LENGTH);
         *data = dest;
         return n_decomp_bytes;
-    } else {
+    }
+    else
+#endif
+    {
         *data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }

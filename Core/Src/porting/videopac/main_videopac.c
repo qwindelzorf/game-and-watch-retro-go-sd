@@ -10,7 +10,9 @@
 #include "gw_buttons.h"
 #include "common.h"
 #include "rom_manager.h"
+#ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
+#endif
 #include "appid.h"
 #include "gw_malloc.h"
 
@@ -178,6 +180,7 @@ static rg_app_desc_t * init(uint8_t load_state, int8_t save_slot)
 static size_t videopac_getromdata(retro_emulator_file_t *rom_file, unsigned char **res_data, size_t max_size) {
     /* src pointer to the ROM data in the external flash (raw or lzma) */
 
+#ifndef GNW_DISABLE_COMPRESSION
     if(strcmp(rom_file->ext, "lzma") == 0) {
         const unsigned char *src = rom_file->address;
         uint8_t *dest = itc_malloc(max_size);
@@ -185,7 +188,10 @@ static size_t videopac_getromdata(retro_emulator_file_t *rom_file, unsigned char
         n_decomp_bytes = lzma_inflate(dest, max_size, src, rom_file->size);
         *res_data = dest;
         return n_decomp_bytes;
-    } else {
+    }
+    else
+#endif
+    {
         *res_data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }

@@ -6,9 +6,9 @@
 #include "gw_buttons.h"
 #include "rom_manager.h"
 #include "common.h"
-#include "lz4_depack.h"
-#include "miniz.h"
+#ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
+#endif
 #include "appid.h"
 #include "bilinear.h"
 #include "rg_i18n.h"
@@ -432,6 +432,7 @@ void wsv_input_read(odroid_gamepad_state_t *joystick) {
 
 size_t wsv_getromdata(unsigned char **data) {
     /* src pointer to the ROM data in the external flash (raw or LZ4) */
+#ifndef GNW_DISABLE_COMPRESSION
     const unsigned char *src = ROM_DATA;
     unsigned char *dest = (unsigned char *)wsv_rom_memory;
 
@@ -440,7 +441,10 @@ size_t wsv_getromdata(unsigned char **data) {
         n_decomp_bytes = lzma_inflate(dest, WSV_ROM_BUFF_LENGTH, src, ROM_DATA_LENGTH);
         *data = dest;
         return n_decomp_bytes;
-    } else {
+    }
+    else
+#endif
+    {
         *data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }

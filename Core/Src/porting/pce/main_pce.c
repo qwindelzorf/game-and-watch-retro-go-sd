@@ -8,9 +8,7 @@
 
 #include <pce.h>
 #include <romdb_pce.h>
-#include "lz4_depack.h"
 #include <assert.h>
-#include "miniz.h"
 #include <gfx.h>
 #include "main.h"
 #include "bilinear.h"
@@ -21,6 +19,9 @@
 #include "common.h"
 #include "sound_pce.h"
 #include "appid.h"
+#ifndef GNW_DISABLE_COMPRESSION
+#include "lzma.h"
+#endif
 #include "rg_i18n.h"
 #include "gui.h"
 
@@ -339,8 +340,23 @@ static void pce_rom_patch()
 size_t
 pce_osd_getromdata(unsigned char **data)
 {
-    *data = (unsigned char *)ROM_DATA;
-    return ROM_DATA_LENGTH;
+    /* src pointer to the ROM data in the external flash (raw or LZ4) */
+#ifndef GNW_DISABLE_COMPRESSION
+    const unsigned char *src = ROM_DATA;
+    unsigned char *dest = (unsigned char *)&_PCE_ROM_UNPACK_BUFFER;
+    uint32_t available_size = (uint32_t)&_PCE_ROM_UNPACK_BUFFER_SIZE;
+    if(strcmp(ROM_EXT, "lzma") == 0){
+        size_t n_decomp_bytes;
+        n_decomp_bytes = lzma_inflate(dest, available_size, src, ROM_DATA_LENGTH);
+        *data = dest;
+        return n_decomp_bytes;
+    }
+    else
+#endif
+    {
+        *data = (unsigned char *)ROM_DATA;
+        return ROM_DATA_LENGTH;
+    }
 }
 
 void LoadCartPCE() {
