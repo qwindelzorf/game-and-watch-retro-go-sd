@@ -128,7 +128,7 @@ static bool circular_flash_write(const char *file_path, uint32_t data_size, uint
 
 uint8_t *store_file_in_flash(const char *file_path, uint32_t file_size) {
     if (metadata == NULL) {
-        metadata = ram_malloc(sizeof(Metadata));
+        metadata = ram_calloc(1, sizeof(Metadata));
     }
     initialize_flash_pointer();
     // TODO : append file modification time to filepath for crc32
