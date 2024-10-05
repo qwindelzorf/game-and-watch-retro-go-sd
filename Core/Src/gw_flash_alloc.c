@@ -15,10 +15,10 @@
 
 // Metadata for each file
 typedef struct {
-    uint32_t file_crc32;  // CRC32 du fichier pour identifier un fichier
+    uint32_t file_crc32;
     uint32_t flash_address;
     uint32_t file_size;
-    bool valid;           // Indique si l'entrée est valide (pas écrasée)
+    bool valid;
 } FileMetadata;
 
 // Global Metadata
@@ -126,7 +126,6 @@ static bool circular_flash_write(const char *file_path, uint32_t data_size, uint
     return true;
 }
 
-// Processus principal pour écrire un fichier dans la flash
 uint8_t *store_file_in_flash(const char *file_path, uint32_t file_size) {
     if (metadata == NULL) {
         metadata = ram_malloc(sizeof(Metadata));
@@ -141,7 +140,6 @@ uint8_t *store_file_in_flash(const char *file_path, uint32_t file_size) {
         return (uint8_t *)flash_address;
     }
 
-    // Écriture circulaire dans la flash
     if (!circular_flash_write(file_path, file_size, &flash_address)) {
         return NULL;
     }
