@@ -51,83 +51,11 @@ static int emulators_count = 0;
 
 static retro_emulator_file_t *CHOSEN_FILE = NULL;
 
+uint8_t *store_file_in_flash(const char *file_path, uint32_t file_size);
+
 /* Copy file into flash "cache" section */
-static const uint8_t *copy_file_to_cache(char *file_path, uint32_t size, bool byte_swap) {
-    FILE *file;
-    size_t bytes_read;
-
-    uint32_t address_in_flash = (&__CACHEFLASH_START__ - &__EXTFLASH_BASE__);
-    uint8_t *address_in_mem = (&__CACHEFLASH_START__);
-    uint8_t buffer[512];
-    uint32_t offset = 0;
-    bool flash_needed = false;
-
-    printf("file_path %s %ld\n",file_path,size/1024);
-
-    // Check file content will fit in flash
-    assert((&__CACHEFLASH_END__ - &__CACHEFLASH_START__) >= size);
-
-    file = fopen(file_path,"rb");
-    if (file == NULL) {
-        return NULL;
-    } 
-
-#if 0
-    // Check if content to load is different from cache content
-    while (offset < size) {
-        wdog_refresh();
-        bytes_read = fread((unsigned char *)&buffer, 1, sizeof(buffer), file);
-        if (bytes_read == 0) break;
-        if (byte_swap) {
-            for (int i=0; i < sizeof(buffer); i+=2)
-            {
-                char temp = buffer[i];
-                buffer[i]=buffer[i+1];
-                buffer[i+1]=temp;
-            }
-        }
-        if (memcmp(buffer, (const void *)(address_in_mem + offset), bytes_read) != 0) {
-            flash_needed = true;
-            break;
-        }
-        offset += bytes_read;
-    }
-#else
-    flash_needed = true;
-#endif
-
-    if (flash_needed) {
-        fseek(file, 0, SEEK_SET);
-        offset = 0;
-
-        OSPI_DisableMemoryMappedMode();
-
-        // Erase flash memory
-        OSPI_EraseSync(address_in_flash, size);
-
-        // read file and write data in flash
-        while (offset < size) {
-            wdog_refresh();
-
-            bytes_read = fread((unsigned char *)&buffer, 1, sizeof(buffer), file);
-            if (bytes_read == 0) break;
-            if (byte_swap) {
-                for (int i=0; i < sizeof(buffer); i+=2)
-                {
-                    char temp = buffer[i];
-                    buffer[i]=buffer[i+1];
-                    buffer[i+1]=temp;
-                }
-            }
-            OSPI_Program(address_in_flash + offset, buffer, bytes_read);
-            offset += bytes_read;
-        }
-
-        OSPI_EnableMemoryMappedMode();
-    }
-
-    fclose(file);
-    return address_in_mem;
+static const uint8_t *copy_file_to_cache(char *file_path, uint32_t file_size, bool byte_swap) {
+    return store_file_in_flash(file_path, file_size);
 }
 
 /* copy file content into ram */
@@ -490,15 +418,16 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
     // Copy game data from SD card to flash if needed
     if (newfile->system->game_data_type != NO_GAME_DATA) {
-        uint32_t rounded_size = 1;
-        while (rounded_size < newfile->size) {
-            rounded_size <<= 1;
-        }
-        newfile->address = copy_file_to_cache(newfile->path,rounded_size,
+        newfile->address = copy_file_to_cache(newfile->path, newfile->size,
                                            newfile->system->game_data_type == GAME_DATA_BYTESWAP_16);
         ROM_DATA = newfile->address;
         ROM_EXT = "";//newfile->ext; // TODO : get correct const char * for this
         ROM_DATA_LENGTH = newfile->size;
+    }
+
+    if (newfile->address == NULL) {
+        // Rom was not loaded in flash, do not start emulator
+        return;
     }
 
     ahb_init();
