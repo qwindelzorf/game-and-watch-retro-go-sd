@@ -18,7 +18,7 @@
 
 #if SD_CARD >= 1
 static int16_t current_logo = -1;
-static uint8_t temp_logo_buffer[150*24/8];
+static uint8_t temp_logo_buffer[152*24/8+4];
 #endif
 
 retro_logo_image *rg_get_logo(int16_t logo_index) {

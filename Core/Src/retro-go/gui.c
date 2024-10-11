@@ -334,7 +334,7 @@ void gui_draw_navbar()
     {
         retro_logo_image *logo = rg_get_logo(gui.tabs[i]->logo_idx);
         if (logo)
-            odroid_display_write(i * IMAGE_LOGO_WIDTH, 0, IMAGE_LOGO_WIDTH, IMAGE_LOGO_HEIGHT, logo);
+            odroid_display_write(i * IMAGE_LOGO_WIDTH, 0, IMAGE_LOGO_WIDTH, IMAGE_LOGO_HEIGHT, (const uint16_t*)logo);
     }
 }
 
