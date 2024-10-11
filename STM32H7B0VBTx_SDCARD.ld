@@ -56,7 +56,7 @@ ENTRY(Reset_Handler)
 _estack = _stack_top;    /* end of RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
-_Heap_Size = 40 * 1024;     /* required amount of heap */
+_Heap_Size = 32 * 1024;     /* required amount of heap */
 
 _Stack_Redzone_Size = 256;  /* size of stack overflow protection */
 _Min_Stack_Size = 20 * 1024; /* required amount of stack */
