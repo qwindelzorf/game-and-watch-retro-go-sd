@@ -97,9 +97,9 @@ static void invalidate_overwritten_files(uint32_t flash_address, uint32_t data_s
     {
         uint32_t file_start = metadata->files[i].flash_address;
         uint32_t file_end = file_start + metadata->files[i].file_size;
+        uint32_t flash_end = flash_address + data_size;
 
-        if (metadata->files[i].valid && ((flash_address >= file_start && flash_address < file_end) ||
-                                         (flash_address + data_size > file_start && flash_address + data_size <= file_end)))
+        if (metadata->files[i].valid && (flash_address < file_end && file_start < flash_end))
         {
             metadata->files[i].valid = false;
         }
@@ -124,6 +124,7 @@ static bool circular_flash_write(const char *file_path,
     {
         return false;
     }
+    uint32_t old_flash_write_pointer = flash_write_pointer;
     uint32_t address_in_flash = flash_write_pointer - (uint32_t)&__EXTFLASH_BASE__;
     OSPI_DisableMemoryMappedMode();
     OSPI_EraseSync(address_in_flash, align_to_next_block(data_size));
@@ -150,9 +151,7 @@ static bool circular_flash_write(const char *file_path,
     OSPI_EnableMemoryMappedMode();
     fclose(file);
 
-    printf("write @%lx done\n", address_in_flash);
-
-    invalidate_overwritten_files(flash_write_pointer, data_size);
+    invalidate_overwritten_files(old_flash_write_pointer, data_size);
 
     update_flash_pointer(flash_write_pointer);
 
