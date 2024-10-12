@@ -1990,7 +1990,6 @@ void app_main_msx(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     image_buffer_current_width =  image_buffer_base_width;
     image_buffer_height        =  240;
 
-    lcd_clear_buffers();
     memset(msx_framebuffer, 0, sizeof(msx_framebuffer));
     
     audio_clear_buffers();
@@ -2037,6 +2036,9 @@ void app_main_msx(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
         }
     }
 */
+    if (!load_state) {
+        lcd_clear_buffers();
+    }
     while (1) {
         // Frequency change check if in automatic mode
         if ((selected_frequency_index == FREQUENCY_VDP_AUTO) && (msx_fps != boardInfo.getRefreshRate())) {

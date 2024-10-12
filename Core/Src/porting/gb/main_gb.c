@@ -529,7 +529,6 @@ rg_app_desc_t * init(uint8_t load_state, int8_t save_slot)
     memset(&rtc, 0, sizeof(rtc));
 
     // Video
-    lcd_clear_buffers();
     memset(&fb, 0, sizeof(fb));
     fb.w = GB_WIDTH;
     fb.h = GB_HEIGHT;
@@ -558,6 +557,8 @@ rg_app_desc_t * init(uint8_t load_state, int8_t save_slot)
 
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
 
     return app;

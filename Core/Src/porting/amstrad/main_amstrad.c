@@ -1014,8 +1014,6 @@ void app_main_amstrad(uint8_t load_state, uint8_t start_paused, int8_t save_slot
     common_emu_state.frame_time_10us = (uint16_t)(100000 / AMSTRAD_FPS + 0.5f);
     lcd_set_refresh_rate(AMSTRAD_FPS);
 
-    lcd_clear_buffers();
-
     odroid_system_init(APPID_AMSTRAD, AMSTRAD_SAMPLE_RATE);
     odroid_system_emu_init(&loadAmstradState, &saveAmstradState, NULL);
 
@@ -1045,6 +1043,8 @@ void app_main_amstrad(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 
     if (load_state) {
         load_result = odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
     // If disk loaded and no save state loaded, enter autoload command
     if ((disk_load_result == 0) && (load_result == 0)) {

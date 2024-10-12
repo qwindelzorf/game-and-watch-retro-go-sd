@@ -514,11 +514,10 @@ app_main_smsplusgx(uint8_t load_state, uint8_t start_paused, int8_t save_slot, u
         common_emu_state.frame_time_10us = (uint16_t)(100000 / FPS_PAL + 0.5f);
     }
 
-    // Video
-    lcd_clear_buffers();
-
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
 
     odroid_gamepad_state_t joystick;

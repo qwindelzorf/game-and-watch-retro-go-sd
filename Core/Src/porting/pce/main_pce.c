@@ -593,7 +593,6 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused, int8_t save_slot) {
     init_color_pals();
     const int refresh_rate = FPS_NTSC;
     sprintf(pce_log,"%d",refresh_rate);
-    lcd_clear_buffers();
 
     gfx_init();
     printf("Graphics initialized\n");
@@ -633,6 +632,8 @@ int app_main_pce(uint8_t load_state, uint8_t start_paused, int8_t save_slot) {
     // If user select "RESUME" in main menu
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
     // Main emulator loop
     printf("Main emulator loop start\n");

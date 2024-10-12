@@ -548,9 +548,6 @@ int app_main_gwenesis(uint8_t load_state, uint8_t start_paused, int8_t save_slot
     power_on();
     reset_emulation();
 
-    /* clear the screen before rendering */
-    lcd_clear_buffers();
-
     unsigned short *screen = 0;
 
     screen = lcd_get_active_buffer();
@@ -564,6 +561,8 @@ int app_main_gwenesis(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
 
     /* Start at the same time DMAs audio & video */

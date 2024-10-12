@@ -640,9 +640,6 @@ void app_main_celeste(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 
     odroid_gamepad_state_t joystick;
 
-    // Black background
-    lcd_clear_buffers();
-
     if (start_paused) {
         common_emu_state.pause_after_frames = 2;
     } else {
@@ -670,6 +667,8 @@ void app_main_celeste(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
 
     while (true)

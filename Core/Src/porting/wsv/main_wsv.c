@@ -508,7 +508,6 @@ int app_main_wsv(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     lcd_set_refresh_rate(50);
 
     video_frame.buffer = wsv_framebuffer;
-    lcd_clear_buffers();
 
     odroid_system_init(APPID_WSV, SV_SAMPLE_RATE);
     odroid_system_emu_init(&LoadState, &SaveState, &Screenshot);
@@ -525,6 +524,8 @@ int app_main_wsv(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
     while(1)
     {

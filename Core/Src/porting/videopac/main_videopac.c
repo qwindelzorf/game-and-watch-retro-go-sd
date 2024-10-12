@@ -162,9 +162,6 @@ static rg_app_desc_t * init(uint8_t load_state, int8_t save_slot)
 
     // Load ROM
 
-    // Video
-    lcd_clear_buffers();
-
     // Audio
     audio_start_playing(SOUND_BUFFER_LEN);
 
@@ -172,6 +169,8 @@ static rg_app_desc_t * init(uint8_t load_state, int8_t save_slot)
 
     if (load_state) {
         odroid_system_emu_load_state(save_slot);
+    } else {
+        lcd_clear_buffers();
     }
 
     return app;

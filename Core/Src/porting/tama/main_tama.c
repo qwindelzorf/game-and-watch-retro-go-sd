@@ -357,7 +357,6 @@ static void main_tama(uint8_t start_paused) {
     odroid_system_emu_init(&LoadState, &SaveState, NULL);
 
     /* Initialize LCD */
-    lcd_clear_buffers();
     lcd_set_refresh_rate(TAMA_LCD_FPS);
 
     /* Initialize frame integrator */
@@ -476,6 +475,7 @@ _Noreturn void app_main_tama(uint8_t load_state, uint8_t start_paused, int8_t sa
 
         current_load_state = true;
     } else {
+        lcd_clear_buffers();
         current_save_slot = 0;
         current_load_state = false;
     }
