@@ -165,6 +165,21 @@ static void add_emulator(const char *system, const char *dirname, const char* ex
     emulator_init(p);
 }
 
+static char* remove_extension(const char* path) {
+    // we can assume an extension is always present
+    const char *last_dot = strrchr(path, '.');
+
+    size_t new_len = last_dot - path;
+
+    char *new_path = (char*)ram_malloc(new_len + 1);
+    if (!new_path) return NULL;
+
+    memcpy(new_path, path, new_len);
+    new_path[new_len] = '\0';
+
+    return new_path;
+}
+
 static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
 {
     retro_emulator_t *emu = (retro_emulator_t *)arg;
@@ -198,7 +213,7 @@ static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
     }
 
     emu->roms.files[emu->roms.count++] = (retro_emulator_file_t) {
-        .name = strdup(entry->basename),
+        .name = remove_extension(entry->basename),
         .ext = ext,
         .address = 0,
         .path = (char *)const_string(entry->path),
