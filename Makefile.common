@@ -1078,6 +1078,7 @@ flash_sd: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin
 	@$(CP) -O binary --only-section=.overlay_amstrad $(BUILD_DIR)/$(TARGET).elf build/cores/amstrad.bin
 	@$(CP) -O binary --only-section=.overlay_videopac $(BUILD_DIR)/$(TARGET).elf build/cores/videopac.bin
 	@$(CP) -O binary --only-section=.overlay_tama $(BUILD_DIR)/$(TARGET).elf build/cores/tama.bin
+	@$(CP) -O binary --only-section=.overlay_celeste $(BUILD_DIR)/$(TARGET).elf build/cores/celeste.bin
 	@$(CP) -O binary --only-section=.overlay_graphics $(BUILD_DIR)/$(TARGET).elf build/cores/logo.bin
 	@$(GNWMANAGER) flash $(INTFLASH_ADDRESS) $(BUILD_DIR)/$(TARGET)_intflash.bin \
 		-- sdpush --file build/cores/nes.bin --dest-path "/cores/" \
@@ -1096,6 +1097,7 @@ flash_sd: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin
 		-- sdpush --file build/cores/videopac.bin --dest-path "/cores/" \
 		-- sdpush --file build/cores/tama.bin --dest-path "/cores/" \
 		-- sdpush --file build/cores/logo.bin --dest-path "/cores/" \
+		-- sdpush --file build/cores/celeste.bin --dest-path "/roms/homebrew/" \
 		-- start $(INTFLASH_ADDRESS) \
 		$(RESET_DBGMCU_CMD)
 
