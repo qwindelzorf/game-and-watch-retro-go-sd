@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "bitmaps.h"
 #include "gw_lcd.h"
+#include "gw_malloc.h"
 
 #if !defined(BIG_BANK)
 #define BIG_BANK 1
@@ -18,7 +19,11 @@
 
 #if SD_CARD >= 1
 static int16_t current_logo = -1;
-static uint8_t temp_logo_buffer[152*24/8+4];
+static uint8_t *temp_logo_buffer;//[112*16/8+4];
+static int16_t current_header = -1;
+static uint8_t *temp_header_buffer;//[152*24/8+4];
+static int16_t current_pad = -1;
+static uint8_t *temp_pad_buffer;//[72*32/8+4];
 #endif
 
 retro_logo_image *rg_get_logo(int16_t logo_index) {
@@ -115,9 +120,36 @@ retro_logo_image *rg_get_logo(int16_t logo_index) {
     }
     return NULL;
 #else
-    retro_logo_image *dest = (retro_logo_image *)temp_logo_buffer;
-    if (current_logo == logo_index) {
-        return dest;
+    retro_logo_image *dest;
+    int16_t *current_logo_ptr;
+    if (logo_index >= RG_LOGO_HEADER_SG1000 && logo_index < RG_LOGO_PAD_SG1000) {
+        if (!temp_header_buffer) {
+            temp_header_buffer = ram_malloc(152*24/8+4);
+        }
+        dest = (retro_logo_image *)temp_header_buffer;
+        if (logo_index == current_header) {
+            return dest;
+        }
+        current_logo_ptr = &current_header;
+    } else if (logo_index >= RG_LOGO_PAD_SG1000 && logo_index < RG_LOGO_COLECO) {
+        if (!temp_pad_buffer) {
+            temp_pad_buffer = ram_malloc(172*32/8+4);
+        }
+        dest = (retro_logo_image *)temp_pad_buffer;
+        if (logo_index == current_pad) {
+            return dest;
+        }
+        current_logo_ptr = &current_pad;
+    } else {
+        if (!temp_logo_buffer) {
+            temp_logo_buffer = ram_malloc(112*16/8+4);
+        }
+        dest = (retro_logo_image *)temp_logo_buffer;
+
+        if (logo_index == current_logo) {
+            return dest;
+        }
+        current_logo_ptr = &current_logo;
     }
     FILE* file = fopen("/cores/logo.bin", "rb");
     if (!file) {
@@ -137,7 +169,7 @@ retro_logo_image *rg_get_logo(int16_t logo_index) {
         if (i != logo_index) {
             fseek(file, data_size, SEEK_CUR);
         } else {
-            current_logo = logo_index;
+            *current_logo_ptr = logo_index;
             dest->width = width;
             dest->height = height;
 
