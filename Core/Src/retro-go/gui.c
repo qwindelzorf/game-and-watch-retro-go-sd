@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "lupng.h"
 #include "gui.h"
@@ -12,6 +13,7 @@
 #include "gw_linker.h"
 #include "main.h"
 #include "rg_i18n.h"
+#include "gw_malloc.h"
 
 #if !defined(COVERFLOW)
 #define COVERFLOW 0
@@ -44,7 +46,7 @@
 #define COVER_MAX_WIDTH (186)
 
 
-#ifdef COVERFLOW
+#if COVERFLOW != 0
 /* instances for JPEG decoder */
 #include "hw_jpeg_decoder.h"
 
@@ -155,15 +157,17 @@ void gui_init_tab(tab_t *tab)
     tab->initialized = true;
     // tab->status[0] = 0;
 
+#if COVERFLOW != 0
     /* setup JPEG decoder instance with 32bits aligned address */
     // reuse emulator buffer for JPEG decoder & DMA2 buffering
     // Direct access to DTCM is not allowed for DMA2D :(
-    // We use emulator ram (__RAM_EMU_START__) which is not used at that point.
-    pJPEG_Buffer = (uint8_t *)((uint32_t)__RAM_EMU_START__ + 4 - ((uint32_t)__RAM_EMU_START__) % 4);
-    pCover_Buffer = (uint16_t *)(pJPEG_Buffer + COVER_420_SIZE + 4 - COVER_420_SIZE % 4);
+    // We use emulator ram.
+    pJPEG_Buffer = (uint8_t *)ram_malloc(COVER_420_SIZE); // ((uint32_t)__RAM_EMU_START__ + 4 - ((uint32_t)__RAM_EMU_START__) % 4);
+    pCover_Buffer = (uint16_t *)ram_malloc(COVER_420_SIZE); // TODO : check if size OK //(pJPEG_Buffer + COVER_420_SIZE + 4 - COVER_420_SIZE % 4);
     assert(JPEG_DecodeToBufferInit((uint32_t)pJPEG_Buffer, JPEG_BUFFER_SIZE) == 0);
     //printf("JPEG init done\n");
     /* -------------------------- */
+#endif
 
     sprintf(str_buffer, "Sel.%.11s", tab->name);
     // tab->listbox.cursor = odroid_settings_int32_get(str_buffer, 0);
@@ -531,6 +535,76 @@ void gui_draw_simple_list(int posx, tab_t *tab)
 
 #if COVERFLOW != 0
 
+#define MAX_COVERS 5
+#define COVER_SIZE (10 * 1024)
+
+typedef struct {
+    char *rom_path;
+    uint8_t *buffer;
+} CoverCache;
+
+static CoverCache cover_cache[MAX_COVERS] = {0};
+
+static void initialize_cache()
+{
+    for (int i = 0; i < MAX_COVERS; i++) {
+        if (!cover_cache[i].buffer) {
+            cover_cache[i].buffer = ram_malloc(COVER_SIZE);
+        }
+    }
+}
+
+static uint8_t *get_coverfile(char *rom_path)
+{
+    static int next_cache_index = 0;
+    
+    initialize_cache();
+
+    // Check if cover is present in cache
+    for (int i = 0; i < MAX_COVERS; i++) {
+        if (cover_cache[i].rom_path && strcmp(cover_cache[i].rom_path, rom_path) == 0) {
+            return cover_cache[i].buffer;
+        }
+    }
+
+    char *coverpath = odroid_system_get_path(ODROID_PATH_COVER_FILE, rom_path);
+    FILE *file = fopen(coverpath, "rb");
+    if (!file)
+    {
+        // No cover exists for this game
+        free (coverpath);
+        return NULL;
+    }
+
+    // Check that file can fit in buffer
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    if (size > COVER_SIZE) {
+        // file too big, ignore it
+        fclose(file);
+        free (coverpath);
+        return NULL;
+    }
+
+    fread(cover_cache[next_cache_index].buffer, size, 1, file);
+    fclose(file);
+    free(coverpath);
+
+    // If a previous file was cached, free text memory
+    if (cover_cache[next_cache_index].rom_path) {
+        free(cover_cache[next_cache_index].rom_path);
+    }
+
+    cover_cache[next_cache_index].rom_path = strdup(rom_path);
+
+    int current_cache_index = next_cache_index;
+    next_cache_index = (next_cache_index + 1) % MAX_COVERS;
+
+    return cover_cache[current_cache_index].buffer;
+}
+
 static void draw_centered_local_text_line(uint16_t y_pos,
                                           const char *text,
                                           uint16_t x1,
@@ -589,7 +663,7 @@ static void gui_get_cover_size(retro_emulator_file_t *file, uint32_t *cov_width,
     if (file == NULL)
         return;
 
-    if (file->img_size != 0)
+    if (file->img_state == IMG_STATE_COVER)
     {
         if (JPEG_DecodeGetSize((uint32_t)(file->img_address), &jpeg_cov_width, &jpeg_cov_height) == 0)
         {
@@ -611,7 +685,17 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
     if (file == NULL)
         return;
 
-    if ((file->img_size) != 0)
+    if (file->img_state != IMG_STATE_NO_COVER) {
+        file->img_address = get_coverfile(file->path);
+        if (file->img_address) {
+            file->img_state = IMG_STATE_COVER;
+        } else {
+            // If there is no cover file, never try to load file again
+            file->img_state = IMG_STATE_NO_COVER;
+        }
+    }
+
+    if (file->img_state == IMG_STATE_COVER)
     {
         JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &cover_width, &cover_height, cover_light[cover_position + 2]);
         if (nocover_width > cover_width)
@@ -669,7 +753,7 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
     }
 
     /* no cover art, draw a grey box */
-    if ((file->img_size) == 0)
+    if (file->img_state == IMG_STATE_NO_COVER)
         odroid_overlay_draw_fill_rect(cover_x + COVER_BORDER, cover_y + COVER_BORDER, cover_width, cover_height, get_darken_pixel(C_GRAY, 100 * cover_light[cover_position + 2] / 255));
 
     /* display the cover art */
@@ -743,7 +827,17 @@ void gui_draw_coverlight_v(retro_emulator_file_t *file, int cover_position)
     if (file == NULL)
         return;
 
-    if (file->img_size != 0)
+    if (file->img_state != IMG_STATE_NO_COVER) {
+        file->img_address = get_coverfile(file->path);
+        if (file->img_address) {
+            file->img_state = IMG_STATE_COVER;
+        } else {
+            // If there is no cover file, never try to load file again
+            file->img_state = IMG_STATE_NO_COVER;
+        }
+    }
+
+    if (file->img_state == IMG_STATE_COVER)
     {
         JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &cover_width, &cover_height, cover_light3[-cover_position]);
         if (nocover_width > cover_width)
@@ -784,7 +878,7 @@ void gui_draw_coverlight_v(retro_emulator_file_t *file, int cover_position)
     }
 
     /* draw cover art or grey box */
-    if ((file->img_size) == 0)
+    if (file->img_state == IMG_STATE_NO_COVER)
         odroid_overlay_draw_fill_rect(cover_x + COVER_BORDER, cover_y + COVER_BORDER, cover_width, cover_height, get_darken_pixel(C_GRAY, 100 * cover_light3[cover_position] / 255));
 
     /* display the cover art */
@@ -806,6 +900,7 @@ void gui_draw_coverlight_v(retro_emulator_file_t *file, int cover_position)
     }
 }
 
+/* Sylver */
 void gui_draw_coverflow_h(tab_t *tab) //------------
 {
     retro_emulator_t *emu = (retro_emulator_t *)tab->arg;
@@ -881,7 +976,16 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     if (item) //current page
     {
         file = (retro_emulator_file_t *)item->arg;
-        if (file->img_size == 0)
+        if (file->img_state != IMG_STATE_NO_COVER) {
+            file->img_address = get_coverfile(file->path);
+            if (file->img_address) {
+                file->img_state = IMG_STATE_COVER;
+            } else {
+                // If there is no cover file, never try to load file again
+                file->img_state = IMG_STATE_NO_COVER;
+            }
+        }
+        if (file->img_state == IMG_STATE_NO_COVER)
         {
             draw_centered_local_text_line(cover_top + (cover_height - font_height) / 2, curr_lang->s_No_Cover, start_xpos + p_width1 + p_width2 + 10, start_xpos + p_width1 + p_width2 + 10 + cover_width, get_darken_pixel(curr_colors->main_c, 80), curr_colors->bg_c, curr_lang);
         }
@@ -901,11 +1005,21 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         }
     }
     int index = list->cursor + 1;
+
     item = gui_get_item_by_index(tab, &index);
     if (item)
     {
         file = (retro_emulator_file_t *)item->arg;
-        if (file->img_size == 0)
+        if (file->img_state != IMG_STATE_NO_COVER) {
+            file->img_address = get_coverfile(file->path);
+            if (file->img_address) {
+                file->img_state = IMG_STATE_COVER;
+            } else {
+                // If there is no cover file, never try to load file again
+                file->img_state = IMG_STATE_NO_COVER;
+            }
+        }
+        if (file->img_state == IMG_STATE_NO_COVER)
         {
             draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, curr_lang->s_No_Cover,
                                           start_xpos + p_width1 + p_width2 + cover_width + 17,
@@ -931,7 +1045,16 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     if (item)
     {
         file = (retro_emulator_file_t *)item->arg;
-        if (file->img_size == 0)
+        if (file->img_state != IMG_STATE_NO_COVER) {
+            file->img_address = get_coverfile(file->path);
+            if (file->img_address) {
+                file->img_state = IMG_STATE_COVER;
+            } else {
+                // If there is no cover file, never try to load file again
+                file->img_state = IMG_STATE_NO_COVER;
+            }
+        }
+        if (file->img_state == IMG_STATE_NO_COVER)
         {
             draw_centered_local_text_line(cover_top + (cover_height - p_height2) / 4 * 3 + (p_height2 - font_height) / 2, curr_lang->s_No_Cover,
                                           start_xpos + p_width1 + 5,
@@ -939,7 +1062,6 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
         }
         else
         {
-
             JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
             for (int y = 0; y < p_height2; y++)
                 for (int x = 0; x < p_width2; x++)
@@ -958,7 +1080,16 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     if (item)
     {
         file = (retro_emulator_file_t *)item->arg;
-        if (file->img_size != 0)
+        if (file->img_state != IMG_STATE_NO_COVER) {
+            file->img_address = get_coverfile(file->path);
+            if (file->img_address) {
+                file->img_state = IMG_STATE_COVER;
+            } else {
+                // If there is no cover file, never try to load file again
+                file->img_state = IMG_STATE_NO_COVER;
+            }
+        }
+        if (file->img_state == IMG_STATE_COVER)
         {
             JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
             for (int y = 0; y < p_height1; y++)
@@ -978,7 +1109,16 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     if (item)
     {
         file = (retro_emulator_file_t *)item->arg;
-        if (file->img_size != 0)
+        if (file->img_state != IMG_STATE_NO_COVER) {
+            file->img_address = get_coverfile(file->path);
+            if (file->img_address) {
+                file->img_state = IMG_STATE_COVER;
+            } else {
+                // If there is no cover file, never try to load file again
+                file->img_state = IMG_STATE_NO_COVER;
+            }
+        }
+        if (file->img_state == IMG_STATE_COVER)
         {
             JPEG_DecodeToBuffer((uint32_t)(file->img_address), (uint32_t)pCover_Buffer, &jpeg_cover_width, &jpeg_cover_height, 255);
             for (int y = 0; y < p_height1; y++)
@@ -992,6 +1132,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
                 };
         };
     };
+
     index = list->cursor;
     item = gui_get_item_by_index(tab, &index);
     if (item)
@@ -1057,7 +1198,16 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
     if (item) //current page
     {
         file = (retro_emulator_file_t *)item->arg;
-        if (file->img_size == 0)
+        if (file->img_state != IMG_STATE_NO_COVER) {
+            file->img_address = get_coverfile(file->path);
+            if (file->img_address) {
+                file->img_state = IMG_STATE_COVER;
+            } else {
+                // If there is no cover file, never try to load file again
+                file->img_state = IMG_STATE_NO_COVER;
+            }
+        }
+        if (file->img_state == IMG_STATE_NO_COVER)
             draw_centered_local_text_line(start_ypos + p_height + 16 + (cover_height - font_height) / 2, curr_lang->s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(curr_colors->main_c, 80), curr_colors->bg_c, curr_lang);
         else
         {
@@ -1072,7 +1222,16 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
         if (item)
         {
             file = (retro_emulator_file_t *)item->arg;
-            if (file->img_size == 0)
+            if (file->img_state != IMG_STATE_NO_COVER) {
+                file->img_address = get_coverfile(file->path);
+                if (file->img_address) {
+                    file->img_state = IMG_STATE_COVER;
+                } else {
+                    // If there is no cover file, never try to load file again
+                    file->img_state = IMG_STATE_NO_COVER;
+                }
+            }
+            if (file->img_state == IMG_STATE_NO_COVER)
             {
                 if (p_height > font_height)
                     draw_centered_local_text_line(start_ypos + p_height + cover_height + 21 + (p_height - font_height) / 2, curr_lang->s_No_Cover, start_posx + 3, start_posx + 3 + cover_width, get_darken_pixel(curr_colors->dis_c, 80), curr_colors->bg_c, curr_lang);
@@ -1091,7 +1250,16 @@ void gui_draw_coverflow_v(tab_t *tab, int start_posx) // ||||||||
             if (item)
             {
                 file = (retro_emulator_file_t *)item->arg;
-                if (file->img_size == 0)
+                if (file->img_state != IMG_STATE_NO_COVER) {
+                    file->img_address = get_coverfile(file->path);
+                    if (file->img_address) {
+                        file->img_state = IMG_STATE_COVER;
+                    } else {
+                        // If there is no cover file, never try to load file again
+                        file->img_state = IMG_STATE_NO_COVER;
+                    }
+                }
+                if (file->img_state == IMG_STATE_NO_COVER)
                 {
                     if (p_height > font_height)
                         draw_centered_local_text_line(start_ypos + 11 + (p_height - font_height) / 2,
@@ -1206,10 +1374,4 @@ void gui_draw_list(tab_t *tab)
 #else
     gui_draw_simple_list(10, tab);
 #endif
-}
-//const char * GW_Themes[] = {s_Theme_sList, s_Theme_CoverV, s_Theme_CoverH,s_Theme_CoverLightV,s_Theme_CoverLight};
-
-void gui_draw_cover(retro_emulator_file_t *file)
-{
-    //nothing
 }

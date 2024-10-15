@@ -96,4 +96,3 @@ void gui_draw_header(tab_t *tab);
 void gui_draw_status(tab_t *tab);
 void gui_draw_list(tab_t *tab);
 void gui_draw_notice(const char *text, uint16_t color);
-void gui_draw_cover(retro_emulator_file_t *file);

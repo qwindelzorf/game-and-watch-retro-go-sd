@@ -118,6 +118,10 @@ char* odroid_system_get_path(emu_path_type_t type, const char *_romPath)
             strcat(buffer, ".crc");
             break;
 
+        case ODROID_PATH_COVER_FILE:
+            sprintf(buffer, "%s%s.img", ODROID_BASE_PATH_COVERS, fileName);
+            break;
+
         default:
             RG_PANIC("Unknown Type");
     }

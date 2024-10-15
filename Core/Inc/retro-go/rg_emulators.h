@@ -23,6 +23,13 @@ typedef enum
 
 typedef struct rom_system_t rom_system_t;
 
+typedef enum
+{
+    IMG_STATE_UNKNOWN,
+    IMG_STATE_NO_COVER,
+    IMG_STATE_COVER
+} img_state_t;
+
 typedef struct {
 #if CHEAT_CODES == 1
     uint32_t id;
@@ -34,8 +41,7 @@ typedef struct {
     uint32_t size;
 	#if COVERFLOW != 0
     const uint8_t *img_address;
-    //max 64kb image file data
-    uint16_t img_size;
+    img_state_t img_state;
 	#endif
     //bool missing_cover;
     rom_region_t region;

@@ -220,6 +220,9 @@ static int scan_folder_cb(const rg_scandir_t *entry, void *arg)
         .size = entry->size,
         .system = emu->system,
         .region = REGION_NTSC,
+#if COVERFLOW != 0
+        .img_state = IMG_STATE_UNKNOWN,
+#endif
     };
     emu->system->roms_count = emu->roms.count;
 
@@ -235,6 +238,10 @@ void emulator_init(retro_emulator_t *emu)
         return;
 
     emu->initialized = true;
+#if COVERFLOW != 0
+    emu->cover_height = 96; // TODO : get proper default size
+    emu->cover_width = 128;
+#endif
 
     printf("Retro-Go: Initializing emulator '%s'\n", emu->system_name);
 
@@ -272,9 +279,6 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     sprintf(choices[0].value, "%.127s", file->name);
     sprintf(choices[1].value, "%s", file->ext);
     sprintf(choices[2].value, "%d KB", (int)(file->size / 1024));
-    #if COVERFLOW != 0
-    sprintf(choices[3].value, "%d KB", file->img_size / 1024);
-	#endif
 
     odroid_overlay_dialog(curr_lang->s_GameProp, choices, -1, &gui_redraw_callback);
 }
@@ -405,6 +409,9 @@ bool emulator_show_file_menu(retro_emulator_file_t *file)
 
     return force_redraw;
 }
+
+typedef int func(void);
+extern LTDC_HandleTypeDef hltdc;
 
 void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused, int8_t save_slot)
 {
@@ -589,6 +596,18 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
         memset(&_OVERLAY_CELESTE_BSS_START, 0x0, (size_t)&_OVERLAY_CELESTE_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_CELESTE_SIZE);
         app_main_celeste(load_state, start_paused, save_slot);
+#if 0
+        uint32_t* ram_start = (uint32_t *)&__RAM_EMU_START__;
+        uint32_t initial_sp = ram_start[0];
+        uint32_t entry_point = ram_start[1];
+
+        __disable_irq();
+        __set_MSP(initial_sp);
+        SCB->VTOR = 0x24000000;
+
+        func* app_entry = (func*)entry_point;
+        app_entry();
+#endif
       }
 //#endif
     } else if(strcmp(system_name, "Tamagotchi") == 0) {
