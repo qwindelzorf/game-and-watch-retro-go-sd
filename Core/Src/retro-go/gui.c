@@ -162,8 +162,8 @@ void gui_init_tab(tab_t *tab)
     // reuse emulator buffer for JPEG decoder & DMA2 buffering
     // Direct access to DTCM is not allowed for DMA2D :(
     // We use emulator ram.
-    pJPEG_Buffer = (uint8_t *)ram_malloc(COVER_420_SIZE); // ((uint32_t)__RAM_EMU_START__ + 4 - ((uint32_t)__RAM_EMU_START__) % 4);
-    pCover_Buffer = (uint16_t *)ram_malloc(COVER_420_SIZE); // TODO : check if size OK //(pJPEG_Buffer + COVER_420_SIZE + 4 - COVER_420_SIZE % 4);
+    pJPEG_Buffer = (uint8_t *)ram_malloc(COVER_420_SIZE);
+    pCover_Buffer = (uint16_t *)ram_malloc(COVER_16BITS_SIZE);
     assert(JPEG_DecodeToBufferInit((uint32_t)pJPEG_Buffer, JPEG_BUFFER_SIZE) == 0);
     //printf("JPEG init done\n");
     /* -------------------------- */
