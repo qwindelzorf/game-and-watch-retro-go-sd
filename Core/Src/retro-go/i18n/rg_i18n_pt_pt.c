@@ -169,7 +169,6 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_File = "Ficheiro",
     .s_Type = "Tipo",
     .s_Size = "ROM",
-    .s_ImgSize = "Capa",
     .s_Close = "Fechar",
     .s_GameProp = "Propriedades",
     .s_Resume_game = "Resumir jogo",

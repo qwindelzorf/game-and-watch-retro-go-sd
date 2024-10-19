@@ -140,7 +140,6 @@ typedef struct
     const char *s_File;
     const char *s_Type;
     const char *s_Size;
-    const char *s_ImgSize;
     const char *s_Close;
     const char *s_GameProp;
     const char *s_Resume_game;

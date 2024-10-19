@@ -169,7 +169,6 @@ const lang_t lang_ru_ru LANG_DATA = {
     .s_File = "Файл",
     .s_Type = "Тип",
     .s_Size = "Размер",
-    .s_ImgSize = "Размер изображения",
     .s_Close = "Закрыть",
     .s_GameProp = "Соотношение",
     .s_Resume_game = "Продолжить игру",

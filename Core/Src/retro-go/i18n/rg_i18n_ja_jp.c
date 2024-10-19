@@ -171,7 +171,6 @@ const lang_t lang_ja_jp LANG_DATA = {
     .s_File = "ファイル",
     .s_Type = "タイプ",
     .s_Size = "サイズ",
-    .s_ImgSize = "イメージサイズ",
     .s_Close = "閉じる",
     .s_GameProp = "プロパティ",
     .s_Resume_game = "続きから遊ぶ",

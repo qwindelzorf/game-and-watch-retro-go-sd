@@ -260,17 +260,11 @@ void emulator_show_file_info(retro_emulator_file_t *file)
     char filename_value[128];
     char type_value[32];
     char size_value[32];
-#if COVERFLOW != 0
-    char img_size[32];
-#endif
 
     odroid_dialog_choice_t choices[] = {
         {-1, curr_lang->s_File, filename_value, 0, NULL},
         {-1, curr_lang->s_Type, type_value, 0, NULL},
         {-1, curr_lang->s_Size, size_value, 0, NULL},
-		#if COVERFLOW != 0
-        {-1, curr_lang->s_ImgSize, img_size, 0, NULL},
-		#endif
         ODROID_DIALOG_CHOICE_SEPARATOR,
         {1, curr_lang->s_Close, "", 1, NULL},
         ODROID_DIALOG_CHOICE_LAST

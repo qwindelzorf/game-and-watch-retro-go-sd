@@ -169,7 +169,6 @@ const lang_t lang_zh_tw LANG_DATA = {
     .s_File = "名稱：",
     .s_Type = "類型：",
     .s_Size = "大小：",
-    .s_ImgSize = "圖像：",
     .s_Close = "× 關閉",
     .s_GameProp = "遊戲屬性",
     .s_Resume_game = "＞ 載入存檔",

@@ -175,7 +175,6 @@ const lang_t lang_zh_cn LANG_DATA = {
     .s_File = "名称：",
     .s_Type = "类型：",
     .s_Size = "大小：",
-    .s_ImgSize = "图像：",
     .s_Close = "× 关闭",
     .s_GameProp = "游戏文件属性",
     .s_Resume_game = "＞ 继续游戏",

@@ -173,7 +173,6 @@ const lang_t lang_ko_kr LANG_DATA = {
     .s_File = "파일",
     .s_Type = "형식",
     .s_Size = "크기",
-    .s_ImgSize = "이미지 크기",
     .s_Close = "닫기",
     .s_GameProp = "속성",
     .s_Resume_game = "계속 게임 하기",

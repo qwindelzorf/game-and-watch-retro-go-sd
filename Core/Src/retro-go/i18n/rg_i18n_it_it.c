@@ -169,7 +169,6 @@ const lang_t lang_it_it LANG_DATA = {
     .s_File = "File",
     .s_Type = "Tipo",
     .s_Size = "Dimensione",
-    .s_ImgSize = "Dimensione immagine",
     .s_Close = "Chiudi",
     .s_GameProp = "Proprietà",
     .s_Resume_game = "Riprendi gioco",
