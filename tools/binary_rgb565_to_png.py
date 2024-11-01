@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This script allows to convert raw 320x240 framebuffer dumps into png files
 # It can be used to convert savestates .raw screenshot into png.
 import sys
