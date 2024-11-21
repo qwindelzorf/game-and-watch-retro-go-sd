@@ -67,9 +67,8 @@ _Min_Stack_Size = 20 * 1024; /* required amount of stack */
 __NULLPTR_LENGTH__  = 0x0;
 __ITCMRAM_LENGTH__  = 64K;
 __DTCMRAM_LENGTH__  = 128K;
-__RAM_UC_LENGTH__   = 300K;
-__RAM_CORE_LENGTH__ = 0K;
-__RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__ - __RAM_CORE_LENGTH__;
+__RAM_UC_LENGTH__   = 300K; /* framebuffer : 2 x 320 x 240 x 16 bits */
+__RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 256K; /* Bank 1 */
 __FLASH2_LENGTH__   = 256K; /* Bank 2 */
@@ -80,8 +79,7 @@ __EXTFLASH_START__ = __EXTFLASH_BASE__;  /* Beginning of where we're going to st
 
 __RAM_START__       = 0x24000000;
 __RAM_UC_START__    = __RAM_START__;
-__RAM_CORE_START__  = __RAM_START__ + __RAM_UC_LENGTH__;
-__RAM_EMU_START__   = __RAM_CORE_START__ + __RAM_CORE_LENGTH__;
+__RAM_EMU_START__   = __RAM_START__ + __RAM_UC_LENGTH__;
 
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 __RAM_END__         = __RAM_START__ + 1024K;
@@ -96,7 +94,6 @@ MEMORY
   ITCMRAM  (xrw) : ORIGIN = 0x00000000 + __NULLPTR_LENGTH__, LENGTH = __ITCMRAM_LENGTH__ - __NULLPTR_LENGTH__
   DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
   RAM_UC   (xrw) : ORIGIN = __RAM_UC_START__, LENGTH = __RAM_UC_LENGTH__
-  RAM      (xrw) : ORIGIN = __RAM_CORE_START__, LENGTH = __RAM_CORE_LENGTH__
   RAM_EMU  (xrw) : ORIGIN = __RAM_EMU_START__, LENGTH = __RAM_EMU_LENGTH__
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
