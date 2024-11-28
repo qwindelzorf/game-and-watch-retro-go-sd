@@ -1,4 +1,3 @@
-#if FORCE_NOFRENDO == 1
 #include <odroid_system.h>
 
 #include <string.h>
@@ -567,5 +566,3 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 
     return 0;
 }
-
-#endif

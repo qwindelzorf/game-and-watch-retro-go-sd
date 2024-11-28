@@ -1,5 +1,3 @@
-#if FORCE_NOFRENDO == 0
-
 #include <string.h>
 #include <ctype.h>
 #include "gw_buttons.h"
@@ -795,7 +793,7 @@ static size_t nes_getromdata(unsigned char **data)
     {
 #if defined(FCEU_LOW_RAM)
         // FDS disks has to be stored in ram for games
-        // that wants to write to the disk
+        // that want to write to the disk
         if (ROM_DATA_LENGTH <= 262000) {
             memcpy(dest, ROM_DATA, ROM_DATA_LENGTH);
             *data = (unsigned char *)dest;
@@ -1167,5 +1165,3 @@ int app_main_nes_fceu(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 
     return 0;
 }
-
-#endif
