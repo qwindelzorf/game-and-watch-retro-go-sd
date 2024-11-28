@@ -35,6 +35,8 @@ extern void * _OVERLAY_NES_LOAD_START[];
 extern uint8_t _OVERLAY_NES_SIZE;
 extern void * _OVERLAY_NES_BSS_START[];
 extern uint8_t _OVERLAY_NES_BSS_SIZE;
+extern uint8_t __RAM_FCEUMM_MAPPER_LENGTH__;
+extern void * __RAM_FCEUMM_START__[];
 extern void * _OVERLAY_NES_FCEU_LOAD_START[];
 extern uint8_t _OVERLAY_NES_FCEU_SIZE;
 extern void * _OVERLAY_NES_FCEU_BSS_START[];

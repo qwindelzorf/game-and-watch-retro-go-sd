@@ -211,3 +211,26 @@ bool rg_storage_scandir(const char *path, rg_scandir_cb_t *callback, void *arg, 
 
     return true;
 }
+
+/* copy file content into ram */
+size_t rg_storage_copy_file_to_ram(char *file_path, char *ram_dest) {
+    FILE *file;
+    size_t bytes_read;
+    uint32_t total_written;
+
+    file = fopen(file_path,"rb");
+    if (file == NULL) {
+        return 0;
+    } 
+
+    total_written = 0;
+
+    while ((bytes_read = fread(ram_dest+total_written, 1, 32*1024, file))) {
+        wdog_refresh();
+        total_written += bytes_read;
+    }
+
+    fclose(file);
+
+    return total_written;
+}

@@ -192,6 +192,7 @@ ifneq ($(strip $(ROMS_NES)),)
 CORE_FCEUMM = external/fceumm-go
 NES_FCEU_C_SOURCES += \
 Core/Src/porting/nes_fceu/main_nes_fceu.c \
+Core/Src/porting/nes_fceu/nes_fceu_mappers.c \
 $(CORE_FCEUMM)/src/boards/09-034a.c \
 $(CORE_FCEUMM)/src/boards/3d-block.c \
 $(CORE_FCEUMM)/src/boards/8in1.c \

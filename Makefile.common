@@ -613,6 +613,11 @@ TAMA_OBJECTS = $(addprefix $(BUILD_DIR)/tama/,$(notdir $(TAMA_C_SOURCES:.c=.o)))
 
 vpath %.c $(sort $(dir $(C_SOURCES) $(FATFS_C_SOURCES) $(NES_C_SOURCES) $(NES_FCEU_C_SOURCES) $(GNUBOY_C_SOURCES) $(TGBDUAL_C_SOURCES) $(TGBDUAL_C_SOURCES) $(SMSPLUSGX_C_SOURCES) $(PCE_C_SOURCES) $(MSX_C_SOURCES) $(GW_C_SOURCES) $(WSV_C_SOURCES) $(MD_C_SOURCES) $(A2600_C_SOURCES) $(A7800_C_SOURCES) $(AMSTRAD_C_SOURCES) $(ZELDA3_C_SOURCES) $(SMW_C_SOURCES) $(VIDEOPAC_C_SOURCES) $(CELESTE_C_SOURCES) $(TAMA_C_SOURCES) $(SDK_C_SOURCES)))
 
+MAPPER_SRCS := $(wildcard external/fceumm-go/src/boards/*.c)
+MAPPER_SRCS := $(filter-out external/fceumm-go/src/boards/__%.c, $(MAPPER_SRCS))
+MAPPER_SRCS := $(filter-out external/fceumm-go/src/boards/fceu-emu2413.c, $(MAPPER_SRCS))
+MAPPER_NAMES := $(notdir $(basename $(MAPPER_SRCS)))
+
 # CXX
 CXX_OBJECTS =          $(addprefix $(BUILD_DIR)/core/,$(notdir $(CXX_SOURCES:.cpp=.o) ))
 TGBDUAL_CXX_OBJECTS = $(addprefix $(BUILD_DIR)/tgbdual/,$(notdir $(TGBDUAL_CXX_SOURCES:.cpp=.o)))
@@ -661,6 +666,9 @@ CheckDirtySubmodules:
 endif
 .PHONY: CheckDirtySubmodules
 
+PrepareFceummMappers:
+	$(V)$(PYTHON3) external/fceumm-go/gen_mappers_ld.py
+
 ifeq (${CHECK_TOOLS},1)
 CheckTools:
 	@# Check that the tools in the toolchain exist
@@ -705,7 +713,7 @@ $(BUILD_DIR)/%.o: %.s Makefile.common Makefile | $(BUILD_DIR)
 	$(V)$(ECHO) [ AS ] $(notdir $<)
 	$(V)$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(FATFS_OBJECTS) $(A2600_OBJECTS) $(A7800_OBJECTS) $(NES_OBJECTS) $(NES_FCEU_OBJECTS) $(GNUBOY_OBJECTS) $(TGBDUAL_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(MSX_OBJECTS) $(GW_OBJECTS) $(WSV_OBJECTS) $(MD_OBJECTS) $(AMSTRAD_OBJECTS) $(VIDEOPAC_OBJECTS) $(CELESTE_OBJECTS) $(CXX_OBJECTS) $(TGBDUAL_CXX_OBJECTS) $(A2600_CXX_OBJECTS) $(ZELDA3_OBJECTS) $(SMW_OBJECTS) $(TAMA_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
+$(BUILD_DIR)/$(TARGET).elf: PrepareFceummMappers $(OBJECTS) $(FATFS_OBJECTS) $(A2600_OBJECTS) $(A7800_OBJECTS) $(NES_OBJECTS) $(NES_FCEU_OBJECTS) $(GNUBOY_OBJECTS) $(TGBDUAL_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(MSX_OBJECTS) $(GW_OBJECTS) $(WSV_OBJECTS) $(MD_OBJECTS) $(AMSTRAD_OBJECTS) $(VIDEOPAC_OBJECTS) $(CELESTE_OBJECTS) $(CXX_OBJECTS) $(TGBDUAL_CXX_OBJECTS) $(A2600_CXX_OBJECTS) $(ZELDA3_OBJECTS) $(SMW_OBJECTS) $(TAMA_OBJECTS) Makefile.common Makefile $(LDSCRIPT)
 	$(V)$(ECHO) [ LD ] $(notdir $@)
 	$(V)$(CC) $(OBJECTS) $(FATFS_OBJECTS) $(A2600_OBJECTS) $(A7800_OBJECTS) $(NES_OBJECTS) $(NES_FCEU_OBJECTS) $(GNUBOY_OBJECTS) $(TGBDUAL_OBJECTS) $(SMSPLUSGX_OBJECTS) $(PCE_OBJECTS) $(MSX_OBJECTS) $(GW_OBJECTS) $(WSV_OBJECTS) $(MD_OBJECTS) $(AMSTRAD_OBJECTS) $(VIDEOPAC_OBJECTS) $(CELESTE_OBJECTS) $(CXX_OBJECTS) $(TGBDUAL_CXX_OBJECTS) $(A2600_CXX_OBJECTS) $(ZELDA3_OBJECTS) $(SMW_OBJECTS) $(TAMA_OBJECTS) $(LDFLAGS) -o $@
 ifeq ($(SD_CARD), 0)
@@ -969,6 +977,7 @@ external/smw/smw_assets.dat: roms/smw/smw.sfc | $(BUILD_DIR)
 $(BUILD_DIR):
 	$(V)mkdir $@
 	$(V)mkdir $@/core
+	$(V)mkdir $@/cores
 	$(V)mkdir $@/fatfs
 	$(V)mkdir $@/nes
 	$(V)mkdir $@/nes_fceu
@@ -1058,43 +1067,66 @@ endif
 .PHONY: flash
 
 # Upload cores to sd card
-flash_sd: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin
-	$(V)mkdir -p build/cores
-	@$(CP) -O binary --only-section=.overlay_nes $(BUILD_DIR)/$(TARGET).elf build/cores/nes.bin
-	@$(CP) -O binary --only-section=.overlay_nes_fceu $(BUILD_DIR)/$(TARGET).elf build/cores/nes_fceu.bin
-	@$(CP) -O binary --only-section=.overlay_gb $(BUILD_DIR)/$(TARGET).elf build/cores/gb.bin
-	@$(CP) -O binary --only-section=.overlay_tgb $(BUILD_DIR)/$(TARGET).elf build/cores/tgb.bin
-	@$(CP) -O binary --only-section=.overlay_sms $(BUILD_DIR)/$(TARGET).elf build/cores/sms.bin
-	@$(CP) -O binary --only-section=.overlay_pce $(BUILD_DIR)/$(TARGET).elf build/cores/pce.bin
-	@$(CP) -O binary --only-section=.overlay_msx $(BUILD_DIR)/$(TARGET).elf build/cores/msx.bin
-	@$(CP) -O binary --only-section=.overlay_wsv $(BUILD_DIR)/$(TARGET).elf build/cores/wsv.bin
-	@$(CP) -O binary --only-section=.overlay_gw $(BUILD_DIR)/$(TARGET).elf build/cores/gw.bin
-	@$(CP) -O binary --only-section=.overlay_md $(BUILD_DIR)/$(TARGET).elf build/cores/md.bin
-	@$(CP) -O binary --only-section=.overlay_a2600 $(BUILD_DIR)/$(TARGET).elf build/cores/a2600.bin
-	@$(CP) -O binary --only-section=.overlay_a7800 $(BUILD_DIR)/$(TARGET).elf build/cores/a7800.bin
-	@$(CP) -O binary --only-section=.overlay_amstrad $(BUILD_DIR)/$(TARGET).elf build/cores/amstrad.bin
-	@$(CP) -O binary --only-section=.overlay_videopac $(BUILD_DIR)/$(TARGET).elf build/cores/videopac.bin
-	@$(CP) -O binary --only-section=.overlay_tama $(BUILD_DIR)/$(TARGET).elf build/cores/tama.bin
-	@$(CP) -O binary --only-section=.overlay_celeste $(BUILD_DIR)/$(TARGET).elf build/cores/celeste.bin
-	@$(CP) -O binary --only-section=.overlay_graphics $(BUILD_DIR)/$(TARGET).elf build/cores/logo.bin
+SD_FOLDER := sd_content
+CORES_DIR := $(SD_FOLDER)/cores
+MAPPERS_DIR := $(CORES_DIR)/mappers
+
+$(MAPPERS_DIR)/mapper_%.bin: $(BUILD_DIR)/$(TARGET).elf
+	@$(CP) -O binary --only-section=.overlay_nes_fceu_$* $< $@
+
+MAPPER_BINS := $(addprefix $(MAPPERS_DIR)/mapper_, $(addsuffix .bin, $(MAPPER_NAMES)))
+
+create_sd_folders:
+	$(V)mkdir -p $(SD_FOLDER)
+	$(V)mkdir -p $(SD_FOLDER)/cores
+	$(V)mkdir -p $(CORES_DIR)
+	$(V)mkdir -p $(MAPPERS_DIR)
+	$(V)mkdir -p $(SD_FOLDER)/bios
+	$(V)mkdir -p $(SD_FOLDER)/bios/msx
+	$(V)mkdir -p $(SD_FOLDER)/bios/nes
+
+create_sd_data: create_sd_folders $(MAPPER_BINS) $(BUILD_DIR)/$(TARGET)_intflash.bin
+	@$(PYTHON3) external/fceumm-go/gen_mappers_table.py $(MAPPERS_DIR)/mappers_table.bin
+	@$(CP) -O binary --only-section=.overlay_nes $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/nes.bin
+	@$(CP) -O binary --only-section=.overlay_nes_fceu $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/nes_fceu.bin
+	@$(CP) -O binary --only-section=.overlay_gb $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/gb.bin
+	@$(CP) -O binary --only-section=.overlay_tgb $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/tgb.bin
+	@$(CP) -O binary --only-section=.overlay_sms $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/sms.bin
+	@$(CP) -O binary --only-section=.overlay_pce $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/pce.bin
+	@$(CP) -O binary --only-section=.overlay_msx $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/msx.bin
+	@$(CP) -O binary --only-section=.overlay_wsv $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/wsv.bin
+	@$(CP) -O binary --only-section=.overlay_gw $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/gw.bin
+	@$(CP) -O binary --only-section=.overlay_md $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/md.bin
+	@$(CP) -O binary --only-section=.overlay_a2600 $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/a2600.bin
+	@$(CP) -O binary --only-section=.overlay_a7800 $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/a7800.bin
+	@$(CP) -O binary --only-section=.overlay_amstrad $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/amstrad.bin
+	@$(CP) -O binary --only-section=.overlay_videopac $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/videopac.bin
+	@$(CP) -O binary --only-section=.overlay_tama $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/tama.bin
+	@$(CP) -O binary --only-section=.overlay_celeste $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/celeste.bin
+	@$(CP) -O binary --only-section=.overlay_graphics $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/logo.bin
+	$(V)cp build/gw_retro_go_intflash.bin sd_content/update_bank2.bin
+
+flash_sd: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin create_sd_data
+	$(eval MAPPERS_SDPUSH := $(foreach mapper,$(MAPPER_NAMES),-- sdpush --file $(MAPPERS_DIR)/mapper_$(mapper).bin --dest-path "/cores/mappers/"))
 	@$(GNWMANAGER) flash $(INTFLASH_ADDRESS) $(BUILD_DIR)/$(TARGET)_intflash.bin \
-		-- sdpush --file build/cores/nes.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/nes_fceu.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/gb.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/tgb.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/sms.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/pce.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/msx.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/wsv.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/gw.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/md.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/a2600.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/a7800.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/amstrad.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/videopac.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/tama.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/logo.bin --dest-path "/cores/" \
-		-- sdpush --file build/cores/celeste.bin --dest-path "/roms/homebrew/" \
+		-- sdpush --file $(CORES_DIR)/nes.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/nes_fceu.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/gb.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/tgb.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/sms.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/pce.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/msx.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/wsv.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/gw.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/md.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/a2600.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/a7800.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/amstrad.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/videopac.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/tama.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/logo.bin --dest-path "/cores/" \
+		-- sdpush --file $(CORES_DIR)/celeste.bin --dest-path "/roms/homebrew/" \
+		$(MAPPERS_SDPUSH) \
 		-- start $(INTFLASH_ADDRESS) \
 		$(RESET_DBGMCU_CMD)
 
@@ -1257,6 +1289,7 @@ download_sdk: $(SDK_HEADERS) $(SDK_C_SOURCES) $(SDK_ASM_SOURCES)
 clean:
 	$(V)$(ECHO) [ RM ] $(BUILD_DIR)
 	$(V)-rm -fR $(BUILD_DIR)
+	$(V)-rm -fR $(SD_FOLDER)
 	$(V)-rm -fR Core/Src/porting/zelda3/zelda_assets.c
 	$(V)-rm -fR external/zelda3/tables/zelda3.sfc
 	$(V)$(MAKE) -C external/zelda3 clean

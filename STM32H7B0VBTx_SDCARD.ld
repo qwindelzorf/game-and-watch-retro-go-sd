@@ -72,6 +72,7 @@ __RAM_EMU_LENGTH__  = 1024K - __RAM_UC_LENGTH__;
 __AHBRAM_LENGTH__   = 128K;
 __FLASH_LENGTH__    = 256K; /* Bank 1 */
 __FLASH2_LENGTH__   = 256K; /* Bank 2 */
+__RAM_FCEUMM_MAPPER_LENGTH__ = 48K; /* Current FCEUMM mapper code */
 
 /* Usefull only for round robin flash allocator */
 __EXTFLASH_BASE__ = 0x90000000;  /* Beginning of addressable extflash addresses */
@@ -80,6 +81,8 @@ __EXTFLASH_START__ = __EXTFLASH_BASE__;  /* Beginning of where we're going to st
 __RAM_START__       = 0x24000000;
 __RAM_UC_START__    = __RAM_START__;
 __RAM_EMU_START__   = __RAM_START__ + __RAM_UC_LENGTH__;
+
+__RAM_FCEUMM_START__   = __RAM_START__ + __RAM_UC_LENGTH__ + __RAM_FCEUMM_MAPPER_LENGTH__;
 
 __RAM_EMU_END__     = __RAM_EMU_START__ + __RAM_EMU_LENGTH__;
 __RAM_END__         = __RAM_START__ + 1024K;
@@ -95,6 +98,7 @@ MEMORY
   DTCMRAM  (xrw) : ORIGIN = 0x20000000, LENGTH =  __DTCMRAM_LENGTH__
   RAM_UC   (xrw) : ORIGIN = __RAM_UC_START__, LENGTH = __RAM_UC_LENGTH__
   RAM_EMU  (xrw) : ORIGIN = __RAM_EMU_START__, LENGTH = __RAM_EMU_LENGTH__
+  RAM_FCEUMM  (xrw) : ORIGIN = __RAM_FCEUMM_START__, LENGTH = __RAM_EMU_LENGTH__ - __RAM_FCEUMM_MAPPER_LENGTH__
   AHBRAM   (xrw) : ORIGIN = 0x30000000, LENGTH =  __AHBRAM_LENGTH__
 
   /* FLASH */
@@ -149,7 +153,9 @@ SECTIONS
   _OVERLAY_NES_BSS_SIZE = SIZEOF(.overlay_nes_bss);
   _NES_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _NES_ROM_UNPACK_BUFFER;
 
-  .overlay_nes_fceu __RAM_EMU_START__ : {
+INCLUDE build/fceumm_mappers.ld
+
+  .overlay_nes_fceu __RAM_FCEUMM_START__ : {
     . = ALIGN(4);
     __ram_emu_nes_fceu_start__ = .;
     build/nes_fceu/*.o (.data .data* .text .text* .rodata .rodata*)

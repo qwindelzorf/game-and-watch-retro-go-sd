@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
+#include "config.h"
 
 #define RG_BASE_PATH        RG_STORAGE_ROOT "/retro-go"
 #define RG_BASE_PATH_BIOS   RG_BASE_PATH "/bios"
@@ -68,3 +69,4 @@ bool rg_storage_exists(const char *path);
 bool rg_storage_mkdir(const char *dir);
 bool rg_storage_scandir(const char *path, rg_scandir_cb_t *callback, void *arg, uint32_t flags);
 rg_stat_t rg_storage_stat(const char *path);
+size_t rg_storage_copy_file_to_ram(char *file_path, char *ram_dest);
