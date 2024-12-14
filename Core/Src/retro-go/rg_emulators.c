@@ -745,3 +745,15 @@ bool emulator_is_file_valid(retro_emulator_file_t *file)
 
     return false;
 }
+
+retro_emulator_file_t *emulator_get_file(char *file_path)
+{
+    for (int i = 0; i < emulators_count; i++) {
+        for (int j = 0; j < emulators[i].roms.count; j++) {
+            if (strcmp(emulators[i].roms.files[j].path, file_path) == 0) {
+                return &emulators[i].roms.files[j];
+            }
+        }
+    }
+    return NULL;
+}

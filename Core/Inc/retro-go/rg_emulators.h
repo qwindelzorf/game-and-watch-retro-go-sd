@@ -80,3 +80,4 @@ bool emulator_build_file_object(const char *path, retro_emulator_file_t *out_fil
 const char *emu_get_file_path(retro_emulator_file_t *file);
 retro_emulator_t *file_to_emu(retro_emulator_file_t *file);
 bool emulator_is_file_valid(retro_emulator_file_t *file);
+retro_emulator_file_t *emulator_get_file(char *file_path);

@@ -227,6 +227,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
             else if(joystick->values[ODROID_INPUT_B]){
                 // Load State
                 last_key = ODROID_INPUT_B;
+                // TODO : handle the last saved slot thing
                 odroid_system_emu_load_state(0);
                 common_emu_state.startup_frames = 0;
                 set_ingame_overlay(INGAME_OVERLAY_LOAD);
@@ -301,7 +302,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
     if (joystick->values[ODROID_INPUT_POWER]) {
         // Save-state and poweroff
         audio_stop_playing();
-#if OFF_SAVESTATE==1
+#if OFF_SAVESTATE == 1 || SD_CARD == 1
         odroid_system_emu_save_state(-1);
 #else
         odroid_system_emu_save_state(0);

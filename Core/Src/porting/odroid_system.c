@@ -83,7 +83,9 @@ char* odroid_system_get_path(emu_path_type_t type, const char *_romPath)
         case ODROID_PATH_SAVE_STATE_3:
             sprintf(buffer, "%s%s-%d.sav", ODROID_BASE_PATH_SAVES, fileName, type);
             break;
-
+        case ODROID_PATH_SAVE_STATE_OFF:
+            sprintf(buffer, "%s/off.sav", ODROID_BASE_PATH_SAVES);
+            break;
         case ODROID_PATH_SCREENSHOT:
         case ODROID_PATH_SCREENSHOT_1:
         case ODROID_PATH_SCREENSHOT_2:
@@ -233,7 +235,7 @@ bool odroid_system_emu_load_state(int slot)
 
     char *filename;
     if (slot == -1) {
-        filename = ODROID_BASE_PATH_SAVES "/off.sav";
+        filename = odroid_system_get_path(ODROID_PATH_SAVE_STATE_OFF, currentApp.romPath);
     } else {
         filename = odroid_system_get_path(ODROID_PATH_SAVE_STATE + slot, currentApp.romPath);
     }
@@ -258,7 +260,7 @@ bool odroid_system_emu_save_state(int slot)
 
     char *filename;
     if (slot == -1) {
-        filename = ODROID_BASE_PATH_SAVES "/off.sav";
+        filename = odroid_system_get_path(ODROID_PATH_SAVE_STATE_OFF, currentApp.romPath);
     } else {
         filename = odroid_system_get_path(ODROID_PATH_SAVE_STATE + slot, currentApp.romPath);
     }
@@ -379,7 +381,7 @@ void odroid_system_sleep(void)
     {
         sleep_hook();
     }
-//    odroid_settings_StartupFile_set(ACTIVE_FILE);
+    odroid_settings_StartupFile_set(ACTIVE_FILE);
 
     // odroid_settings_commit();
     gui_save_current_tab();

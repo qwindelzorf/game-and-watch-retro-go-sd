@@ -768,6 +768,10 @@ void GLOBAL_DATA app_logo()
 void GLOBAL_DATA app_sleep_logo()
 {
     retro_logo_image *logo;
+    // As we will use ram_alloc, make sure ram_start pointer is valid
+    if (ram_start == 0) {
+        ram_start = (uint32_t)&__RAM_EMU_START__;
+    }
     for (int i = 10; i <= 100; i+=2)
     {
         logo = rg_get_logo(RG_LOGO_GNW);
@@ -802,7 +806,7 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
     // Init ram start for pseudo dynamic mem allocation
     ahb_init();
     itc_init();
-    ram_start = &__RAM_EMU_START__;
+    ram_start = (uint32_t)&__RAM_EMU_START__;
 
     if (fs_mounted == false) {
         sdcard_error_screen();
@@ -831,13 +835,14 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
     // Start the previously running emulator directly if it's a valid pointer.
     // If the user holds down the TIME button during startup,start the retro-go
     // gui instead of the last ROM as a fallback.
-    retro_emulator_file_t *file = odroid_settings_StartupFile_get();
-    if (emulator_is_file_valid(file) && ((GW_GetBootButtons() & B_TIME) == 0)) {
-        int save_slot = 0;
-#if OFF_SAVESTATE
-        save_slot = -1;
-#endif
-        emulator_start(file, true, true, save_slot);
+    char *startup_file = odroid_settings_StartupFile_get();
+    retro_emulator_file_t *file = NULL;
+    if (strlen(startup_file) > 0) {
+        file = emulator_get_file(startup_file);
+    }
+
+    if ((file != NULL) && ((GW_GetBootButtons() & B_TIME) == 0)) {
+        emulator_start(file, true, true, -1);
     }
     else
     {

@@ -66,7 +66,7 @@ typedef struct persistent_config {
     uint8_t lang;
     uint8_t startup_app;
     uint8_t cpu_oc_level;
-    void *startup_file;
+    char    startup_file[256];
 
     uint16_t main_menu_timeout_s;
     uint16_t main_menu_selected_tab;
@@ -490,13 +490,21 @@ void odroid_settings_StartupApp_set(int32_t value)
 }
 
 
-void* odroid_settings_StartupFile_get()
+char* odroid_settings_StartupFile_get()
 {
     return persistent_config_ram.startup_file;
 }
-void odroid_settings_StartupFile_set(void *value)
+void odroid_settings_StartupFile_set(retro_emulator_file_t *file)
 {
-    persistent_config_ram.startup_file = value;
+    // We save only file path and we'll try to find it in built list at next startup
+    if (file)
+    {
+        memcpy(&persistent_config_ram.startup_file, file->path, sizeof(persistent_config_ram.startup_file));
+    }
+    else
+    {
+        memset(&persistent_config_ram.startup_file,0,sizeof(persistent_config_ram.startup_file));
+    }
 }
 
 uint16_t odroid_settings_MainMenuTimeoutS_get()
