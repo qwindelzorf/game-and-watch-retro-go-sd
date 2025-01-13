@@ -1,9 +1,3 @@
-/*
-*********************************************************
-*                Warning!!!!!!!                         *
-*  This file must be saved with Windows 1252 Encoding   *
-*********************************************************
-*/
 #if !defined (INCLUDED_DE_DE)
 #define INCLUDED_DE_DE 1
 #endif
@@ -114,9 +108,9 @@ const lang_t lang_de_de LANG_DATA = {
     .s_copy_GW_time_to_RTC = "G&W Zeit -> RTC",
     .s_LCD_filter = "LCD filter",
     .s_Display_RAM = "Anzeigespeicher",
-    .s_Press_ACL = "Drücke ACL oder Reset",
-    .s_Press_TIME = "Drücke TIME [B+TIME]",
-    .s_Press_ALARM = "Drücke ALARM [B+GAME]",
+    .s_Press_ACL = "DrÃ¼cke ACL oder Reset",
+    .s_Press_TIME = "DrÃ¼cke TIME [B+TIME]",
+    .s_Press_ALARM = "DrÃ¼cke ALARM [B+GAME]",
     .s_filter_0_none = "0-kein",
     .s_filter_1_medium = "1-mittel",
     .s_filter_2_high = "2-hoch",
@@ -130,9 +124,9 @@ const lang_t lang_de_de LANG_DATA = {
     .s_No = "Nein",
     .s_PlsChose = "Auswahl",
     .s_OK = "OK",
-    .s_Confirm = "Bestätige",
+    .s_Confirm = "BestÃ¤tige",
     .s_Brightness = "Helligkeit",
-    .s_Volume = "Lautstärke",
+    .s_Volume = "LautstÃ¤rke",
     .s_OptionsTit = "Optionen",
     .s_FPS = "FPS",
     .s_BUSY = "ausgelastet",
@@ -153,7 +147,7 @@ const lang_t lang_de_de LANG_DATA = {
     .s_Reload = "Neu laden",
     .s_Options = "Optionen",
     .s_Power_off = "Abschalten",
-    .s_Quit_to_menu = "Verlassen (Hautptmenü)",
+    .s_Quit_to_menu = "Verlassen (HautptmenÃ¼)",
     .s_Retro_Go_options = "Retro-Go",
     .s_Font = "Schriftart",
     .s_Colors = "Farben",
@@ -169,15 +163,15 @@ const lang_t lang_de_de LANG_DATA = {
     // Core\Src\retro-go\rg_emulators.c ====================================
     .s_File = "Datei",
     .s_Type = "Typ",
-    .s_Size = "Größe",
-    .s_Close = "Schließen",
+    .s_Size = "GrÃ¶ÃŸe",
+    .s_Close = "SchlieÃŸen",
     .s_GameProp = "Eigenschaften",
     .s_Resume_game = "Spiel fortsetzen",
     .s_New_game = "Neues Spiel",
-    .s_Del_favorite = "Favorit löschen",
-    .s_Add_favorite = "Favorit hinzufügen",
-    .s_Delete_save = "Spielstand löschen",
-    .s_Confirm_del_save = "Spielstand wirklich löschen?",
+    .s_Del_favorite = "Favorit lÃ¶schen",
+    .s_Add_favorite = "Favorit hinzufÃ¼gen",
+    .s_Delete_save = "Spielstand lÃ¶schen",
+    .s_Confirm_del_save = "Spielstand wirklich lÃ¶schen?",
     .s_Confirm_del_sram = "Delete SRAM file?",
     .s_Free_space_alert = "Not enough free space for a new save, please delete some.",
 #if CHEAT_CODES == 1
@@ -209,10 +203,10 @@ const lang_t lang_de_de LANG_DATA = {
     .s_UI_Mod = "UI Mod",
     .s_Lang = "Deutsch",
     .s_LangAuthor = "LeZerb",
-    .s_Debug_menu = "Debug Menü",
-    .s_Reset_settings = "Einstellungen zurücksetzen",
-    .s_Retro_Go = "Über Retro-Go",
-    .s_Confirm_Reset_settings = "Alle Einstellungen zurücksetzen?",
+    .s_Debug_menu = "Debug MenÃ¼",
+    .s_Reset_settings = "Einstellungen zurÃ¼cksetzen",
+    .s_Retro_Go = "Ãœber Retro-Go",
+    .s_Confirm_Reset_settings = "Alle Einstellungen zurÃ¼cksetzen?",
     .s_Flash_JEDEC_ID = "Flash JEDEC ID",
     .s_Flash_Name = "Flash Name",
     .s_Flash_SR = "Flash SR",

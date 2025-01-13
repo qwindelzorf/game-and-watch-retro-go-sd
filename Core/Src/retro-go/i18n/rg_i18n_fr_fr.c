@@ -1,9 +1,3 @@
-/*
-*********************************************************
-*                Warning!!!!!!!                         *
-*  This file must be saved with Windows 1252 Encoding   *
-*********************************************************
-*/
 #if !defined (INCLUDED_FR_FR)
 #define INCLUDED_FR_FR 1
 #endif
@@ -36,12 +30,12 @@ const lang_t lang_fr_fr LANG_DATA = {
     // Core\Src\porting\nes-fceu\main_nes_fceu.c ===========================
     .s_Crop_Vertical_Overscan = "Recadrage Vertical",
     .s_Crop_Horizontal_Overscan = "Recadrage Horizontal",
-    .s_Disable_Sprite_Limit = "Désactiver limit. nb sprites",
+    .s_Disable_Sprite_Limit = "DÃ©sactiver limit. nb sprites",
     .s_Reset = "Reset",
     .s_NES_CPU_OC = "Overclocking du CPU NES",
-    .s_NES_Eject_Insert_FDS = "Ejecter/Insérer le disque",
+    .s_NES_Eject_Insert_FDS = "Ejecter/InsÃ©rer le disque",
     .s_NES_Eject_FDS = "Ejecter Disque",
-    .s_NES_Insert_FDS = "Insérer Disque",
+    .s_NES_Insert_FDS = "InsÃ©rer Disque",
     .s_NES_Swap_Side_FDS = "Changer la face du disque",
     .s_NES_FDS_Side_Format = "Disque %d Face %s",
     //=====================================================================
@@ -52,7 +46,7 @@ const lang_t lang_fr_fr LANG_DATA = {
 
     // Core\Src\porting\nes\main_nes.c =====================================
     //.s_Palette = "Palette" dul
-    .s_Default = "Par défaut",
+    .s_Default = "Par dÃ©faut",
     //=====================================================================
 
     // Core\Src\porting\md\main_gwenesis.c ================================
@@ -83,7 +77,7 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_msx_MSX1_EUR = "MSX1 (EUR)",
     .s_msx_MSX2_EUR = "MSX2 (EUR)",
     .s_msx_MSX2_JP = "MSX2+ (JP)",
-    .s_msx_Frequency = "Fréquence",
+    .s_msx_Frequency = "FrÃ©quence",
     .s_msx_Freq_Auto = "Auto",
     .s_msx_Freq_50 = "50Hz",
     .s_msx_Freq_60 = "60Hz",
@@ -94,7 +88,7 @@ const lang_t lang_fr_fr LANG_DATA = {
 
     // Core\Src\porting\md\main_amstrad.c ================================
     .s_amd_Change_Dsk = "Change Dsk",
-    .s_amd_Controls = "Contrôles",
+    .s_amd_Controls = "ContrÃ´les",
     .s_amd_Controls_Joystick = "Manette",
     .s_amd_Controls_Keyboard = "Clavier",
     .s_amd_palette_Color = "Couleur",
@@ -119,7 +113,7 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_Press_ALARM = "Presser ALARM [B+GAME]",
     .s_filter_0_none = "0-aucun",
     .s_filter_1_medium = "1-moyen",
-    .s_filter_2_high = "2-élevé",
+    .s_filter_2_high = "2-Ã©levÃ©",
     //=====================================================================
 
     // Core\Src\porting\odroid_overlay.c ===================================
@@ -131,21 +125,21 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_PlsChose = "Question",
     .s_OK = "OK",
     .s_Confirm = "Confirmer",
-    .s_Brightness = "Luminosité",
+    .s_Brightness = "LuminositÃ©",
     .s_Volume = "Volume",
     .s_OptionsTit = "Options",
     .s_FPS = "FPS",
-    .s_BUSY = "Occupé",
+    .s_BUSY = "OccupÃ©",
     .s_Scaling = "Echelle",
     .s_SCalingOff = "Off",
-    .s_SCalingFit = "Adaptée",
+    .s_SCalingFit = "AdaptÃ©e",
     .s_SCalingFull = "Complete",
-    .s_SCalingCustom = "Personalisée",
+    .s_SCalingCustom = "PersonalisÃ©e",
     .s_Filtering = "Filtrage",
     .s_FilteringNone = "Aucun",
     .s_FilteringOff = "Off",
-    .s_FilteringSharp = "Précis",
-    .s_FilteringSoft = "Léger",
+    .s_FilteringSharp = "PrÃ©cis",
+    .s_FilteringSoft = "LÃ©ger",
     .s_Speed = "Vitesse",
     .s_Speed_Unit = "x",
     .s_Save_Cont = "Sauver & Continuer",
@@ -171,7 +165,7 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_Type = "Type",
     .s_Size = "Taille",
     .s_Close = "Fermer",
-    .s_GameProp = "Propriétés",
+    .s_GameProp = "PropriÃ©tÃ©s",
     .s_Resume_game = "Reprendre le jeu",
     .s_New_game = "Nouvelle partie",
     .s_Del_favorite = "Retirer des favoris",
@@ -193,10 +187,10 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_CPU_Overclock_0 = "Sans",
     .s_CPU_Overclock_1 = "Moyen",
     .s_CPU_Overclock_2 = "Maximum",
-    .s_CPU_OC_Upgrade_to = "Augmenter à ",
-    .s_CPU_OC_Downgrade_to = "Diminuer à ",
+    .s_CPU_OC_Upgrade_to = "Augmenter Ã  ",
+    .s_CPU_OC_Downgrade_to = "Diminuer Ã  ",
     .s_CPU_OC_Stay_at = "",
-    .s_Confirm_OC_Reboot = "Un redémarrage est nécessaire pour appliquer le nouveau réglage de l'overclocking du CPU. Etes-vous sûr ?",
+    .s_Confirm_OC_Reboot = "Un redÃ©marrage est nÃ©cessaire pour appliquer le nouveau rÃ©glage de l'overclocking du CPU. Etes-vous sÃ»r ?",
 #if INTFLASH_BANK == 2
     .s_Reboot = "Reboot",
     .s_Original_system = "Original system",
@@ -207,12 +201,12 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_Author = "De",
     .s_Author_ = "\t\t+",
     .s_UI_Mod = "UI Mod",
-    .s_Lang = "Français",
+    .s_Lang = "FranÃ§ais",
     .s_LangAuthor = "Narkoa",
     .s_Debug_menu = "Menu Debug",
-    .s_Reset_settings = "Restaurer les paramètres",
+    .s_Reset_settings = "Restaurer les paramÃ¨tres",
     .s_Retro_Go = "A propos de Retro-Go",
-    .s_Confirm_Reset_settings = "Restaurer les paramètres ?",
+    .s_Confirm_Reset_settings = "Restaurer les paramÃ¨tres ?",
     .s_Flash_JEDEC_ID = "Id Flash JEDEC",
     .s_Flash_Name = "Nom Flash",
     .s_Flash_SR = "SR Flash",
@@ -232,12 +226,12 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_Hour = "Heure",
     .s_Minute = "Minute",
     .s_Second = "Seconde",
-    .s_Time_setup = "Réglage",
+    .s_Time_setup = "RÃ©glage",
     .s_Day = "Jour",
     .s_Month = "Mois",
-    .s_Year = "Année",
+    .s_Year = "AnnÃ©e",
     .s_Weekday = "Jour de la semaine",
-    .s_Date_setup = "Réglage Date",
+    .s_Date_setup = "RÃ©glage Date",
     .s_Weekday_Mon = "Lun",
     .s_Weekday_Tue = "Mar",
     .s_Weekday_Wed = "Mer",

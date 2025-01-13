@@ -1,9 +1,3 @@
-/*
-*********************************************************
-*                Warning!!!!!!!                         *
-*  This file must be saved with Windows 1252 Encoding   *
-*********************************************************
-*/
 #if !defined (INCLUDED_IT_IT)
 #define INCLUDED_IT_IT 1
 #endif
@@ -126,12 +120,12 @@ const lang_t lang_it_it LANG_DATA = {
     .s_Full = "\x7",
     .s_Fill = "\x8",
     .s_No_Cover = "Senza immagine",
-    .s_Yes = "SÏ",
+    .s_Yes = "S√¨",
     .s_No = "No",
     .s_PlsChose = "Seleziona",
     .s_OK = "OK",
     .s_Confirm = "Conferma",
-    .s_Brightness = "Luminosit‡",
+    .s_Brightness = "Luminosit√†",
     .s_Volume = "Volume",
     .s_OptionsTit = "Opzioni",
     .s_FPS = "FPS",
@@ -146,14 +140,14 @@ const lang_t lang_it_it LANG_DATA = {
     .s_FilteringOff = "Off",
     .s_FilteringSharp = "Nitido",
     .s_FilteringSoft = "Leggero",
-    .s_Speed = "Velocit‡",
+    .s_Speed = "Velocit√†",
     .s_Speed_Unit = "x",
     .s_Save_Cont = "Salva e Continua",
     .s_Save_Quit = "Salva ed Esci",
     .s_Reload = "Ricarica",
     .s_Options = "Opzioni",
     .s_Power_off = "Spegni",
-    .s_Quit_to_menu = "Esci e torna al men˘",
+    .s_Quit_to_menu = "Esci e torna al men√π",
     .s_Retro_Go_options = "Retro-Go",
     .s_Font = "Carattere",
     .s_Colors = "Colori",
@@ -171,7 +165,7 @@ const lang_t lang_it_it LANG_DATA = {
     .s_Type = "Tipo",
     .s_Size = "Dimensione",
     .s_Close = "Chiudi",
-    .s_GameProp = "Propriet‡",
+    .s_GameProp = "Propriet√†",
     .s_Resume_game = "Riprendi gioco",
     .s_New_game = "Nuova partita",
     .s_Del_favorite = "Rimuovi dai preferiti",
@@ -209,7 +203,7 @@ const lang_t lang_it_it LANG_DATA = {
     .s_UI_Mod = "Mod UI",
     .s_Lang = "Italiano",
     .s_LangAuthor = "SantX27",
-    .s_Debug_menu = "Men˘ di Debug",
+    .s_Debug_menu = "Men√π di Debug",
     .s_Reset_settings = "Ripristina configurazione",
     .s_Retro_Go = "Riguardo Retro-Go",
     .s_Confirm_Reset_settings = "Ripristinare configurazione?",

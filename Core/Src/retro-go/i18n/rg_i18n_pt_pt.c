@@ -1,9 +1,3 @@
-/*
-*********************************************************
-*                Warning!!!!!!!                         *
-*  This file must be saved with Windows 1252 Encoding   *
-*********************************************************
-*/
 #if !defined (INCLUDED_PT_PT)
 #define INCLUDED_PT_PT 1
 #endif
@@ -52,20 +46,20 @@ const lang_t lang_pt_pt LANG_DATA = {
 
     // Core\Src\porting\nes\main_nes.c =====================================
     //.s_Palette= "Palette" dul
-    .s_Default = "Padr„o",
+    .s_Default = "Padr√£o",
     //=====================================================================
 
     // Core\Src\porting\md\main_gwenesis.c ================================
-    .s_md_keydefine = "Botıes: A-B-C",
-    .s_md_Synchro = "SincronizaÁ„o",
+    .s_md_keydefine = "Bot√µes: A-B-C",
+    .s_md_Synchro = "Sincroniza√ß√£o",
     .s_md_Synchro_Audio = "AUDIO",
     .s_md_Synchro_Vsync = "VSYNC",
-    .s_md_Dithering = "RuÌdo Branco",
+    .s_md_Dithering = "Ru√≠do Branco",
     .s_md_Debug_bar = "Barra de Debug",
     .s_md_Option_ON = "\x6",
     .s_md_Option_OFF = "\x5",
     .s_md_AudioFilter = "Filtro de Audio",
-    .s_md_VideoUpscaler = "ResoluÁ„o de Video",
+    .s_md_VideoUpscaler = "Resolu√ß√£o de Video",
     //=====================================================================
     
     // Core\Src\porting\md\main_wsv.c ================================
@@ -83,13 +77,13 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_msx_MSX1_EUR = "MSX1(EUR)",
     .s_msx_MSX2_EUR = "MSX2(EUR)",
     .s_msx_MSX2_JP = "MSX2+(JP)",
-    .s_msx_Frequency = "FrequÍncia",
+    .s_msx_Frequency = "Frequ√™ncia",
     .s_msx_Freq_Auto = "Auto",
     .s_msx_Freq_50 = "50Hz",
     .s_msx_Freq_60 = "60Hz",
-    .s_msx_A_Button = "Bot„o A",
-    .s_msx_B_Button = "Bot„o B",
-    .s_msx_Press_Key = "Pressione bot„o",
+    .s_msx_A_Button = "Bot√£o A",
+    .s_msx_B_Button = "Bot√£o B",
+    .s_msx_Press_Key = "Pressione bot√£o",
     //=====================================================================
 
     // Core\Src\porting\md\main_amstrad.c ================================
@@ -100,13 +94,13 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_amd_palette_Color = "Cor",
     .s_amd_palette_Green = "Verde",
     .s_amd_palette_Grey = "Cinza",
-    .s_amd_game_Button = "Bot„o Game",
-    .s_amd_time_Button = "Bot„o Time",
-    .s_amd_start_Button = "Bot„o Start",
-    .s_amd_select_Button = "Bot„o Select",
-    .s_amd_A_Button = "Bot„o A",
-    .s_amd_B_Button = "Bot„o B",
-    .s_amd_Press_Key = "Pressione bot„o",
+    .s_amd_game_Button = "Bot√£o Game",
+    .s_amd_time_Button = "Bot√£o Time",
+    .s_amd_start_Button = "Bot√£o Start",
+    .s_amd_select_Button = "Bot√£o Select",
+    .s_amd_A_Button = "Bot√£o A",
+    .s_amd_B_Button = "Bot√£o B",
+    .s_amd_Press_Key = "Pressione bot√£o",
     //=====================================================================
 
     // Core\Src\porting\gw\main_gw.c =======================================
@@ -118,7 +112,7 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_Press_TIME = "Pressione TIME [B+TIME]",
     .s_Press_ALARM = "Pressione ALARM [B+GAME]",
     .s_filter_0_none = "0-nenhum",
-    .s_filter_1_medium = "1-mÈdio",
+    .s_filter_1_medium = "1-m√©dio",
     .s_filter_2_high = "2-alto",
     //=====================================================================
 
@@ -127,15 +121,15 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_Fill = "\x8",
     .s_No_Cover = "Sem capa",
     .s_Yes = "Sim",
-    .s_No = "N„o",
-    .s_PlsChose = "AtenÁ„o",
+    .s_No = "N√£o",
+    .s_PlsChose = "Aten√ß√£o",
     .s_OK = "OK",
     .s_Confirm = "Confirmar",
     .s_Brightness = "Brilho",
     .s_Volume = "Volume",
-    .s_OptionsTit = "OpÁıes",
+    .s_OptionsTit = "Op√ß√µes",
     .s_FPS = "FPS",
-    .s_BUSY = "OCUPA«√O",
+    .s_BUSY = "OCUPA√á√ÉO",
     .s_Scaling = "Escala",
     .s_SCalingOff = "Desligado",
     .s_SCalingFit = "Ajustar",
@@ -151,7 +145,7 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_Save_Cont = "Gravar e Continuar",
     .s_Save_Quit = "Gravar e Sair",
     .s_Reload = "Recarregar",
-    .s_Options = "OpÁıes",
+    .s_Options = "Op√ß√µes",
     .s_Power_off = "Desligar",
     .s_Quit_to_menu = "Sair para o menu",
     .s_Retro_Go_options = "Retro-Go",
@@ -176,13 +170,13 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_New_game = "Novo jogo",
     .s_Del_favorite = "Apagar favorito",
     .s_Add_favorite = "Adicionar favorito",
-    .s_Delete_save = "Apagar gravaÁ„o",
-    .s_Confirm_del_save = "Apagar gravaÁ„o?",
+    .s_Delete_save = "Apagar grava√ß√£o",
+    .s_Confirm_del_save = "Apagar grava√ß√£o?",
     .s_Confirm_del_sram = "Delete SRAM file?",
     .s_Free_space_alert = "Not enough free space for a new save, please delete some.",
 #if CHEAT_CODES == 1
-    .s_Cheat_Codes = "CÛdigo de Batota",
-    .s_Cheat_Codes_Title = "OpÁıes de Batota",
+    .s_Cheat_Codes = "C√≥digo de Batota",
+    .s_Cheat_Codes_Title = "Op√ß√µes de Batota",
     .s_Cheat_Codes_ON = "\x6",
     .s_Cheat_Codes_OFF = "\x5",
 #endif
@@ -191,28 +185,28 @@ const lang_t lang_pt_pt LANG_DATA = {
     // Core\Src\retro-go\rg_main.c =========================================
     .s_CPU_Overclock = "CPU Overclock",
     .s_CPU_Overclock_0 = "Zero",
-    .s_CPU_Overclock_1 = "IntermÈdio",
-    .s_CPU_Overclock_2 = "M·ximo",
+    .s_CPU_Overclock_1 = "Interm√©dio",
+    .s_CPU_Overclock_2 = "M√°ximo",
     .s_CPU_OC_Upgrade_to = "Aumentar para ",
     .s_CPU_OC_Downgrade_to = "Diminuir para ",
     .s_CPU_OC_Stay_at = "Manter a ",
-    .s_Confirm_OC_Reboot = "A configuraÁ„o do Overclock do CPU mudou e È necess·rio reiniciar. Tem a certeza?",
+    .s_Confirm_OC_Reboot = "A configura√ß√£o do Overclock do CPU mudou e √© necess√°rio reiniciar. Tem a certeza?",
 #if INTFLASH_BANK == 2
     .s_Reboot = "Reiniciar",
-    .s_Original_system = "ReposiÁ„o de Sistema",
-    .s_Confirm_Reboot = "Confirmar reinÌcio?",
+    .s_Original_system = "Reposi√ß√£o de Sistema",
+    .s_Confirm_Reboot = "Confirmar rein√≠cio?",
 #endif
     .s_Second_Unit = "s",
     .s_Version = "Ver.",
     .s_Author = "Por",
     .s_Author_ = "\t\t+",
     .s_UI_Mod = "UI Mod",
-    .s_Lang = "PortuguÍs",
+    .s_Lang = "Portugu√™s",
     .s_LangAuthor = "Pollux",
-    .s_Debug_menu = "Menu de depuraÁ„o",
-    .s_Reset_settings = "RepÙr configuraÁıes",
+    .s_Debug_menu = "Menu de depura√ß√£o",
+    .s_Reset_settings = "Rep√¥r configura√ß√µes",
     .s_Retro_Go = "Sobre Retro-Go",
-    .s_Confirm_Reset_settings = "RepÙr configuraÁıes?",
+    .s_Confirm_Reset_settings = "Rep√¥r configura√ß√µes?",
     .s_Flash_JEDEC_ID = "Flash JEDEC ID",
     .s_Flash_Name = "Flash Ref",
     .s_Flash_SR = "Flash SR",
@@ -224,7 +218,7 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_DBGMCU_clock = "DBGMCU Clock",
     .s_DBGMCU_clock_on = "On",
     .s_DBGMCU_clock_auto = "Auto",
-    .s_Debug_Title = "DepuraÁ„o",
+    .s_Debug_Title = "Depura√ß√£o",
     .s_Idle_power_off = "Desligar se inativo",
     .s_Time = "Hora",
     .s_Date = "Data",
@@ -234,7 +228,7 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_Second = "Segundos",
     .s_Time_setup = "Acertar hora",
     .s_Day = "Dia",
-    .s_Month = "MÍs",
+    .s_Month = "M√™s",
     .s_Year = "Ano",
     .s_Weekday = "Dia da semana",
     .s_Date_setup = "Acertar data",
@@ -243,7 +237,7 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_Weekday_Wed = "Qua",
     .s_Weekday_Thu = "Qui",
     .s_Weekday_Fri = "Sex",
-    .s_Weekday_Sat = "S·b",
+    .s_Weekday_Sat = "S√°b",
     .s_Weekday_Sun = "Dom",
     .s_Turbo_Button = "Turbo",
     .s_Turbo_None = "Nenhum",

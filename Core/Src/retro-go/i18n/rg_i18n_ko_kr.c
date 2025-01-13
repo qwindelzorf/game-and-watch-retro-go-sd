@@ -1,9 +1,3 @@
-/*
-***************************************************
-*                Warning!!!!!!!                   *
-*  This file must be saved with cp949(EUC-KR) Encoding   *
-***************************************************
-*/
 #if !defined (INCLUDED_KO_KR)
 #define INCLUDED_KO_KR 0
 #endif
@@ -27,11 +21,11 @@ int ko_kr_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 const lang_t lang_ko_kr LANG_DATA = {
     .codepage = 949,
     .extra_font = ko_kr_fonts,
-    .s_LangUI = "¾ğ¾î",
+    .s_LangUI = "ì–¸ì–´",
     .s_LangName = "Korean",
-    //ÇÑ±¹¾î
+    //í•œêµ­ì–´
     // If you can translate, please feed back the translation results to me, thank you
-    // translate by  Augen(È÷Èı¸¶½ºÅÍ):
+    // translate by  Augen(íˆí›ë§ˆìŠ¤í„°):
 
     // Core\Src\porting\nes-fceu\main_nes_fceu.c ===========================
     .s_Crop_Vertical_Overscan = "Crop Vertical Overscan",
@@ -47,12 +41,12 @@ const lang_t lang_ko_kr LANG_DATA = {
     //=====================================================================
 
     // Core\Src\porting\gb\main_gb.c =======================================
-    .s_Palette = "ÆÈ·¹Æ®",
+    .s_Palette = "íŒ”ë ˆíŠ¸",
     //=====================================================================
 
     // Core\Src\porting\nes\main_nes.c =====================================
     //.s_Palette= "Palette" dul
-    .s_Default = "±âº»",
+    .s_Default = "ê¸°ë³¸",
     //=====================================================================
 
     // Core\Src\porting\md\main_gwenesis.c ================================
@@ -126,62 +120,62 @@ const lang_t lang_ko_kr LANG_DATA = {
     .s_Full = "\x7",
     .s_Fill = "\x8",
 
-    .s_No_Cover = "Ä¿¹ö ¾øÀ½",
+    .s_No_Cover = "ì»¤ë²„ ì—†ìŒ",
 
-    .s_Yes = "³×",
-    .s_No = "¾Æ´Ï¿À",
-    .s_PlsChose = "¼±ÅÃÇØ ÁÖ¼¼¿ä := ",
-    .s_OK = "È®ÀÎ",
-    .s_Confirm = "Àû¿ë",
-    .s_Brightness = "¹à±â",
-    .s_Volume = "¼Ò¸®Å©±â",
-    .s_OptionsTit = "È¯°æ ¼³Á¤",
+    .s_Yes = "ë„¤",
+    .s_No = "ì•„ë‹ˆì˜¤",
+    .s_PlsChose = "ì„ íƒí•´ ì£¼ì„¸ìš” := ",
+    .s_OK = "í™•ì¸",
+    .s_Confirm = "ì ìš©",
+    .s_Brightness = "ë°ê¸°",
+    .s_Volume = "ì†Œë¦¬í¬ê¸°",
+    .s_OptionsTit = "í™˜ê²½ ì„¤ì •",
     .s_FPS = "FPS",
-    .s_BUSY = "Å¬·°(CPU)= ",
-    .s_Scaling = "½ºÄÉÀÏ",
+    .s_BUSY = "í´ëŸ­(CPU)= ",
+    .s_Scaling = "ìŠ¤ì¼€ì¼",
     .s_SCalingOff = "Off",
     .s_SCalingFit = "Fit",
-    .s_SCalingFull = "ÀüÃ¼È­¸é",
+    .s_SCalingFull = "ì „ì²´í™”ë©´",
     .s_SCalingCustom = "Custom",
-    .s_Filtering = "ÇÊÅÍ¸µ",
-    .s_FilteringNone = "ÇÊÅÍ¸µ ¾øÀ½",
+    .s_Filtering = "í•„í„°ë§",
+    .s_FilteringNone = "í•„í„°ë§ ì—†ìŒ",
     .s_FilteringOff = "Off",
     .s_FilteringSharp = "Sharp",
     .s_FilteringSoft = "Soft",
-    .s_Speed = "¼Óµµ(¹è¼Ó)",
+    .s_Speed = "ì†ë„(ë°°ì†)",
     .s_Speed_Unit = "x",
-    .s_Save_Cont = "ÀúÀå ¹× °è¼Ó ÇÏ±â",
-    .s_Save_Quit = "ÀúÀå ¹× Á¾·á ÇÏ±â",
-    .s_Reload = "´Ù½Ã ºÒ·¯¿À±â",
-    .s_Options = "¼³Á¤",
-    .s_Power_off = "Àü¿ø Á¾·á",
-    .s_Quit_to_menu = "¸Å´º·Î ³ª°¡±â",
+    .s_Save_Cont = "ì €ì¥ ë° ê³„ì† í•˜ê¸°",
+    .s_Save_Quit = "ì €ì¥ ë° ì¢…ë£Œ í•˜ê¸°",
+    .s_Reload = "ë‹¤ì‹œ ë¶ˆëŸ¬ì˜¤ê¸°",
+    .s_Options = "ì„¤ì •",
+    .s_Power_off = "ì „ì› ì¢…ë£Œ",
+    .s_Quit_to_menu = "ë§¤ë‰´ë¡œ ë‚˜ê°€ê¸°",
     .s_Retro_Go_options = "Retro-Go",
 
     .s_Font = "Font",
     .s_Colors = "Colors",
-    .s_Theme_Title = "UI ÅÂ¸¶",
-    .s_Theme_sList = "½ÉÇÃ ¸®½ºÆ®",
-    .s_Theme_CoverV = "Ä¿¹öÇÃ·Î¿ì ¼¼·Î",
-    .s_Theme_CoverH = "Ä¿¹öÇÃ·Î¿ì °¡·Î",
-    .s_Theme_CoverLightV = "Ä¿¹öÇÃ·Î¿ì V",
-    .s_Theme_CoverLightH = "Ä¿¹öÇÃ·Î¿ì",
-    .s_Caching_Game = "°ÔÀÓ Ä³½Ì Áß",
+    .s_Theme_Title = "UI íƒœë§ˆ",
+    .s_Theme_sList = "ì‹¬í”Œ ë¦¬ìŠ¤íŠ¸",
+    .s_Theme_CoverV = "ì»¤ë²„í”Œë¡œìš° ì„¸ë¡œ",
+    .s_Theme_CoverH = "ì»¤ë²„í”Œë¡œìš° ê°€ë¡œ",
+    .s_Theme_CoverLightV = "ì»¤ë²„í”Œë¡œìš° V",
+    .s_Theme_CoverLightH = "ì»¤ë²„í”Œë¡œìš°",
+    .s_Caching_Game = "ê²Œì„ ìºì‹± ì¤‘",
 
     //=====================================================================
 
     // Core\Src\retro-go\rg_emulators.c ====================================
-    .s_File = "ÆÄÀÏ",
-    .s_Type = "Çü½Ä",
-    .s_Size = "Å©±â",
-    .s_Close = "´İ±â",
-    .s_GameProp = "¼Ó¼º",
-    .s_Resume_game = "°è¼Ó °ÔÀÓ ÇÏ±â",
-    .s_New_game = "»õ·Î °ÔÀÓ ½ÃÀÛ ÇÏ±â",
-    .s_Del_favorite = "Áñ°ÜÃ£±â »èÁ¦",
-    .s_Add_favorite = "Áñ°ÜÃ£±â Ãß°¡",
-    .s_Delete_save = "ÀúÀåµ¥ÀÌÅÍ »èÁ¦",
-    .s_Confirm_del_save = "ÀúÀå µ¥ÀÌÅÍ¸¦ »èÁ¦ÇÏ½Ã°Ú½À´Ï±î?",
+    .s_File = "íŒŒì¼",
+    .s_Type = "í˜•ì‹",
+    .s_Size = "í¬ê¸°",
+    .s_Close = "ë‹«ê¸°",
+    .s_GameProp = "ì†ì„±",
+    .s_Resume_game = "ê³„ì† ê²Œì„ í•˜ê¸°",
+    .s_New_game = "ìƒˆë¡œ ê²Œì„ ì‹œì‘ í•˜ê¸°",
+    .s_Del_favorite = "ì¦ê²¨ì°¾ê¸° ì‚­ì œ",
+    .s_Add_favorite = "ì¦ê²¨ì°¾ê¸° ì¶”ê°€",
+    .s_Delete_save = "ì €ì¥ë°ì´í„° ì‚­ì œ",
+    .s_Confirm_del_save = "ì €ì¥ ë°ì´í„°ë¥¼ ì‚­ì œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?",
     .s_Confirm_del_sram = "Delete SRAM file?",
     .s_Free_space_alert = "Not enough free space for a new save, please delete some.",
 #if CHEAT_CODES == 1
@@ -207,55 +201,55 @@ const lang_t lang_ko_kr LANG_DATA = {
     .s_Original_system = "Original system",
     .s_Confirm_Reboot = "Confirm reboot?",
 #endif
-    .s_Second_Unit = "ÃÊ",
+    .s_Second_Unit = "ì´ˆ",
     .s_Version = "Ver.",
     .s_Author = "By",
     .s_Author_ = "\t\t+",
-    .s_UI_Mod = "ÀÎÅÍÆäÀÌ½º ¸ğµå",
-    .s_Lang = "ÇÑ±¹¾î",
-    .s_LangAuthor = "Augen(È÷Èı¸¶½ºÅÍ)",
-    .s_Debug_menu = "µğ¹ö±× ¸Å´º",
-    .s_Reset_settings = "¸ğµç ¼³Á¤ ÃÊ±âÈ­",
-    //.s_Close                  = "´İ±â",
-    .s_Retro_Go = "Retro-Go Á¤º¸= ",
-    .s_Confirm_Reset_settings = "¸ğµç ¼³Á¤À» Àç¼³Á¤ ÇÏ½Ã°Ú½À´Ï±î?",
+    .s_UI_Mod = "ì¸í„°í˜ì´ìŠ¤ ëª¨ë“œ",
+    .s_Lang = "í•œêµ­ì–´",
+    .s_LangAuthor = "Augen(íˆí›ë§ˆìŠ¤í„°)",
+    .s_Debug_menu = "ë””ë²„ê·¸ ë§¤ë‰´",
+    .s_Reset_settings = "ëª¨ë“  ì„¤ì • ì´ˆê¸°í™”",
+    //.s_Close                  = "ë‹«ê¸°",
+    .s_Retro_Go = "Retro-Go ì •ë³´= ",
+    .s_Confirm_Reset_settings = "ëª¨ë“  ì„¤ì •ì„ ì¬ì„¤ì • í•˜ì‹œê² ìŠµë‹ˆê¹Œ?",
 
-    .s_Flash_JEDEC_ID = "ÇÃ·¡½Ã JEDEC ID",
-    .s_Flash_Name = "ÇÃ·¡½Ã ÀÌ¸§",
-    .s_Flash_SR = "ÇÃ·¡½Ã SR",
-    .s_Flash_CR = "ÇÃ·¡½Ã CR",
+    .s_Flash_JEDEC_ID = "í”Œë˜ì‹œ JEDEC ID",
+    .s_Flash_Name = "í”Œë˜ì‹œ ì´ë¦„",
+    .s_Flash_SR = "í”Œë˜ì‹œ SR",
+    .s_Flash_CR = "í”Œë˜ì‹œ CR",
     .s_Flash_Size = "Flash Size",
-    .s_Smallest_erase = "Smallest Áö¿ì±â",
+    .s_Smallest_erase = "Smallest ì§€ìš°ê¸°",
     .s_DBGMCU_IDCODE = "DBGMCU IDCODE",
     .s_DBGMCU_CR = "DBGMCU CR",
     .s_DBGMCU_clock = "DBGMCU Clock",
     .s_DBGMCU_clock_on = "On",
     .s_DBGMCU_clock_auto = "Auto",
-    //.s_Close                  = "´İ±â",
-    .s_Debug_Title = "µğ¹ö±×",
-    .s_Idle_power_off = "¸ğµç Àü¿ø Á¾·á",
+    //.s_Close                  = "ë‹«ê¸°",
+    .s_Debug_Title = "ë””ë²„ê·¸",
+    .s_Idle_power_off = "ëª¨ë“  ì „ì› ì¢…ë£Œ",
 
-    .s_Time = "½Ã°£",
-    .s_Date = "³¯½Î",
-    .s_Time_Title = "½Ã°£",
-    .s_Hour = "½Ã",
-    .s_Minute = "ºĞ",
-    .s_Second = "ÃÊ",
-    .s_Time_setup = "½Ã°£ ¼³Á¤",
+    .s_Time = "ì‹œê°„",
+    .s_Date = "ë‚ ì‹¸",
+    .s_Time_Title = "ì‹œê°„",
+    .s_Hour = "ì‹œ",
+    .s_Minute = "ë¶„",
+    .s_Second = "ì´ˆ",
+    .s_Time_setup = "ì‹œê°„ ì„¤ì •",
 
-    .s_Day = "ÀÏ",
-    .s_Month = "¿ù",
-    .s_Year = "³â",
-    .s_Weekday = "ÁÖ",
-    .s_Date_setup = "³¯Â¥ ¼³Á¤",
+    .s_Day = "ì¼",
+    .s_Month = "ì›”",
+    .s_Year = "ë…„",
+    .s_Weekday = "ì£¼",
+    .s_Date_setup = "ë‚ ì§œ ì„¤ì •",
 
-    .s_Weekday_Mon = "¿ù",
-    .s_Weekday_Tue = "È­",
-    .s_Weekday_Wed = "¼ö",
-    .s_Weekday_Thu = "¸ñ",
-    .s_Weekday_Fri = "±İ",
-    .s_Weekday_Sat = "Åä",
-    .s_Weekday_Sun = "ÀÏ",
+    .s_Weekday_Mon = "ì›”",
+    .s_Weekday_Tue = "í™”",
+    .s_Weekday_Wed = "ìˆ˜",
+    .s_Weekday_Thu = "ëª©",
+    .s_Weekday_Fri = "ê¸ˆ",
+    .s_Weekday_Sat = "í† ",
+    .s_Weekday_Sun = "ì¼",
 
     .s_Turbo_Button = "Turbo",
     .s_Turbo_None = "None",

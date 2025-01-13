@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
 #if !defined (INCLUDED_ZH_CN)
 #define INCLUDED_ZH_CN 0
 #endif
@@ -247,6 +246,47 @@ const lang_t *gui_lang[] = {
 lang_t *curr_lang = &lang_en_us;
 const int gui_lang_count = sizeof(gui_lang) / sizeof(*gui_lang);
 
+int utf8_decode(const char *str, uint32_t *codepoint) {
+    if (!str || !codepoint) return 0;
+
+    unsigned char c = str[0];
+    if (c < 0x80) {
+        *codepoint = c;
+        return 1; // Single-byte ASCII
+    } else if ((c & 0xE0) == 0xC0) {
+        *codepoint = ((c & 0x1F) << 6) | (str[1] & 0x3F);
+        return 2; // Two-byte sequence
+    } else if ((c & 0xF0) == 0xE0) {
+        *codepoint = ((c & 0x0F) << 12) | ((str[1] & 0x3F) << 6) | (str[2] & 0x3F);
+        return 3; // Three-byte sequence
+    } else if ((c & 0xF8) == 0xF0) {
+        *codepoint = ((c & 0x07) << 18) | ((str[1] & 0x3F) << 12) | ((str[2] & 0x3F) << 6) | (str[3] & 0x3F);
+        return 4; // Four-byte sequence
+    }
+
+    printf("Invalid UTF-8 byte sequence\n");
+    return 0;
+}
+
+int i18n_get_char_width(uint32_t codepoint)
+{
+    char *font;
+    if (codepoint < 0x100) {
+        font = gui_fonts[curr_font];
+        return font[codepoint]; // Basic Latin (ASCII) characters
+    } else if (codepoint >= 0x410 && codepoint <= 0x44F) {
+            codepoint = codepoint - 0x410 + 0xC0; // 0x400 utf8 codepoint is 0x80 in cp1251 font
+        font = cp1251_fonts[curr_font];
+        return font[codepoint]; // Cyrillic characters
+    } else if (codepoint >= 0x4E00 && codepoint <= 0x9FFF) {
+        return 12; // CJK Unified Ideographs
+    } else if (codepoint >= 0x1100 && codepoint <= 0x11FF) {
+        return 12; // Hangul Jamo
+    } else {
+        return 8; // Default width for other Unicode characters
+    }
+}
+
 int i18n_get_text_height()
 {
     return 12;
@@ -259,91 +299,57 @@ bool IS_CJK(const lang_t* lang)
 
 int i18n_get_text_width(const char *text, const lang_t* lang)
 {
-    if (text == NULL || text[0] == 0)
-        return 0;
-    int text_len = strlen(text);
-    int ret = 0;
-    char *font = gui_fonts[curr_font];
-    char *extra_font = gui_fonts[curr_font];
-    if ((lang->extra_font != NULL) && (lang->extra_font[curr_font] != NULL))
-            extra_font = lang->extra_font[curr_font];
-    bool is_cjk = IS_CJK(lang);
-    for (int i = 0; i < text_len; i++)
-    {
-        if (text[i] > 0x80)
-        {
-            if (is_cjk)
-            {
-                if ((lang->codepage == 932) && (text[i] > 0xa0) && (text[i] < 0xe0))
-                    ret += 6;
-                else if (text[i] < 0xa1)
-                    ret += font[text[i]];
-                else
-                {
-                    ret += 12;
-                    i++;
-                }
-            }
-            else
-                ret += extra_font[text[i]];
-        }
-        else
-            ret += font[text[i]];
+    if (!text) return 0;
+
+    int width = 0;
+    uint32_t codepoint;
+    int bytes;
+    while (*text) {
+        bytes = utf8_decode(text, &codepoint);
+        if (bytes == 0) break; // Invalid sequence
+        width += i18n_get_char_width(codepoint);
+        text += bytes;
     }
-    return ret;
+
+    return width;
 };
 
 int i18n_get_text_lines(const char *text, const int fix_width, const lang_t* lang)
 {
-    if (text == NULL || text[0] == 0)
-        return 0;
-    int text_len = strlen(text);
-    int w = 0;
-    int ret = (text[0]) ? 1 : 0;
-    int chr_width = 0;
-    bool is_cjk = IS_CJK(lang);
-    char *font = gui_fonts[curr_font];
-    char *extra_font = gui_fonts[curr_font];
-    if ((lang->extra_font != NULL) && (lang->extra_font[curr_font] != NULL))
-            extra_font = lang->extra_font[curr_font];
-    for (int i = 0; i < text_len; i++)
-    {
-        if (text[i] == 13)
-            ret += 1;
-        else if (text[i] == 10)
-            w = 0;
-        else
-        {
-            chr_width = 0;
-            if (text[i] > 0x80)
-            {
-                if (is_cjk)
-                {
-                    if ((lang->codepage == 932) && (text[i] > 0xa0) && (text[i] < 0xe0))
-                        chr_width = 6;
-                    else if (text[i] < 0xa1)
-                        ret += font[text[i]];
-                    else
-                    {
-                        chr_width = 12;
-                        i++;
-                    }
-                }
-                else
-                    chr_width = extra_font[text[i]];
-            }
-            else
-                chr_width = font[text[i]];
+    if (text == NULL || text[0] == '\0') return 0;
 
-            if ((fix_width - w) < chr_width)
-            {
-                w = 0;
-                ret += 1;
-            };
+    int w = 0;             // Current line width
+    int lines = 1;         // Number of lines
+    uint32_t codepoint;    // Decoded UTF-8 codepoint
+    int bytes;             // Number of bytes in the UTF-8 sequence
+    const char *current = text;
+
+    while (*current) {
+        if (*current == '\n') {
+            // Newline resets line width
+            lines++;
+            w = 0;
+            current++;
+            continue;
         }
-        w += chr_width;
+
+        bytes = utf8_decode(current, &codepoint);
+        if (bytes == 0) break; // Invalid UTF-8 sequence
+
+        // Determine character width based on the Unicode code point
+        int char_width = i18n_get_char_width(codepoint);
+
+        // Check if the character fits in the current line
+        if ((fix_width - w) < char_width) {
+            lines++;
+            w = 0;
+        }
+
+        w += char_width;
+        current += bytes; // Advance to the next character
     }
-    return ret;
+
+    return lines;
 }
 
 void odroid_overlay_read_screen_rect(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t height)
@@ -360,14 +366,8 @@ int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const ch
         return 0;
     int font_height = 12;
     int x_offset = 0;
-    char realtxt[161];
-    uint8_t cc;
-    bool is_cjk = IS_CJK(lang);
     char *font = gui_fonts[curr_font];
-    char *extra_font = gui_fonts[curr_font];
-    if ((lang->extra_font != NULL) && (lang->extra_font[curr_font] != NULL))
-            extra_font = lang->extra_font[curr_font];
-    
+
     if (transparent)
         odroid_overlay_read_screen_rect(x_pos, y_pos, width, font_height);
     else
@@ -376,59 +376,64 @@ int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const ch
             for (int y = 0; y < font_height; y++)
                 overlay_buffer[x + y * width] = color_bg;
     }
+#if 0 // TODO: Implement text clipping
     int w = i18n_get_text_width(text, lang);
     sprintf(realtxt, "%.*s", 160, text);
-    bool dByte = false;
+    // if text is too long, cut it and paint end point
     if (w > width)
     {
         w = 0;
         int i = 0;
         while (w < width)
         {
-            dByte = false;
-            if (realtxt[i] > 0x80)
-            {
-                if (is_cjk)
-                {
-                    if ((lang->codepage == 932) && (realtxt[i] > 0xa0) && (realtxt[i] < 0xe0))
-                        w += 6;
-                    else if (realtxt[i] < 0xa1)
-                        w += font[realtxt[i]];
-                    {
-                        w += 12;
-                        dByte = true;
-                        i++;
-                    }
-                }
-                else
-                    w += extra_font[realtxt[i]];
-            }
-            else
-                w += font[realtxt[i]];
+            w += font[realtxt[i]];
             i++;
         }
-        realtxt[i - (dByte ? 2 : 1)] = 0;
+        realtxt[i - 1] = 0;
         // paint end point
         overlay_buffer[width * (font_height - 3) - 1] = get_darken_pixel(color, 80);
         overlay_buffer[width * (font_height - 3) - 3] = get_darken_pixel(color, 80);
         overlay_buffer[width * (font_height - 3) - 6] = get_darken_pixel(color, 80);
     };
+#endif
+    uint32_t codepoint;
+    int bytes;
+    while (*text) {
+        bytes = utf8_decode(text, &codepoint);
+        if (bytes == 0) break; // Invalid sequence
+        text += bytes;
 
-    int text_len = strlen(realtxt);
-
-    for (int i = 0; i < text_len; i++)
-    {
-        uint8_t c1 = realtxt[i];
-        bool ofont = ((c1 > 0x80) && (lang->codepage == 932)) || ((c1 > 0xA0) && is_cjk); 
-        if (! ofont)
-        {
-            char *draw_font = (c1 >= 0x80) ? (is_cjk ? font :extra_font) : font;
-            int cw = draw_font[c1]; // width;
+        if (codepoint < 0x100) {
+            char *draw_font = font;
+            int cw = draw_font[codepoint]; // width;
             if ((x_offset + cw) > width)
                 break;
             if (cw != 0)
             {
-                int d_pos = draw_font[c1 * 2 + 0x100] + draw_font[c1 * 2 + 0x101] * 0x100; // data pos
+                int d_pos = draw_font[codepoint * 2 + 0x100] + draw_font[codepoint * 2 + 0x101] * 0x100; // data pos
+                int line_bytes = (cw + 7) / 8;
+                for (int y = 0; y < font_height; y++)
+                {
+                    uint32_t *pixels_data = (uint32_t *)&(draw_font[0x300 + d_pos + y * line_bytes]);
+                    int offset = x_offset + (width * y);
+
+                    for (int x = 0; x < cw; x++)
+                    {
+                        if (pixels_data[0] & (1 << x))
+                            overlay_buffer[offset + x] = color;
+                    }
+                }
+            }
+            x_offset += cw;
+        } else if (codepoint >= 0x410 && codepoint <= 0x44F) {
+            codepoint = codepoint - 0x410 + 0xC0; // 0x400 utf8 codepoint is 0x80 in cp1251 font
+            char *draw_font = cp1251_fonts[curr_font];
+            int cw = draw_font[codepoint]; // width;
+            if ((x_offset + cw) > width)
+                break;
+            if (cw != 0)
+            {
+                int d_pos = draw_font[codepoint * 2 + 0x100] + draw_font[codepoint * 2 + 0x101] * 0x100; // data pos
                 int line_bytes = (cw + 7) / 8;
                 for (int y = 0; y < font_height; y++)
                 {
@@ -444,139 +449,62 @@ int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const ch
             }
             x_offset += cw;
         }
-        else
-        {
-            uint32_t location = 0;
-            uint8_t c2 = text[i + 1];
-            bool half = false;
-            if (lang->codepage == 950) // zh_tw
-                location = ((c1 - 0xa1) * 157 + ((c2 > 0xa0) ? (c2 - 0x62) : (c2 - 0x40))) * 24;
-            else if (lang->codepage == 932) // ja_jp
-            {
-                half = (c1 > 0xa0) && (c1 < 0xe0);
-                location = half ? ((c1 - 0xa1) * 12) : ((((c1 <= 0x9F) ? (c1 - 0x81) : (c1 - 0x41)) * 188 + ((c2 >= 0x80) ? (c2 - 0x41) : (c2 - 0x40)) + 32)  * 24 - 12);
-            }
-            else
-                location = ((c1 - 0xa1) * 94 + (c2 - 0xa1)) * 24;
-            for (int y = 0; y < font_height; y++)
-            { // height :12;
-                int offset = x_offset + (width * y);
-                cc = extra_font[location + y * (half ? 1 : 2)];
-
-                if (cc & 0x04)
-                    overlay_buffer[offset + 5] = color;
-                if (cc & 0x08)
-                    overlay_buffer[offset + 4] = color;
-                if (cc & 0x10)
-                    overlay_buffer[offset + 3] = color;
-                if (cc & 0x20)
-                    overlay_buffer[offset + 2] = color;
-                if (cc & 0x40)
-                    overlay_buffer[offset + 1] = color;
-                if (cc & 0x80)
-                    overlay_buffer[offset + 0] = color;
-                
-                if (!half)
-                {
-                    if (cc & 0x01)
-                        overlay_buffer[offset + 7] = color;
-                    if (cc & 0x02)
-                        overlay_buffer[offset + 6] = color;
-
-                    cc = extra_font[location + y * 2 + 1];
-
-                    if (cc & 0x10)
-                        overlay_buffer[offset + 11] = color;
-                    if (cc & 0x20)
-                        overlay_buffer[offset + 10] = color;
-                    if (cc & 0x40)
-                        overlay_buffer[offset + 9] = color;
-                    if (cc & 0x80)
-                        overlay_buffer[offset + 8] = color;
-                }
-            }
-            x_offset += half ? 6 : 12;
-            if (! half)
-                i++;
-        }
     }
+
     odroid_display_write(x_pos, y_pos, width, font_height, overlay_buffer);
     return font_height;
 }
 
 int i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_height, const char *text, uint16_t color, uint16_t color_bg, char transparent, const lang_t* lang)
 {
-    int text_len = 1;
-    int height = 0;
-    bool is_cjk = IS_CJK(lang);
-    char *font = gui_fonts[curr_font];
-    char *extra_font = gui_fonts[curr_font];
-    if ((lang->extra_font != NULL) && (lang->extra_font[curr_font] != NULL))
-            extra_font = lang->extra_font[curr_font];
-
-    if (text == NULL || text[0] == 0)
-        text = " ";
-
-    text_len = strlen(text);
-    if (x_pos < 0)
-        x_pos = ODROID_SCREEN_WIDTH + x_pos;
-
-    if (width < 1)
-        width = i18n_get_text_width(text, lang);
-
-    if (width > (ODROID_SCREEN_WIDTH - x_pos))
-        width = (ODROID_SCREEN_WIDTH - x_pos);
-
-    int line_len = 160; // min width is 2, max 160 char everline;
-    char buffer[line_len + 1];
-
-    for (int pos = 0; pos < text_len;)
-    {
-        if ((height + i18n_get_text_height()) > max_height)
-            break;
-        sprintf(buffer, "%.*s", line_len, text + pos);
-        if (strchr(buffer, '\n'))
-            *(strchr(buffer, '\n')) = 0;
-        int w = 0;
-        for (int x = 0; x < line_len; x++)
-        {
-            if (buffer[x] == 0)
-                break;
-
-            bool dByte = false;
-            int chr_width = 0;
-            if (buffer[x] > 0x80)
-            {
-                if (is_cjk)
-                {
-                    if ((lang->codepage == 932) && (buffer[x] > 0xa0) && (buffer[x] < 0xe0))
-                        chr_width = 6;
-                    else if (buffer[x] < 0xa1)
-                        chr_width = font[buffer[x]];
-                    {
-                        chr_width = 12;
-                        dByte = true;
-                    }
-                }
-                else
-                    chr_width = extra_font[buffer[x]];
-            }
-            else
-                chr_width = font[buffer[x]];
-
-            if ((width - w) < chr_width)
-            {
-                buffer[x] = 0;
-                break;
-            }
-            w += chr_width;
-            if (dByte)
-                x ++;
-        }
-        height += i18n_draw_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, transparent, lang);
-        pos += strlen(buffer);
-        if (*(text + pos) == 0 || *(text + pos) == '\n')
-            pos++;
+    if (text == NULL || text[0] == '\0') {
+        return 0; // No text to draw
     }
+
+    int text_len = strlen(text);
+    int height = 0; // Total height of the drawn text
+    char buffer[256]; // Temporary buffer for a single line of text
+    int buffer_index = 0; // Index for filling the buffer
+    int line_width = 0; // Current line width
+    uint32_t consumed_bytes = 0; // Bytes consumed per character
+
+    // Loop through the input text
+    for (int pos = 0; pos < text_len;) {
+        // Decode the next UTF-8 character
+        uint32_t codepoint = utf8_decode(&text[pos], &consumed_bytes);
+
+        if (codepoint == '\n' || (line_width + i18n_get_char_width(codepoint)) > width) {
+            // Line break: draw the current buffer
+            buffer[buffer_index] = '\0'; // Null-terminate the buffer
+            if ((height + i18n_get_text_height()) > max_height) {
+                break; // Stop if max height is exceeded
+            }
+            height += i18n_draw_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, transparent, lang);
+
+            // Reset the buffer for the next line
+            buffer_index = 0;
+            line_width = 0;
+
+            if (codepoint == '\n') {
+                pos += consumed_bytes; // Skip the newline character
+                continue;
+            }
+        }
+
+        // Add the character to the buffer
+        memcpy(&buffer[buffer_index], &text[pos], consumed_bytes);
+        buffer_index += consumed_bytes;
+        line_width += i18n_get_char_width(codepoint);
+        pos += consumed_bytes;
+    }
+
+    // Draw any remaining text in the buffer
+    if (buffer_index > 0) {
+        buffer[buffer_index] = '\0'; // Null-terminate the buffer
+        if ((height + i18n_get_text_height()) <= max_height) {
+            height += i18n_draw_text_line(x_pos, y_pos + height, width, buffer, color, color_bg, transparent, lang);
+        }
+    }
+
     return height;
 }

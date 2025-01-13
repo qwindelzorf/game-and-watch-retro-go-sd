@@ -1,13 +1,3 @@
-/*
-*********************************************************
-*                Warning!!!!!!!                         *
-*  This file must be saved with Windows 1252 Encoding   *
-*********************************************************
-*/
-
-
-
-
 //#include "rg_i18n_lang.h"
 // Stand English
 
