@@ -163,10 +163,6 @@ typedef struct
     const char *s_CPU_Overclock_0;
     const char *s_CPU_Overclock_1;
     const char *s_CPU_Overclock_2;
-    const char *s_CPU_OC_Upgrade_to;
-    const char *s_CPU_OC_Downgrade_to;
-    const char *s_CPU_OC_Stay_at;
-    const char *s_Confirm_OC_Reboot;
 #if INTFLASH_BANK == 2
     const char *s_Reboot;
     const char *s_Original_system;

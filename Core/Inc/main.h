@@ -120,9 +120,7 @@ void Error_Handler(void);
 void BSOD(BSOD_t fault, uint32_t pc, uint32_t lr) __attribute__((noreturn));
 
 void boot_magic_set(uint32_t magic);
-void oc_level_set(uint32_t level);
-uint32_t oc_level_get();
-uint32_t oc_level_gets();
+void SystemClock_Config(uint8_t new_oc_level);
 void uptime_inc(void);
 uint32_t uptime_get(void);
 

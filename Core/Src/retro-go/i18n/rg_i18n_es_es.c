@@ -187,10 +187,6 @@ const lang_t lang_es_es LANG_DATA = {
     .s_CPU_Overclock_0 = "Stock",
     .s_CPU_Overclock_1 = "Medio",
     .s_CPU_Overclock_2 = "Máximo",
-    .s_CPU_OC_Upgrade_to = "Subir a ",
-    .s_CPU_OC_Downgrade_to = "Bajar a ",
-    .s_CPU_OC_Stay_at = "Permanecer en ",
-    .s_Confirm_OC_Reboot = "Para cambiar la CPU se debe reiniciar ¿Estás Seguro?",
 #if INTFLASH_BANK == 2
     .s_Reboot = "Reiniciar",
     .s_Original_system = "Sistema original",

@@ -638,7 +638,6 @@ INCLUDE build/fceumm_mappers.ld
     . = ALIGN(4);
     __dtcram_start__ = .;
     *(.persistent_boot_magic)
-    *(.persistent_oc_level)
     *(.persistent_log_idx)
     *(.persistent_logbuf)
     . = ALIGN(4);

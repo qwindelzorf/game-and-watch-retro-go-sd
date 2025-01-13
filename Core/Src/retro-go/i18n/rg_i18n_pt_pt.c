@@ -187,10 +187,6 @@ const lang_t lang_pt_pt LANG_DATA = {
     .s_CPU_Overclock_0 = "Zero",
     .s_CPU_Overclock_1 = "Intermédio",
     .s_CPU_Overclock_2 = "Máximo",
-    .s_CPU_OC_Upgrade_to = "Aumentar para ",
-    .s_CPU_OC_Downgrade_to = "Diminuir para ",
-    .s_CPU_OC_Stay_at = "Manter a ",
-    .s_Confirm_OC_Reboot = "A configuração do Overclock do CPU mudou e é necessário reiniciar. Tem a certeza?",
 #if INTFLASH_BANK == 2
     .s_Reboot = "Reiniciar",
     .s_Original_system = "Reposição de Sistema",

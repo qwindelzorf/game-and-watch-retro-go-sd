@@ -90,7 +90,6 @@ WWDG_HandleTypeDef hwwdg1;
 /* USER CODE BEGIN PV */
 
 PERSISTENT(boot_magic) volatile uint32_t boot_magic;
-PERSISTENT(oc_level) volatile uint32_t oc_level;
 uint32_t log_idx PERSISTENT(log_idx);
 char logbuf[1024 * 4] PERSISTENT(logbuf) __attribute__((aligned(4)));
 
@@ -103,7 +102,6 @@ static bool wdog_enabled;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
@@ -217,23 +215,6 @@ void abort(void)
 void boot_magic_set(uint32_t magic)
 {
   boot_magic = magic;
-}
-
-void oc_level_set(uint32_t level)
-{
-  oc_level = (oc_level & 0xFFFF0000) + level;
-}
-
-uint32_t oc_level_get()
-{
-  uint32_t level = oc_level >> 16;
-  return ((level > 2) || (level < 0)) ? 0 : level;
-}
-
-uint32_t oc_level_gets()
-{
-  uint32_t level = oc_level & 0xF;
-  return ((level > 2) || (level < 0)) ? 0 : level;
 }
 
 void uptime_inc(void)
@@ -402,7 +383,7 @@ int main(void)
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config();
+  SystemClock_Config(0);
 
   /* USER CODE BEGIN SysInit */
 
@@ -514,12 +495,17 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void)
+void SystemClock_Config(uint8_t oc_level)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
   RCC_CRSInitTypeDef RCC_CRSInitStruct = {0};
+
+  /* Make sure we are running on HSI clock
+     before we start changing the PLL settings */
+  RCC->CFGR &= ~RCC_CFGR_SW;
+  RCC->CFGR |= RCC_CFGR_SW_HSI;
 
   /** Supply configuration update enable
   */
@@ -555,14 +541,13 @@ void SystemClock_Config(void)
     CoreClock= HSI/PLLM x PLLN/PLLP
     OSPIClock= HSI/PLLM x PLLN/PLLQ
   */
-  switch (oc_level & 0xF) {
+  switch (oc_level) {
     case 1: // Intermediate overclocking
       RCC_OscInitStruct.PLL.PLLM = 16;
       RCC_OscInitStruct.PLL.PLLN = 156;
       RCC_OscInitStruct.PLL.PLLP = 2;
       RCC_OscInitStruct.PLL.PLLQ = 6;
       RCC_OscInitStruct.PLL.PLLR = 2;
-      oc_level = 0x10001; 
       break;
     case 2: // Maximum overclocking
       RCC_OscInitStruct.PLL.PLLM = 38;
@@ -570,7 +555,6 @@ void SystemClock_Config(void)
       RCC_OscInitStruct.PLL.PLLP = 2;
       RCC_OscInitStruct.PLL.PLLQ = 7;
       RCC_OscInitStruct.PLL.PLLR = 2;
-      oc_level = 0x20002; 
       break;
     default: // No overclocking
       RCC_OscInitStruct.PLL.PLLM = 16;
@@ -578,7 +562,6 @@ void SystemClock_Config(void)
       RCC_OscInitStruct.PLL.PLLP = 2;
       RCC_OscInitStruct.PLL.PLLQ = 2;
       RCC_OscInitStruct.PLL.PLLR = 2;
-      oc_level = 0; 
       break; 
   }
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;

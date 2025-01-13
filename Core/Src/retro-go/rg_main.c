@@ -33,13 +33,13 @@ static bool GLOBAL_DATA main_menu_cpu_oc_cb(odroid_dialog_choice_t *option, odro
         // do not allow oc with it until a new flex PCB fix that
         sprintf(option->value, "%s", curr_lang->s_CPU_Overclock_0);
     } else {
-        int cpu_oc = oc_level_gets();
+        int cpu_oc = odroid_settings_cpu_oc_level_get();
         if (event == ODROID_DIALOG_PREV) {
             if (cpu_oc > 0)
                 cpu_oc--;
             else
                 cpu_oc = 2;
-            oc_level_set(cpu_oc);
+            SystemClock_Config(cpu_oc);
             odroid_settings_cpu_oc_level_set(cpu_oc);
         }
         else if (event == ODROID_DIALOG_NEXT) {
@@ -47,7 +47,7 @@ static bool GLOBAL_DATA main_menu_cpu_oc_cb(odroid_dialog_choice_t *option, odro
                 cpu_oc++;
             else
                 cpu_oc = 0;
-            oc_level_set(cpu_oc);
+            SystemClock_Config(cpu_oc);
             odroid_settings_cpu_oc_level_set(cpu_oc);
         }
         switch (cpu_oc) {
@@ -484,10 +484,6 @@ static void GLOBAL_DATA handle_options_menu()
 #else
     odroid_overlay_settings_menu(choices, &gui_redraw_callback);
 #endif
-    if (oc_level_gets() != oc_level_get())
-        //reboot;
-        if (odroid_overlay_confirm(curr_lang->s_Confirm_OC_Reboot, false, &gui_redraw_callback) == 1)
-            odroid_system_switch_app(0);
 }
 
 static void GLOBAL_DATA handle_time_menu()
@@ -812,16 +808,11 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
         sdcard_error_screen();
     }
 
-    // Re-initialize system now that the filesystem is mounted.
+    // Re-initialize system now that the filesystem is mounted
+    // and apply the correct CPU overclocking level.
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     uint8_t oc = odroid_settings_cpu_oc_level_get();
-    if (oc != oc_level_get())
-    {
-        //reboot to oc level;
-        oc_level_set(oc);
-        boot_magic_set(BOOT_MAGIC_STANDBY);
-        odroid_system_switch_app(9);
-    }
+    SystemClock_Config(oc);
 
     emulators_init();
 

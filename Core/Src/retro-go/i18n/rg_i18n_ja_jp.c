@@ -190,10 +190,6 @@ const lang_t lang_ja_jp LANG_DATA = {
     .s_CPU_Overclock_0 = "None",
     .s_CPU_Overclock_1 = "Mid",
     .s_CPU_Overclock_2 = "Max",
-    .s_CPU_OC_Upgrade_to = "Up to ",
-    .s_CPU_OC_Downgrade_to = "Down to ",
-    .s_CPU_OC_Stay_at = "Stay at ",
-    .s_Confirm_OC_Reboot = "CPUオーバークロックの設定が変更されました。再起動が必要です。よろしいですか？",
 #if INTFLASH_BANK == 2
     .s_Reboot = "再起動",
     .s_Original_system = "オリジナルシステム",
