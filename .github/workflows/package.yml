@@ -23,12 +23,10 @@ jobs:
           sudo apt-get install -y binutils-arm-none-eabi python3 python3-pip libhidapi-hidraw0 libftdi1 libftdi1-2 make git wget
 
       # 3. Install the ARM compiler
-      - name: Install ARM Compiler
-        run: |
-          wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-          tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-          mv gcc-arm-none-eabi-10.3-2021.10 $HOME/
-          echo "$HOME/gcc-arm-none-eabi-10.3-2021.10/bin" >> $GITHUB_ENV
+      - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
 
       # 4. Install Python dependencies from requirements.txt
       - name: Install Python dependencies
