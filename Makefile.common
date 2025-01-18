@@ -1142,7 +1142,7 @@ flash_sd: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin cr
 		$(RESET_DBGMCU_CMD)
 
 build_update_archive: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin create_sd_data
-	tar --format=ustar --uid=0 --gid=0 -cf gw_update.tar -C sd_content $$(find sd_content -mindepth 1 -maxdepth 1 -exec basename {} \;)
+	tar --format=ustar -cf gw_update.tar -C sd_content $$(find sd_content -mindepth 1 -maxdepth 1 -exec basename {} \;)
 
 monitor:
 	@$(GNWMANAGER) monitor
