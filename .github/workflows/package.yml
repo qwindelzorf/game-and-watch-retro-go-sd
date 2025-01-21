@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 jobs:
   build-package:
+    if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
 
     steps:
@@ -38,3 +41,67 @@ jobs:
       - name: Generate gw_update.tar
         run: |
           make -j$(nproc) GNW_TARGET=zelda COVERFLOW=1 SHARED_HIBERNATE_SAVESTATE=1 DISABLE_SPLASH_SCREEN=1 INTFLASH_BANK=2 release
+
+  release-package:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository with submodules
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: true  # Clone submodules with --recurse-submodules
+
+      # 2. Install necessary dependencies (binutils, Python, etc.)
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-arm-none-eabi python3 python3-pip libhidapi-hidraw0 libftdi1 libftdi1-2 make git wget
+
+      # 3. Install the ARM compiler
+      - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
+
+      # 4. Install Python dependencies from requirements.txt
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      # 5. Generate the update files
+      - name: Generate firmware_update.bin and gw_update.tar
+        run: |
+          make -j$(nproc) GNW_TARGET=zelda COVERFLOW=1 SHARED_HIBERNATE_SAVESTATE=1 DISABLE_SPLASH_SCREEN=1 INTFLASH_BANK=2 release
+
+      # 6. Create a release and upload files
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            Automatic release for tag ${{ github.ref_name }}.
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload firmware_update.bin to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: release/firmware_update.bin
+          asset_name: firmware_update.bin
+          asset_content_type: application/octet-stream
+
+      - name: Upload gw_update.tar to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: release/gw_update.tar
+          asset_name: gw_update.tar
+          asset_content_type: application/x-tar
