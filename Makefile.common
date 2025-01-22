@@ -1148,6 +1148,12 @@ firmware_update: create_sd_folders
 # this is creating a release folder with update archive and update application
 release: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin create_sd_data firmware_update
 	@tar --format=ustar -cf $(RELEASE_FOLDER)/gw_update.tar -C sd_content $$(find sd_content -mindepth 1 -maxdepth 1 -exec basename {} \;)
+	@./scripts/gen_release_package.sh
+
+release_sdpush: release
+	@$(GNWMANAGER) sdpush --file $(RELEASE_FOLDER)/retro-go_update.bin --dest-path "/" \
+		-- start bank1 \
+		$(RESET_DBGMCU_CMD)
 
 monitor:
 	@$(GNWMANAGER) monitor

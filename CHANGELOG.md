@@ -11,10 +11,8 @@ To install this version, make sure you have:
 - A micro SD card formatted as FAT32 or exFAT.
 
 ## Installation Instructions
-1. Download the following files:
-   - `firmware_update.bin`
-   - `gw_update.tar`
-2. Copy both files to the root directory of your micro SD card.
+1. Download the `retro-go_update.bin` file.
+2. Copy the `retro-go_update.bin` file to the root directory of your micro SD card.
 3. Insert the micro SD card into your Game & Watch.
 4. Turn on the Game & Watch and wait for the installation to complete.
 
