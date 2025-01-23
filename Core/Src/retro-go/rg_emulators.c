@@ -580,7 +580,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 #endif
     } else if(strcmp(system_name, "Atari 7800") == 0)  {
 //#ifdef ENABLE_EMULATOR_A7800
-      if (rg_storage_copy_file_to_ram("/cores/a7600.bin", (char *)&__RAM_EMU_START__)) {
+      if (rg_storage_copy_file_to_ram("/cores/a7800.bin", (char *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_A7800_BSS_START, 0x0, (size_t)&_OVERLAY_A7800_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_A7800_SIZE);
         app_main_a7800(load_state, start_paused, save_slot);
@@ -787,6 +787,8 @@ bool emulator_is_file_valid(retro_emulator_file_t *file)
 retro_emulator_file_t *emulator_get_file(char *file_path)
 {
     for (int i = 0; i < emulators_count; i++) {
+        emulators[i].roms.count = 0;
+        emulator_refresh_list(&emulators[i]);
         for (int j = 0; j < emulators[i].roms.count; j++) {
             if (strcmp(emulators[i].roms.files[j].path, file_path) == 0) {
                 return &emulators[i].roms.files[j];
