@@ -34,10 +34,10 @@ typedef struct {
 #if CHEAT_CODES == 1
     uint32_t id;
 #endif
-    const char *name;
+    char name[256];
     const char *ext;
-    char *path;
-    const uint8_t *address;
+    char path[256];
+    uint8_t *address;
     uint32_t size;
 	#if COVERFLOW != 0
     const uint8_t *img_address;
@@ -72,6 +72,7 @@ typedef struct {
 
 void emulators_init();
 void emulator_init(retro_emulator_t *emu);
+void emulator_refresh_list(retro_emulator_t *emu);
 void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_paused, int8_t save_slot);
 bool emulator_show_file_menu(retro_emulator_file_t *file);
 void emulator_show_file_info(retro_emulator_file_t *file);

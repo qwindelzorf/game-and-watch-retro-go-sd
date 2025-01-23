@@ -185,6 +185,11 @@ void gui_init_tab(tab_t *tab)
     tab->listbox.cursor = MAX(tab->listbox.cursor, 0);
 }
 
+void gui_refresh_tab(tab_t *tab)
+{
+    gui_event(TAB_REFRESH_LIST, tab);
+}
+
 tab_t *gui_get_tab(int index)
 {
     return (index >= 0 && index < gui.tabcount) ? gui.tabs[index] : NULL;
@@ -800,7 +805,7 @@ void gui_draw_coverlight_h(retro_emulator_file_t *file, int cover_position)
 */
 
         /* add game titleof the current cover art */
-        sprintf(str_buffer, "%s", file->name);
+        snprintf(str_buffer, 128, "%s", file->name);
         draw_centered_local_text_line(169,
                                       str_buffer,
                                       0,
@@ -1139,7 +1144,7 @@ void gui_draw_coverflow_h(tab_t *tab) //------------
     if (item)
     {
         file = (retro_emulator_file_t *)item->arg;
-        sprintf(str_buffer, "%s", file->name);
+        snprintf(str_buffer, 128, "%s", file->name);
         size_t width = i18n_get_text_width(str_buffer, curr_lang);
         if (width > (ODROID_SCREEN_WIDTH - 24))
             width = ODROID_SCREEN_WIDTH - 24;

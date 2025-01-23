@@ -9,6 +9,7 @@ typedef enum {
     KEY_PRESS_B,
     TAB_SCROLL,
     TAB_INIT,
+    TAB_REFRESH_LIST,
     TAB_SAVE,
     TAB_IDLE,
     TAB_REDRAW,
@@ -82,6 +83,7 @@ tab_t *gui_get_tab(int index);
 tab_t *gui_get_current_tab();
 tab_t *gui_set_current_tab(int index);
 void gui_init_tab(tab_t *tab);
+void gui_refresh_tab(tab_t *tab);
 void gui_save_current_tab(void);
 
 void gui_sort_list(tab_t *tab, int sort_mode);

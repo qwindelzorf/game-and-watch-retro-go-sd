@@ -580,6 +580,8 @@ void retro_loop()
             if (!tab->initialized)
             {
                 gui_init_tab(tab);
+            } else {
+                gui_refresh_tab(tab);
             }
 
             if (!tab_enabled(tab))
