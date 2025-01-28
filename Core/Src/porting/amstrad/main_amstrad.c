@@ -20,6 +20,8 @@
 #define AMSTRAD_DISK_EXTENSION "dsk"
 #define AMSTRAD_DISK_EXTENSION_COMPRESSED "cdk"
 
+static void blit(uint8_t *src_fb, uint16_t *framebuffer);
+
 typedef enum
 {
     CPC_0,
@@ -191,7 +193,9 @@ static int selected_palette_index = 0;
 static char controls_name[10];
 static int selected_controls_index = 0;
 
+#if 0
 static char disk_name[128];
+#endif
 static int selected_disk_index = 0;
 
 #if SD_CARD == 1
@@ -266,15 +270,78 @@ static const uint8_t volume_table[ODROID_AUDIO_VOLUME_MAX + 1] = {
 
 static char *headerString = "AMST0000";
 
-//extern int cap32_save_state(fs_file_t *file);
-//extern int cap32_load_state(fs_file_t *file);
+extern int cap32_save_state(FILE *file);
+extern int cap32_load_state(FILE *file);
 
-bool saveAmstradState(const char *savePathName) {
-    return 0;
+static bool SaveState(const char *savePathName) {
+    // Show disk icon when saving state
+    uint16_t *dest = lcd_get_inactive_buffer();
+    uint16_t idx = 0;
+    for (uint8_t i = 0; i < 24; i++) {
+        for (uint8_t j = 0; j < 24; j++) {
+        if (IMG_DISKETTE[idx / 8] & (1 << (7 - idx % 8))) {
+            dest[274 + j + GW_LCD_WIDTH * (2 + i)] = 0xFFFF;
+        }
+        idx++;
+        }
+    }
+
+    FILE *file = fopen(savePathName, "wb");
+    if (file == NULL) {
+        return false;
+    }
+    fwrite(headerString, 1, 8, file);
+    cap32_save_state(file);
+    fwrite(&selected_palette_index, 4, 1, file);
+    fwrite(&selected_disk_index, 4, 1, file);
+    fwrite(&selected_controls_index, 4, 1, file);
+    fwrite(&selected_key_index, 4, 1, file);
+    fwrite(&amstrad_button_a_key, 4, 1, file);
+    fwrite(&amstrad_button_b_key, 4, 1, file);
+    fwrite(&amstrad_button_game_key, 4, 1, file);
+    fwrite(&amstrad_button_time_key, 4, 1, file);
+    fwrite(&amstrad_button_start_key, 4, 1, file);
+    fwrite(&amstrad_button_select_key, 4, 1, file);
+    fclose(file);
+
+    return true;
 }
 
-bool loadAmstradState(const char *savePathName) {
+static bool LoadState(const char *savePathName) {
+    FILE *file = fopen(savePathName, "rb");
+    if (file == NULL) {
+        return false;
+    }
+
+    unsigned char readin_header[8] = {0};
+    fread(readin_header, 1, 8, file);
+    // Check for header
+    if (memcmp(headerString, readin_header, sizeof(readin_header)) == 0) { 
+        cap32_load_state(file);
+        fread(&selected_palette_index, 4, 1, file);
+        fread(&selected_disk_index, 4, 1, file);
+        fread(&selected_controls_index, 4, 1, file);
+        fread(&selected_key_index, 4, 1, file);
+        fread(&amstrad_button_a_key, 4, 1, file);
+        fread(&amstrad_button_b_key, 4, 1, file);
+        fread(&amstrad_button_game_key, 4, 1, file);
+        fread(&amstrad_button_time_key, 4, 1, file);
+        fread(&amstrad_button_start_key, 4, 1, file);
+        fread(&amstrad_button_select_key, 4, 1, file);
+    }
+    fclose(file);
     return true;
+}
+
+static void *Screenshot()
+{
+    lcd_wait_for_vblank();
+
+    lcd_clear_active_buffer();
+
+    blit(amstrad_framebuffer, lcd_get_active_buffer());
+
+    return lcd_get_active_buffer();
 }
 
 unsigned int *amstrad_getScreenPtr()
@@ -1026,7 +1093,7 @@ void app_main_amstrad(uint8_t load_state, uint8_t start_paused, int8_t save_slot
     lcd_set_refresh_rate(AMSTRAD_FPS);
 
     odroid_system_init(APPID_AMSTRAD, AMSTRAD_SAMPLE_RATE);
-    odroid_system_emu_init(&loadAmstradState, &saveAmstradState, NULL);
+    odroid_system_emu_init(&LoadState, &SaveState, &Screenshot);
 
     // Init Sound
     audio_start_playing(AUDIO_BUFFER_LENGTH_AM);
