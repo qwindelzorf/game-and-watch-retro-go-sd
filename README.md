@@ -1,71 +1,61 @@
 ![](assets/gnw.gif)
 
+WARNING : This readme is the process of beeing updated for SD Card support info, a lot of information could be wrong or obsolete
+
 # Support
-You can support my (sylverb) work and get beta versions of new emulators on https://www.patreon.com/sylverb
+You can follow my (sylverb) work on https://www.patreon.com/sylverb
 
-# NewUI howto
-Please run `make help` to see more information.
+***********
+# SD-Card support
 
-最新 Game Genie 以及基于 Game Genie 基础之上的 PCE Rom Patcher 已经可以支持中文化。从 [https://github.com/olderzeus/game-genie-codes-nes/tree/zh_cn](https://github.com/olderzeus/game-genie-codes-nes/tree/zh_cn) 可以查阅或自定义相关文件。
+Features :
+- Allow to store your roms/dsk games in a SD Card (FAT32 or exFat formated) and to play them on your G&W
+- 4 savestate slots by game
+- Covers support (need to create a section to explain how it works)
+- Easy update of Retro-Go SD version
+- TBC
 
-:exclamation::exclamation::exclamation: 任何时候都 **不要** 连接 stlink 的 VCC 和 Game & Watch 主板的 VDD 脚 :exclamation::exclamation::exclamation:
+Current limitations :
+- Up to 1000 roms/disks will be visible for each system
+- Dual boot (to keep original firmware) is not supported
+- Super Mario World & Zelda 3 ports are not available
+- Cheat codes are not supported
+- Disk change is not available for MSX and Amstrad systems
+- TBC
 
-一般情况下只需要连接 GND，SWDIO，SWCLK 3个针脚即可。
+***********
+# Requirements
 
-来自[apple524](https://github.com/apple524)的 ubuntu 刷机攻略：
-[Game & Watch 刷机完全教程](https://apple524.github.io/2022/04/03/g-w-hack/)
+The Retro-Go SD code is designed to run with my [bootloader](https://github.com/sylverb/game-and-watch-bootloader).
 
-來自[maxxkao](http://maxxkao.blogspot.com/)的刷機攻略：
+The purpose of this bootloader is to allow installing/updating Retro-Go or anything else from a file on SD Card ! This is a major feature allowing to make sure that anyone will be able to keep his Retro-Go version up to date without the need of a complicated setup for compiling the project and flashing using jtag usb adapter.
 
-[Nintendo Game & Watch 刷機完全攻略](https://maxxkao.blogspot.com/2022/01/game-watch.html)
+***********
+# How to install/update Retro-Go SD
 
-[Zelda Game & Watch Dual System 薩爾達機刷雙系統完全攻略](https://maxxkao.blogspot.com/2022/02/zelda-game-watch-dual-boot-wip.html)
+To install/update your version of Retro-Go SD, just download latest release retro-go_update.bin file in [Releases](https://github.com/sylverb/game-and-watch-retro-go-sd/releases) section and copy it to the root folder of the SD Card in your G&W.
+Turn on your G&W and wait for the install/update to be done.
 
-## **Undocumented 256k BANK used by default**
- Now NewUI used BANK as undocumented size 256k by default, It's required [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) to work. You can set `BIG_BANK=0` disabled it to use 128k BANK size.
+# Credits
+This repository is the result of the contribution of several participants :
+- Ducalex : Original [Retro-Go](https://github.com/ducalex/retro-go) for Odroid-Go devices.
+- kbeckmann & stacksmashing : Original hack and [Retro-Go](https://github.com/kbeckmann/game-and-watch-retro-go) port.
+- [Tim Schuerewegen](https://www.schuerewegen.tk/gnw/) : SD Card reader hardware & flex PCB design.
+- [Yota9](https://github.com/yota9) : Another design of SD Card support, but with some issues to be solved.
+- orzeus : [Retro-Go](https://github.com/olderzeus/game-and-watch-retro-go) with major UI refactoring (Covers, ...).
+- [bzhxx](https://github.com/bzhxx) : LCD-Game-Emulator port, Genesis emulator, overclocking and many other things.
+- [Benjamin Sølberg](https://github.com/BenjaminSoelberg) : Tamalib port, many improvements about synchronization of audio and screen.
+- [Brian Pugh](https://github.com/BrianPugh) : [game-and-watch-patch](https://github.com/BrianPugh/game-and-watch-patch), [gnwmanager](https://github.com/BrianPugh/gnwmanager), lots of improvements
+- [Macs](https://github.com/Macs75) : PC Engine improvements
+- [tfmoe__](https://github.com/marian-m12l) : Ports of Zelda 3 and Super Mario World (not yet supported on SD Card)
+- [Sylver Bruneau](https://github.com/sylverb) (me) : Several emulators ports, lots of various improvements, SD Card support.
 
-:exclamation: 128k internal is too small to enough Coverflow UI | i18n | multi font and program more game rom, So [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) is recommend.
-
-### i18n support
-`make CODEPAGE=lang` Sets codepage to configures default display language.(default=1252 as English);
-Expert `UICODEPAGE=lang` set the ui display language, default `UICODEPAGE=CODEPAGE`;
-- 1252 : English
-- 936 : 简体中文
-- 950 : 繁體中文
-- 949  : 한국어 (translation by [Augen(히힛마스터)](https://github.com/#))
-- 12521 : Español (translation by [Icebox2](https://github.com/Icebox2))
-- 12522 : Portuguese (translation by [DefKorns](https://github.com/DefKorns))
-- 12523 : Français (translation by [Narkoa](https://github.com/Narkoa))
-- 12524 : Italiano (translation by [SantX27](https://github.com/SantX27))
-- 12521 : Russian (translation by [teuchezh](https://github.com/teuchezh))
-- 12525 : German (translation by [LeZerb](https://github.com/LeZerb))
-- 932 : 日本語(translation by [macohime](https://github.com/macohime))
-
-You can set `[OPT]=[0|1]` to include or exclude some language, List of `OPT` parameter:
-`EN_US`  English; `ES_ES`  Español; `PT_PT` Portuguese; `FR_FR` Français; `IT_IT` Italiano; `ZH_CN` 简体中文; `ZH_TW` 繁體中文;`KO_KR` 한국어; `JA_JP` 日本語; `DE_DE` Deutsch; `RU_RU` Russian;
-
-other : Wait your support to translate
-
-### Coverflow support
-`make COVERFLOW=1 JPG_QUALITY=(90)`  set `COVERFLOW=1` to support show cover art. support `.png` `.bmp` `.jpg` file which filename same as rom's filename and same floder. CFW will convet it to jpg format file `.img` and pack it into firmware, you can custom jpg's quality use `JPG_QUALITY`.
-
-### Other features
-Here some other features you can edit the rom define file to custom by youself.
-Before you run `make flash`, please run `make romdef` then you can get some romdef file in `roms` folder as `gb.json` `nes.json` ..etc. Edit this files then you can custom the follow feature.
-
-Use `make ROMINFOCODE=[ascii|?]` to set charset of rominfo sourcecode to enabled local language support.
-
-- Game display title(Set `name` value, title's charset be must your custom language supported)
-- Pack or don't pack rom to firmware (Set `publish` to `1` or `0`)
-- Emulator system cover image size(Set `_cover_width` and `_cover_height`, 180>=`_cover_width`>=64 and 136>=`_cover_height`>=64)
-
-`make romdef` is run patched mode for `*emu*.json` if the file already exist, each time only append new rom's information when command execute.
-
+I'm probably missing some people
 
 ***********
 # Emulator collection for Nintendo® Game & Watch™
 
-This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Super Mario Bros. system.
+This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Zelda system with SD Card reader installed.
 
 Supported emulators:
 
@@ -83,24 +73,20 @@ Supported emulators:
 - Sega SG-1000 (sg)
 - Videopac / Odyssey2 (videopac)
 - Watara Supervision (wsv)
+
+To be restored
 - Tamagotchi P1 (tama)
 
 Supported SNES game _ports_:
 
-- The Legend of Zelda: A Link to the Past
-- Super Mario World
+- The Legend of Zelda: A Link to the Past (not yet supported on SD Card)
+- Super Mario World (not yet supported on SD Card)
 
 Supported Homebrew _ports_:
 
 - ccleste (a port of Pico-8 version of Celeste Classic)
 
 ## Table of Contents
-- [NewUI howto](#newui-howto)
-  - [**Undocumented 256k BANK used by default**](#undocumented-256k-bank-used-by-default)
-    - [i18n support](#i18n-support)
-    - [Coverflow support](#coverflow-support)
-    - [Other features](#other-features)
-    - [FONT](#font)
 - [Emulator collection for Nintendo® Game & Watch™](#emulator-collection-for-nintendo-game--watch)
   - [Table of Contents](#table-of-contents)
   - [Controls](#controls)
@@ -274,25 +260,7 @@ Screenshots can be captured by pressing `PAUSE/SET` + `GAME`.
 
 Screenshots can be downloaded by running `make dump_screenshot`, and will be saved as a 24-bit RGB PNG to `./screenshot.png`.
 
-## Compression support
-
-Default configuration when building a firmware is to compress files when possible. The compression is done in different ways depending on each emulator.
-General case is that we will be able to compress roms that can be decompressed in ram, for example if there is more than 512kB of ram free with a given emulator, then we will be able to compress roms up to 512kB. Larger roms will be stored in flash without compression. Here is the maximum size for compressed roms for different systems :
-- Atari 7800 : 128kB
-- MSX : 128kB
-- Nintendo NES/Famicom : 512kB
-- PC Engine : 292kB
-- SG1000/Colecovision : 60kB
-- Watara Supervision : 512kB
-
-Some systems are handling roms as pages of data, so it's possible to compress roms data following this page organization so the emulator will decompress a page of data on request. A caching system is often in place to prevent decompressing (often used) pages too often (as decompressing data is taking time). This is also possible with disks games as they are made of sides/tracks/sectors ! The following systems have no limit in the size of compressed roms thanks to that :
-- Amstrad CPC6128
-- Nintendo Gameboy/Gameboy Color
-- MSX (disks and HDD images only, roms compression is possible up to 128kB)
-
-Some systems are not supporting compression due to the lack of free ram (SMS/GG/Genesis), what could be possible is to decompress a rom and store it in an unused zone of flash, the only problem with that would be the wearing of flash chip blocks (a flash memory block has an erase/flash count limitation, typical value is 10 000 times).
-
-## Cheat codes
+## Cheat codes !!!! NOT YET SUPPORTED WITH SD CARD
 
 Note: Currently cheat codes are only working with NES, PCE and MSX games.
 
