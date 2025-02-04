@@ -4,6 +4,7 @@
 
 ### Version 0.2.0
 - Improved flash caching system to refresh content if the cached file has been modified
+- Text that spans multiple lines is now correctly handled (Fix #19)
 
 ## Prerequisites
 To install this version, make sure you have:
