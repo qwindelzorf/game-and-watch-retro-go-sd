@@ -254,8 +254,8 @@ void emulator_init(retro_emulator_t *emu)
 
     emu->initialized = true;
 #if COVERFLOW != 0
-    emu->cover_height = 96; // TODO : get proper default size
-    emu->cover_width = 128;
+    emu->cover_height = 0;
+    emu->cover_width = 0;
 #endif
 
     printf("Retro-Go: Initializing emulator '%s'\n", emu->system_name);
