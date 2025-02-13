@@ -251,7 +251,6 @@ int stat(const char *path, struct stat *st) {
 
     // Set modification time
     st->st_mtime = fatfs_to_unix_timestamp(fno.fdate, fno.ftime);
-    printf("st->st_mtime = %lld\n", st->st_mtime);
 
     return 0;
 }

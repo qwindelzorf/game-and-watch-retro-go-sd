@@ -878,10 +878,8 @@ static void setPropertiesMsx(Machine *machine, int msxType) {
                 // forcing disabling second floppy controller without having
                 // to press ctrl key at boot
                 if (ctrl_needed) {
-                    printf("1\n");
                     strcpy(machine->slotInfo[i].name, "/bios/msx/PANASONICDISK_.rom");
                 } else {
-                    printf("2\n");
                     strcpy(machine->slotInfo[i].name, "/bios/msx/PANASONICDISK.rom");
                 }
                 i++;
