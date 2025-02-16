@@ -108,7 +108,7 @@ MEMORY
   CORES    (x)   : ORIGIN = 0x0,                 LENGTH = 0xFFFFFFFF
 
   /* RODATA */
-  RODATA   (x)   : ORIGIN = __EXTFLASH_BASE__,                 LENGTH = 0xFFFFFFFF
+  RODATA   (x)   : ORIGIN = __EXTFLASH_BASE__,   LENGTH = 0xFFFFFFFF
 }
 
 
@@ -249,7 +249,12 @@ INCLUDE build/fceumm_mappers.ld
   }
   _OVERLAY_SMS_BSS_SIZE = SIZEOF(.overlay_sms_bss);
 
-   .overlay_pce __RAM_EMU_START__ : {
+  .coleco_bios_data : {
+    . = ALIGN(4);
+    KEEP(*(.coleco_bios_data))
+  } > CORES
+
+  .overlay_pce __RAM_EMU_START__ : {
       . = ALIGN(4);
     __ram_emu_pce_start__ = .;
       build/pce/*.o (.data .data* .text .text* .rodata .rodata*)

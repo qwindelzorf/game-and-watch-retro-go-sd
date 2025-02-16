@@ -48,6 +48,7 @@ void set_config();
 unsigned int crc32_le(unsigned int crc, unsigned char const * buf,unsigned int len);
 
 // --- MAIN
+#ifndef GNW_DISABLE_COMPRESSION
 #define SMSROM_RAM_BUFFER_LENGTH (60*1024)
 static uint8_t *ROMinRAM_DATA;
 
@@ -62,6 +63,7 @@ static const uint8_t IMG_DISKETTE[] = {
     0x3E, 0x7D, 0xFF, 0xBE, 0x7C, 0x00, 0x3E, 0x7C,
     0x00, 0x3E, 0x3F, 0xFF, 0xFC, 0x00, 0x00, 0x00,
 };
+#endif
 
 static void blit_console();
 
@@ -168,8 +170,14 @@ load_rom_from_flash(uint8_t emu_engine)
 
     if (sms.console == CONSOLE_COLECO)
     {
+#if SD_CARD == 1
+        coleco.rom = (uint8*)itc_malloc(0x2000); // 8KB bios
+        printf("Loading Coleco BIOS %p\n", coleco.rom);
+        odroid_sdcard_read_file("/bios/coleco/coleco.bin", coleco.rom, 0x2000);
+#else
         extern const unsigned char ColecoVision_BIOS[];
         coleco.rom = (uint8*)ColecoVision_BIOS;
+#endif
     }
     return 1;
 }
