@@ -11,24 +11,8 @@ V = @
 endif
 
 ROMS_A2600 := 
-ROMS_A7800 := y
-ROMS_AMSTRAD := y
-ROMS_GB := y
-ROMS_GW := y
-ROMS_MD := y
-ROMS_NES := y
-ROMS_MSX := y
-ROMS_PCE := y
 ROMS_VIDEOPAC := 
-ROMS_WSV := y
 ROMS_TAMA := 
-
-ROMS_COL := y
-ROMS_GG := y
-ROMS_SG := y
-ROMS_SMS := y
-
-HOMEBREW_CELESTE := y
 
 ######################################
 # source
@@ -78,7 +62,6 @@ TGBDUAL_C_SOURCES =
 TGBDUAL_CXX_SOURCES = 
 
 ifeq ($(FORCE_GNUBOY),1)
-ifneq ($(strip $(ROMS_GB)),)
 GNUBOY_C_SOURCES += \
 Core/Src/porting/gb/main_gb.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/gnuboy_cpu.c \
@@ -90,9 +73,7 @@ retro-go-stm32/gnuboy-go/components/gnuboy/gnuboy_loader.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/gnuboy_mem.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/gnuboy_rtc.c \
 retro-go-stm32/gnuboy-go/components/gnuboy/gnuboy_sound.c
-endif
 else
-ifneq ($(strip $(ROMS_GB)),)
 CORE_TGBDUAL = external/tgbdual-go
 
 TGBDUAL_CXX_SOURCES += \
@@ -106,12 +87,10 @@ $(CORE_TGBDUAL)/gb_core/tgbdual_lcd.cpp \
 $(CORE_TGBDUAL)/gb_core/tgbdual_mbc.cpp \
 $(CORE_TGBDUAL)/gb_core/tgbdual_rom.cpp
 endif
-endif
 
 NES_C_SOURCES = 
 
 ifeq ($(FORCE_NOFRENDO),1)
-ifneq ($(strip $(ROMS_NES)),)
 NES_C_SOURCES += \
 Core/Src/porting/nes/main_nes.c \
 Core/Src/porting/nes/nofrendo_stm32.c \
@@ -185,10 +164,8 @@ retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_ppu.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_rom.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes_state.c \
 retro-go-stm32/nofrendo-go/components/nofrendo/nes/nes.c
-endif
 else
 NES_FCEU_C_SOURCES = 
-ifneq ($(strip $(ROMS_NES)),)
 CORE_FCEUMM = external/fceumm-go
 NES_FCEU_C_SOURCES += \
 Core/Src/porting/nes_fceu/main_nes_fceu.c \
@@ -490,11 +467,9 @@ $(CORE_FCEUMM)/src/ppu.c \
 $(CORE_FCEUMM)/src/video.c \
 $(CORE_FCEUMM)/src/x6502.c
 endif
-endif
 
 SMSPLUSGX_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_COL)$(ROMS_GG)$(ROMS_SG)$(ROMS_SMS)),)
 SMSPLUSGX_C_SOURCES += \
 retro-go-stm32/smsplusgx-go/components/smsplus/loadrom.c \
 retro-go-stm32/smsplusgx-go/components/smsplus/render.c \
@@ -512,22 +487,18 @@ retro-go-stm32/smsplusgx-go/components/smsplus/sound/sn76489.c \
 retro-go-stm32/smsplusgx-go/components/smsplus/sound/sms_sound.c \
 retro-go-stm32/smsplusgx-go/components/smsplus/sound/ym2413.c \
 Core/Src/porting/smsplusgx/main_smsplusgx.c
-endif
 
 PCE_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_PCE)),)
 PCE_C_SOURCES += \
 retro-go-stm32/pce-go/components/pce-go/gfx.c \
 retro-go-stm32/pce-go/components/pce-go/h6280.c \
 retro-go-stm32/pce-go/components/pce-go/pce.c \
 Core/Src/porting/pce/sound_pce.c \
 Core/Src/porting/pce/main_pce.c
-endif
 
 MSX_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_MSX)),)
 CORE_MSX = external/blueMSX-go
 LIBRETRO_COMM_DIR  = $(CORE_MSX)/libretro-common
 
@@ -598,11 +569,9 @@ $(CORE_MSX)/Src/Input/InputEvent.c \
 Core/Src/porting/msx/main_msx.c \
 Core/Src/porting/msx/msx_database.c \
 Core/Src/porting/msx/save_msx.c
-endif
 
 GW_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_GW)),)
 CORE_GW = external/LCD-Game-Emulator
 #TODO : change linking so lz4/lzma libraries are in LCD emulator section
 #       and not in internal flash
@@ -621,11 +590,9 @@ $(CORE_GW)/src/gw_sys/gw_romloader.c \
 $(CORE_GW)/src/gw_sys/gw_graphic.c \
 $(CORE_GW)/src/gw_sys/gw_system.c \
 Core/Src/porting/gw/main_gw.c
-endif
 
 WSV_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_WSV)),)
 CORE_WSV = external/potator
 WSV_C_SOURCES += \
 $(CORE_WSV)/common/controls.c \
@@ -636,11 +603,9 @@ $(CORE_WSV)/common/timer.c \
 $(CORE_WSV)/common/watara.c \
 $(CORE_WSV)/common/wsv_sound.c \
 Core/Src/porting/wsv/main_wsv.c
-endif
 
 MD_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_MD)),)
 CORE_GWENESIS = external/gwenesis
 MD_C_SOURCES += \
 $(CORE_GWENESIS)/src/cpus/M68K/m68kcpu.c \
@@ -654,7 +619,6 @@ $(CORE_GWENESIS)/src/vdp/gwenesis_vdp_mem.c \
 $(CORE_GWENESIS)/src/vdp/gwenesis_vdp_gfx.c \
 $(CORE_GWENESIS)/src/savestate/gwenesis_savestate.c \
 Core/Src/porting/gwenesis/main_gwenesis.c
-endif
 
 A2600_C_SOURCES =
 A2600_CXX_SOURCES =
@@ -726,7 +690,6 @@ endif
 
 A7800_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_A7800)),)
 CORE_PROSYSTEM = external/prosystem-go
 A7800_C_SOURCES += \
 $(CORE_PROSYSTEM)/core/Bios.c \
@@ -743,11 +706,9 @@ $(CORE_PROSYSTEM)/core/Riot.c \
 $(CORE_PROSYSTEM)/core/Sally.c \
 $(CORE_PROSYSTEM)/core/Tia.c \
 Core/Src/porting/a7800/main_a7800.c
-endif
 
 AMSTRAD_C_SOURCES = 
 
-ifneq ($(strip $(ROMS_AMSTRAD)),)
 CORE_AMSTRAD = external/caprice32-go
 AMSTRAD_C_SOURCES += \
 $(CORE_AMSTRAD)/cap32/cap32.c \
@@ -762,7 +723,6 @@ Core/Src/porting/amstrad/amstrad_catalog.c \
 Core/Src/porting/amstrad/amstrad_format.c \
 Core/Src/porting/amstrad/amstrad_loader.c \
 Core/Src/porting/amstrad/amstrad_video8bpp.c
-endif
 
 VIDEOPAC_C_SOURCES = 
 
@@ -802,19 +762,14 @@ endif
 
 CELESTE_C_SOURCES = 
 
-ifneq ($(strip $(HOMEBREW_CELESTE)),)
 CORE_CCLESTE = external/ccleste-go
 CELESTE_C_SOURCES += \
 $(CORE_CCLESTE)/celeste.c \
 $(CORE_CCLESTE)/celeste_audio.c \
 Core/Src/porting/celeste/main_celeste.c
-endif
 
-ZELDA3_C_SOURCES = 
-
-ifneq ("$(wildcard roms/zelda3/zelda3.sfc)","")
 CORE_ZELDA3 = external/zelda3
-ZELDA3_C_SOURCES += \
+ZELDA3_C_SOURCES = \
 $(CORE_ZELDA3)/zelda_rtl.c \
 $(CORE_ZELDA3)/misc.c \
 $(CORE_ZELDA3)/nmi.c \
@@ -843,11 +798,9 @@ $(CORE_ZELDA3)/third_party/opus-1.3.1-stripped/opus_decoder_amalgam.c \
 $(CORE_ZELDA3)/tile_detect.c \
 $(CORE_ZELDA3)/overlord.c \
 Core/Src/porting/zelda3/main_zelda3.c
-endif
 
-SMW_C_SOURCES = 
 CORE_SMW = external/smw
-SMW_C_SOURCES += \
+SMW_C_SOURCES = \
 $(CORE_SMW)/src/smw_rtl.c \
 $(CORE_SMW)/src/smw_00.c \
 $(CORE_SMW)/src/smw_01.c \

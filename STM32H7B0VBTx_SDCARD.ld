@@ -108,7 +108,7 @@ MEMORY
   CORES    (x)   : ORIGIN = 0x0,                 LENGTH = 0xFFFFFFFF
 
   /* RODATA */
-  RODATA   (x)   : ORIGIN = __EXTFLASH_BASE__,   LENGTH = 0xFFFFFFFF
+  RODATA   (x)   : ORIGIN = 0xCAFE0000,   LENGTH = 0xFFFFFFFF
 }
 
 
@@ -434,19 +434,13 @@ INCLUDE build/fceumm_mappers.ld
   }
   _OVERLAY_AMSTRAD_BSS_SIZE = SIZEOF(.overlay_amstrad_bss);
 
-  .rodata_zelda3 :
-  {
-    . = ALIGN(4);
-    . = ALIGN(4);
-    __rodata_zelda3_start__ = .;
-    build/zelda3/*.o (.rodata .rodata*)
-    __rodata_zelda3_end__ = .;
-  } > RODATA
-
   .overlay_zelda3 __RAM_EMU_START__ : {
     . = ALIGN(4);
     __ram_emu_zelda3_start__ = .;
-    build/zelda3/*.o (.data .data* .text .text* .rodata .rodata*)
+    _ZELDA3_MAIN_CODE_START = .;
+    build/zelda3/main_zelda3.o (.data .data* .text .text* .rodata .rodata*)
+    _ZELDA3_MAIN_CODE_END = .;
+    build/zelda3/*.o (.data .data* .text .text* .noreloc)
     . = ALIGN(4);
     _OVERLAY_ZELDA3_LOAD_END = .;
   } AT > CORES
@@ -464,6 +458,15 @@ INCLUDE build/fceumm_mappers.ld
     ASSERT(ABSOLUTE(_OVERLAY_ZELDA3_BSS_END) < __RAM_EMU_END__, "Error: ZELDA3 BSS overflow");
   }
   _OVERLAY_ZELDA3_BSS_SIZE = SIZEOF(.overlay_zelda3_bss);
+
+  .rodata_zelda3 :
+  {
+    . = ALIGN(4);
+    . = ALIGN(4);
+    __rodata_zelda3_start__ = .;
+    build/zelda3/*.o (.rodata .rodata*)
+    __rodata_zelda3_end__ = .;
+  } > RODATA
 
   .overlay_smw __RAM_EMU_START__ : {
     . = ALIGN(4);

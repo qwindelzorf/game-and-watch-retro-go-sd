@@ -89,6 +89,8 @@ extern uint8_t _OVERLAY_ZELDA3_SIZE;
 extern void * _OVERLAY_ZELDA3_BSS_START[];
 extern void * _OVERLAY_ZELDA3_BSS_END[];
 extern uint8_t _OVERLAY_ZELDA3_BSS_SIZE;
+extern void * _ZELDA3_MAIN_CODE_START[];
+extern void * _ZELDA3_MAIN_CODE_END[];
 extern void * _OVERLAY_SMW_LOAD_START[];
 extern uint8_t _OVERLAY_SMW_SIZE;
 extern void * _OVERLAY_SMW_BSS_START[];

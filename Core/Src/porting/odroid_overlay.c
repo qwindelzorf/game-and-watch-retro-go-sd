@@ -1476,7 +1476,6 @@ uint8_t *odroid_overlay_cache_file_in_flash(const char *file_path, uint32_t *fil
 {
     void progress_cb(uint8_t progress)
     {
-        printf("Caching progress: %d%%\n", progress);
         lcd_sleep_while_swap_pending();
 
         odroid_overlay_draw_progress_bar(curr_lang->s_Caching_Game, progress);

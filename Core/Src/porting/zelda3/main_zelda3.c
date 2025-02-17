@@ -80,7 +80,7 @@ static void LoadAssetsChunk(size_t length, uint8* data) {
 }
 
 static void LoadAssets() {
-  uint32_t zelda_assets_length;
+  uint32_t zelda_assets_length = 0;
   uint8 *zelda_assets = odroid_overlay_cache_file_in_flash("/roms/homebrew/zelda3_assets.dat", &zelda_assets_length, false);;
   static const char kAssetsSig[] = { kAssets_Sig };
 
@@ -250,7 +250,7 @@ static bool zelda3_system_SaveState(char *savePathName, char *sramPathName, int 
 
   // Save state
   strcpy(savestate_path, savePathName);
-  RtlSaveLoad(kSaveLoad_Save, 0);
+  SaveLoadSlot(kSaveLoad_Save, 0);
 
   odroid_audio_mute(false);
   return true;
@@ -262,7 +262,7 @@ static bool zelda3_system_LoadState(char *savePathName, char *sramPathName, int 
 
   // Load state
   strcpy(savestate_path, savePathName);
-  RtlSaveLoad(kSaveLoad_Load, 0);
+  SaveLoadSlot(kSaveLoad_Load, 0);
 
   odroid_audio_mute(false);
   return true;
@@ -307,11 +307,48 @@ static bool reset_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event
   return event == ODROID_DIALOG_ENTER;
 }
 
+/**
+ * PatchCodeRodataOffset - Adjusts the code rodata offset in memory.
+ * @rodata: Pointer to the rodata section in external flash.
+ */
+#define RODATA_BASE   0xCAFE0000
+static void PatchCodeRodataOffset(uint8 *rodata, uint32_t rodata_length)
+{
+  uint32_t *ptr = (uint32_t *)__RAM_EMU_START__;
+  uint32_t *end = (uint32_t *)&_OVERLAY_ZELDA3_BSS_END;
+
+  int32_t offset = (uint32_t)rodata - RODATA_BASE;
+
+  printf("rodata = %p offset = 0x%08lX\n", rodata, offset);
+  while (ptr < end) {
+    if ((ptr < (uint32_t *)&_ZELDA3_MAIN_CODE_START) || (ptr > (uint32_t *)&_ZELDA3_MAIN_CODE_END)) {
+      uint32_t value = *ptr;
+
+      if ((value >= RODATA_BASE) && (value < RODATA_BASE + rodata_length)) {
+          *ptr = value + offset;
+          wdog_refresh();
+      }
+    }
+    ptr++;
+  }
+}
+
 /* Main */
 int app_main_zelda3(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 {
-  ram_start = (uint32_t)&_OVERLAY_ZELDA3_BSS_END;
   printf("Zelda3 start\n");
+  ram_start = (uint32_t)&_OVERLAY_ZELDA3_BSS_END;
+
+  /* Store read only data into round robin flash cache memory */
+  uint32_t zelda_rodata_length = 0;
+  uint8 *zelda_rodata = odroid_overlay_cache_file_in_flash("/roms/homebrew/zelda3.ro", &zelda_rodata_length, false);
+  if (zelda_rodata == NULL) {
+    printf("Missing /roms/homebrew/zelda3.ro file\n");
+  }
+
+  /* Patch application in ram to point to real flash location of data*/
+  PatchCodeRodataOffset(zelda_rodata, zelda_rodata_length);
+
   odroid_system_init(APPID_ZELDA3, ZELDA3_AUDIO_SAMPLE_RATE);
   odroid_system_emu_init(&zelda3_system_LoadState, &zelda3_system_SaveState, &Screenshot);
   
@@ -330,10 +367,10 @@ int app_main_zelda3(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     
   ZeldaInitialize();
 
-  g_wanted_zelda_features = FEATURES;
+  g_wanted_zelda_features = FEATURES; // TODO : Add options to enable some features
 
   ZeldaEnableMsu(false);
-  ZeldaSetLanguage(STRINGIZE_VALUE_OF(DIALOGUES_LANGUAGE));
+  ZeldaSetLanguage(STRINGIZE_VALUE_OF(DIALOGUES_LANGUAGE)); // TODO : add option to select language
 
   g_zenv.ppu->extraLeftRight = 0;
 
