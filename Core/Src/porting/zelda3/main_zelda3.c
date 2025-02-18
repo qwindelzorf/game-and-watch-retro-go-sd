@@ -55,6 +55,8 @@ static int16_t audiobuffer_zelda3[ZELDA3_AUDIO_BUFFER_LENGTH];
 const uint8 *g_asset_ptrs[kNumberOfAssets];
 uint32 g_asset_sizes[kNumberOfAssets];
 
+static int selected_language_index = 0;
+static char display_language_value[10];
 
 /* keys inputs (hw & sw) */
 static odroid_gamepad_state_t joystick;
@@ -221,6 +223,8 @@ void writeSaveStateImpl(uint8_t* data, size_t size) {
 }
 void writeSaveStateFinalizeImpl() {
   if (savestate_file) {
+    fwrite(&selected_language_index, 1, sizeof(selected_language_index), savestate_file);
+    fwrite(&g_wanted_zelda_features, 1, sizeof(g_wanted_zelda_features), savestate_file);
     fclose(savestate_file);
     savestate_file = NULL;
   }
@@ -239,6 +243,8 @@ void readSaveStateImpl(uint8_t* data, size_t size) {
 }
 void readSaveStateFinalizeImpl() {
   if (savestate_file) {
+    fread(&selected_language_index, 1, sizeof(selected_language_index), savestate_file);
+    fread(&g_wanted_zelda_features, 1, sizeof(g_wanted_zelda_features), savestate_file);
     fclose(savestate_file);
     savestate_file = NULL;
   }
@@ -333,6 +339,24 @@ static void PatchCodeRodataOffset(uint8 *rodata, uint32_t rodata_length)
   }
 }
 
+static bool update_language_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
+{
+    int max_index = ZeldaGetLanguageCount() - 1;
+
+    if (event == ODROID_DIALOG_PREV) {
+        selected_language_index = selected_language_index > 0 ? selected_language_index - 1 : max_index;
+    }
+    if (event == ODROID_DIALOG_NEXT) {
+        selected_language_index = selected_language_index < max_index ? selected_language_index + 1 : 0;
+    }
+
+    ZeldaGetLanguageAtIndex(selected_language_index, option->value);
+    printf("option->value = %s\n", option->value);
+
+    ZeldaSetLanguage(option->value);
+    return event == ODROID_DIALOG_ENTER;
+}
+
 /* Main */
 int app_main_zelda3(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 {
@@ -367,10 +391,9 @@ int app_main_zelda3(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     
   ZeldaInitialize();
 
-  g_wanted_zelda_features = FEATURES; // TODO : Add options to enable some features
+  g_wanted_zelda_features = FEATURES; // TODO : Add options to enable/disable some features
 
   ZeldaEnableMsu(false);
-  ZeldaSetLanguage(STRINGIZE_VALUE_OF(DIALOGUES_LANGUAGE)); // TODO : add option to select language
 
   g_zenv.ppu->extraLeftRight = 0;
 
@@ -379,6 +402,9 @@ int app_main_zelda3(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
   } else {
     lcd_clear_buffers();
   }
+
+  ZeldaGetLanguageAtIndex(selected_language_index, display_language_value);
+  ZeldaSetLanguage(display_language_value);
 
   /* Start at the same time DMAs audio & video */
   /* Audio period and Video period are the same (almost at least 1 hour) */
@@ -404,6 +430,7 @@ int app_main_zelda3(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 
 
     odroid_dialog_choice_t options[] = {
+            {300, curr_lang->s_LangUI, display_language_value, 1, &update_language_cb},
             {300, curr_lang->s_Reset, NULL, 1, &reset_cb},
             ODROID_DIALOG_CHOICE_LAST
     };
