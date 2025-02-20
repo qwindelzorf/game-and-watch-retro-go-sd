@@ -18,6 +18,7 @@ enum {
     RG_LOGO_HEADER_SG1000,
     RG_LOGO_HEADER_COL,
     RG_LOGO_HEADER_GB,
+    RG_LOGO_HEADER_GBC,
     RG_LOGO_HEADER_GG,
     RG_LOGO_HEADER_NES,
     RG_LOGO_HEADER_PCE,
@@ -74,6 +75,7 @@ extern const retro_logo_image logo_gnw;
 extern const retro_logo_image header_sg1000;
 extern const retro_logo_image header_col;
 extern const retro_logo_image header_gb;
+extern const retro_logo_image header_gbc;
 extern const retro_logo_image header_gg;
 extern const retro_logo_image header_nes;
 extern const retro_logo_image header_pce;

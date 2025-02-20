@@ -635,6 +635,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 void emulators_init()
 {
     add_emulator("Nintendo Gameboy", "gb", "gb gbc", RG_LOGO_PAD_GB, RG_LOGO_HEADER_GB, GAME_DATA);
+    add_emulator("Nintendo Gameboy Color", "gbc", "gb gbc", RG_LOGO_PAD_GB, RG_LOGO_HEADER_GBC, GAME_DATA);
     add_emulator("Nintendo Entertainment System", "nes", "nes fds nsf", RG_LOGO_PAD_NES, RG_LOGO_HEADER_NES, GAME_DATA);
     add_emulator("Game & Watch", "gw", "gw", RG_LOGO_PAD_GW, RG_LOGO_HEADER_GW, GAME_DATA);
     add_emulator("PC Engine", "pce", "pce", RG_LOGO_PAD_PCE, RG_LOGO_HEADER_PCE, GAME_DATA);

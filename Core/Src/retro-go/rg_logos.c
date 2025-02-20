@@ -52,6 +52,8 @@ retro_logo_image *rg_get_logo(int16_t logo_index) {
             return (retro_logo_image *)&header_col;
         case RG_LOGO_HEADER_GB:
             return (retro_logo_image *)&header_gb;
+        case RG_LOGO_HEADER_GBC:
+            return (retro_logo_image *)&header_gbc;
         case RG_LOGO_HEADER_GG:
             return (retro_logo_image *)&header_gg;
         case RG_LOGO_HEADER_NES:
@@ -438,7 +440,7 @@ const retro_logo_image header_col LOGO_DATA = {
         0x0f, 0xff, 0xe1, 0xff, 0xc0, 0x7f, 0x87, 0xff, 0x0f, 0xfe, 0x1f, 0xfc, 0x00, 0x3f, 0x00, 0x1e, 0xff, 0xf8, 0x78, 0x7f, 0xf0, 0xf0, 0x0f, //____###############____###########_______########____###########____###########____###########____________######___________####_#############____####____###########____####________####
     },
 };
-/*
+
 const retro_logo_image header_gb LOGO_DATA = {
     128,
     18,
@@ -464,8 +466,8 @@ const retro_logo_image header_gb LOGO_DATA = {
         0x07, 0xfc, 0xf0, 0x0f, 0xf8, 0x1c, 0x0f, 0xff, 0xf8, 0x0f, 0xff, 0x00, 0x7f, 0xc0, 0x7c, 0x00, //_____#########__####________#########______###______#################_______############_________#########_______#####__________
     },
 };
-*/
-const retro_logo_image header_gb LOGO_DATA = {
+
+const retro_logo_image header_gbc LOGO_DATA = {
     176,
     18,
     {
