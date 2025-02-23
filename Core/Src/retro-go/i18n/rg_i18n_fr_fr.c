@@ -188,9 +188,9 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_CPU_Overclock_1 = "Moyen",
     .s_CPU_Overclock_2 = "Maximum",
 #if INTFLASH_BANK == 2
-    .s_Reboot = "Reboot",
-    .s_Original_system = "Original system",
-    .s_Confirm_Reboot = "Confirm reboot?",
+    .s_Reboot = "Redémarrer",
+    .s_Original_system = "système original",
+    .s_Confirm_Reboot = "Confirmer redémarrage ?",
 #endif
     .s_Second_Unit = "s",
     .s_Author = "De",

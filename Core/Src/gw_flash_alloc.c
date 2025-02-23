@@ -11,6 +11,7 @@
 #include "config.h"
 #include "gw_malloc.h"
 #include "gw_flash_alloc.h"
+#include "gw_ofw.h"
 
 #define METADATA_FILE ODROID_BASE_PATH_SAVES "/flashcachedata.bin"
 #define MAX_FILES 50
@@ -36,19 +37,6 @@ typedef struct
 static Metadata *metadata = NULL;
 static uint32_t flash_write_pointer = 0;
 
-#pragma pack(push, 1)
-typedef struct
-{
-    unsigned int external_flash_size : 24;
-    unsigned int must_be_4: 4;
-    unsigned int is_mario : 1;
-    unsigned int is_zelda : 1;
-    unsigned int _padding : 2;  // Padding to align to byte boundary
-} Bank1FirmwareMetadata;
-#pragma pack(pop)
-
-Bank1FirmwareMetadata bank1_firmware_metadata;
-
 static uint32_t compute_file_crc32(const char *file_path)
 {
     // Include file modification time or content in CRC32 calculation
@@ -69,20 +57,9 @@ static uint32_t align_to_next_block(uint32_t pointer)
     return (pointer + block_size - 1) & ~(block_size - 1);
 }
 
-static void load_bank1_firmware_metadata()
-{
-    // Load firmware data from bank1 firmware's HDMI-CEC field in vector table.
-    bank1_firmware_metadata = *(Bank1FirmwareMetadata*)(0x080001B8);
-    if(bank1_firmware_metadata.must_be_4 != 4){
-        // This data came from an uncontrolled source; 0 everything out.
-        bank1_firmware_metadata = (Bank1FirmwareMetadata){0};
-    }
-}
-
 static uint32_t get_extflash_base()
 {
-    load_bank1_firmware_metadata();
-    return align_to_next_block(((uint32_t)&__EXTFLASH_BASE__) + (bank1_firmware_metadata.external_flash_size << 12));
+    return align_to_next_block(((uint32_t)&__EXTFLASH_BASE__) + get_ofw_extflash_size());
 }
 
 static void load_metadata()

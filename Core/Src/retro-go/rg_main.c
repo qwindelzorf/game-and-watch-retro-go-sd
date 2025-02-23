@@ -21,6 +21,7 @@
 #include "error_screens.h"
 #include "gw_malloc.h"
 #include "gw_linker.h"
+#include "gw_ofw.h"
 #if SD_CARD == 1
 #include "gw_flash_alloc.h"
 #endif
@@ -311,8 +312,7 @@ static inline bool GLOBAL_DATA tab_enabled(tab_t *tab)
 #if INTFLASH_BANK == 2
 void GLOBAL_DATA soft_reset_do(void)
 {
-    *((uint32_t *)0x2001FFF8) = 0x544F4F42; // "BOOT"
-    *((uint32_t *)0x2001FFFC) = 0x08000000; // vector table
+    HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR0, 0x00000000); // Tell patched OFW to stop booting to Retro-Go
 
     NVIC_SystemReset();
 }
@@ -483,8 +483,18 @@ static void GLOBAL_DATA handle_options_menu()
 #if INTFLASH_BANK == 2
     //{9, curr_lang->s_Reboot, curr_lang->s_Original_system, 1, NULL},
 #endif
+        ODROID_DIALOG_CHOICE_LAST, // Reserve space to dynamically add more options
         ODROID_DIALOG_CHOICE_LAST};
 #if INTFLASH_BANK == 2
+    if (get_ofw_extflash_size() != 0) // if OFW is present
+    {
+        uint8_t ofw_boot_index = sizeof(choices) / sizeof(odroid_dialog_choice_t) - 2;
+        choices[ofw_boot_index].id = 9;
+        choices[ofw_boot_index].label = curr_lang->s_Reboot;
+        choices[ofw_boot_index].value = (char *)curr_lang->s_Original_system;
+        choices[ofw_boot_index].enabled = 1;
+        choices[ofw_boot_index].update_cb = NULL;
+    }
     int r = odroid_overlay_settings_menu(choices, &gui_redraw_callback);
     if (r == 9)
         soft_reset_do();
@@ -807,6 +817,13 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
     sdcard_init();
     odroid_system_init(ODROID_APPID_LAUNCHER, 32000);
     odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, ODROID_SCREEN_HEIGHT, curr_colors->bg_c);
+
+    // if OFW is present, write "BOOT" to RTC backup register to always boot to Retro-Go
+    // Check game_and_watch_patch project for more details
+    if (get_ofw_extflash_size() != 0)
+    {
+        HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR0, 0x544F4F42); // BOOT
+    }
 
     // Init ram start for pseudo dynamic mem allocation
     ahb_init();
