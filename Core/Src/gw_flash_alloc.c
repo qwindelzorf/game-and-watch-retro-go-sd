@@ -212,7 +212,7 @@ static bool circular_flash_write(const char *file_path,
 
             address_in_flash += block_size;
             flash_write_pointer += block_size;
-            total_bytes_processed += block_size;
+            total_bytes_processed += bytes_read;
 
             if (progress_cb) {
                 progress = (uint8_t)((total_bytes_processed * 100) / (*data_size));
