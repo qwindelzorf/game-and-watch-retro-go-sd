@@ -2,9 +2,10 @@
 
 ## What's New
 
-### Version 0.3.2
-- Fix Zelda 3 crash when entering sanctuary
-- Add support for different languages in Zelda 3 (check README.md file for instructions to buld assets file with various languages). Current language can be set in in-game options menu.
+### Version 0.4.0
+- Add support for dual boot mode
+- Add possibility to split GB and GBC into 2 different folders (/roms/gb and /roms/gbc). It's still possible to keep them merged in the same folder to have all gb/gbc roms together.
+- Add checks in firmware update application (battery level, written data validation, ...)
 
 ## Prerequisites
 To install this version, make sure you have:
