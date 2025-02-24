@@ -41,6 +41,13 @@ uint32_t get_ofw_extflash_size()
     return bank1_firmware_metadata.external_flash_size << 12;
 }
 
+bool get_ofw_is_present()
+{
+    load_bank1_firmware_metadata();
+    return bank1_firmware_metadata.must_be_4 == 4;
+}
+
+
 bool get_ofw_is_zelda()
 {
     load_bank1_firmware_metadata();

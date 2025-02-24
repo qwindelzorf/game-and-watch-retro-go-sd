@@ -820,7 +820,7 @@ void GLOBAL_DATA app_main(uint8_t boot_mode)
 
     // if OFW is present, write "BOOT" to RTC backup register to always boot to Retro-Go
     // Check game_and_watch_patch project for more details
-    if (get_ofw_extflash_size() != 0)
+    if (get_ofw_is_present())
     {
         HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR0, 0x544F4F42); // BOOT
     }
