@@ -2,7 +2,7 @@
 
 ## What's New
 
-### Version 0.4.3
+### Version 0.4.2
 - In dual boot configuration, retro-go will always boot until you select to boot OFW in menu
   It requires gnwmanager v0.16.1 or above, install patched OFW using this command :
 
