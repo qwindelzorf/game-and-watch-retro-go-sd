@@ -515,9 +515,6 @@ void emulator_update_cheats_info(retro_emulator_file_t *file) {
 bool emulator_show_file_menu(retro_emulator_file_t *file)
 {
     int slot = -1;
-#if CHEAT_CODES == 1
-    CHOSEN_FILE = file;
-#endif
     char *sram_path = odroid_system_get_path(ODROID_PATH_SAVE_SRAM, file->path);
     rg_emu_states_t *savestates = odroid_system_emu_get_states(file->path, 4);
     bool has_save = savestates->used > 0;
@@ -526,6 +523,17 @@ bool emulator_show_file_menu(retro_emulator_file_t *file)
     bool force_redraw = false;
 
 #if CHEAT_CODES == 1
+    // Free previous cheat codes
+    if (CHOSEN_FILE) {
+        for (int i = 0; i < CHOSEN_FILE->cheat_count; i++) {
+            if (CHOSEN_FILE->cheat_codes[i]) free(CHOSEN_FILE->cheat_codes[i]);
+            if (CHOSEN_FILE->cheat_descs[i]) free(CHOSEN_FILE->cheat_descs[i]);
+        }
+        free(CHOSEN_FILE->cheat_codes);
+        free(CHOSEN_FILE->cheat_descs);
+    }
+
+    CHOSEN_FILE = file;
     emulator_update_cheats_info(CHOSEN_FILE);
     odroid_dialog_choice_t last = ODROID_DIALOG_CHOICE_LAST;
     odroid_dialog_choice_t cheat_row = {4, curr_lang->s_Cheat_Codes, "", 1, NULL};
