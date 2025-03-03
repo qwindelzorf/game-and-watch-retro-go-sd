@@ -43,12 +43,13 @@ typedef struct app_config {
 } app_config_t;
 
 #if CHEAT_CODES == 1
-#if (MAX_CHEAT_CODES > 32)
-#error MAX_CHEAT_CODES is assumed to be 32. Changing this value requires adjusting the type of active_cheat_codes below
-#endif
-typedef struct cheat_config {
-    uint32_t active_cheat_codes; // A bit array for which cheat codes in retro_emulator_file_t.cheat_codes are active for this rom
-} cheat_config_t;
+typedef struct {
+    char *game_path;
+    uint32_t active_cheat_codes;
+    bool is_cached;
+} CheatCache;
+
+static CheatCache cheat_cache = {NULL, 0, false};
 #endif
 
 typedef struct persistent_config {
@@ -75,10 +76,6 @@ typedef struct persistent_config {
     bool debug_clock_always_on;
 
     app_config_t app[APPID_COUNT];
-
-#if CHEAT_CODES == 1
-    cheat_config_t cheat_config;
-#endif
 
     uint32_t crc32;
 } persistent_config_t;
@@ -143,9 +140,6 @@ static const persistent_config_t persistent_config_default = {
         {0}, // GW
         {0}, // MD Genesis
     },
-#if CHEAT_CODES == 1
-    .cheat_config = {0},
-#endif
 };
 
 persistent_config_t persistent_config_ram;
@@ -230,10 +224,52 @@ void odroid_settings_commit()
     }
 }
 
+static void odroid_settings_delete_cheat_state_files()
+{
+    DIR dir, subdir;
+    FILINFO fno, subfno;
+    FRESULT res, subres;
+
+    res = f_opendir(&dir, ODROID_BASE_PATH_CHEATS);
+    if (res == FR_OK) {
+        for (;;) {
+            res = f_readdir(&dir, &fno);
+            if (res != FR_OK || fno.fname[0] == 0) break; // Break on error or end of dir
+            if (fno.fattrib & AM_DIR && fno.fname[0] != '.') { // Check for subdirectories, skip '.' and '..'
+                char subdirpath[256];
+                snprintf(subdirpath, sizeof(subdirpath), "%s/%s", ODROID_BASE_PATH_CHEATS, fno.fname);
+                subres = f_opendir(&subdir, subdirpath);
+                if (subres == FR_OK) {
+                    for (;;) {
+                        subres = f_readdir(&subdir, &subfno);
+                        if (subres != FR_OK || subfno.fname[0] == 0) break; // Break on error or end of subdir
+                        if (!(subfno.fattrib & AM_DIR)) { // Skip sub directories
+                            // Check if the file has a ".state" extension
+                            char *ext = strrchr(subfno.fname, '.');
+                            if (ext && strcmp(ext, ".state") == 0) {
+                                char filepath[256];
+                                snprintf(filepath, sizeof(filepath), "%s/%s", subdirpath, subfno.fname);
+                                f_unlink(filepath);
+                            }
+                        }
+                    }
+                    f_closedir(&subdir);
+                }
+            }
+        }
+        f_closedir(&dir);
+    }
+}
+
 void odroid_settings_reset()
 {
-#if CHEAT_CODES == 1 
-    persistent_config_ram.cheat_config.active_cheat_codes = 0;
+#if CHEAT_CODES == 1
+    // Delete all cheat state files
+    odroid_settings_delete_cheat_state_files();
+    // Reset cheat cache
+    cheat_cache.is_cached = false;
+    cheat_cache.game_path = NULL;
+    cheat_cache.active_cheat_codes = 0;
 #endif
     memcpy(&persistent_config_ram, &persistent_config_default, sizeof(persistent_config_t));
 
@@ -602,28 +638,79 @@ void odroid_settings_DisplayOverscan_set(int32_t value)
 }
 
 
-#if CHEAT_CODES == 1 
-bool odroid_settings_ActiveGameGenieCodes_is_enabled(uint32_t rom_id, int code_index)
-{
-    if (code_index > MAX_CHEAT_CODES) {
-        return false;
+#if CHEAT_CODES == 1
+
+static uint32_t read_active_cheats(char *game_path) {
+    if (cheat_cache.is_cached && cheat_cache.game_path != NULL && strcmp(cheat_cache.game_path, game_path) == 0) {
+        return cheat_cache.active_cheat_codes;
     }
 
-    uint32_t active_cheat_codes = persistent_config_ram.cheat_config.active_cheat_codes;
-    return ((active_cheat_codes >> code_index) & 0x1) == 1;
+    uint32_t active_cheat_codes = 0;
+    char *cheat_state_path = odroid_system_get_path(ODROID_PATH_CHEAT_STATE, game_path);
+    if (odroid_sdcard_get_filesize(cheat_state_path) > 0) {
+        FILE *cheat_state_file = fopen(cheat_state_path, "r");
+        if (!cheat_state_file) {
+            printf("Failed to open cheat state file %s\n", cheat_state_path);
+            free(cheat_state_path);
+            return 0;
+        }
+        fread(&active_cheat_codes, 1, sizeof(uint32_t), cheat_state_file);
+        fclose(cheat_state_file);
+    }
+    free(cheat_state_path);
+
+    // Update cache
+    if (cheat_cache.game_path != NULL) {
+        free(cheat_cache.game_path);
+    }
+    cheat_cache.game_path = strdup(game_path);
+    cheat_cache.active_cheat_codes = active_cheat_codes;
+    cheat_cache.is_cached = true;
+
+    return active_cheat_codes;
 }
 
-bool odroid_settings_ActiveGameGenieCodes_set(uint32_t rom_id, int code_index, bool enable)
-{
+static void write_active_cheats(char *game_path, uint32_t active_cheat_codes) {
+    char *cheat_state_path = odroid_system_get_path(ODROID_PATH_CHEAT_STATE, game_path);
+    FILE *cheat_state_file = fopen(cheat_state_path, "w");
+    if (!cheat_state_file) {
+        printf("Failed to open cheat state file %s\n", cheat_state_path);
+        free(cheat_state_path);
+        return;
+    }
+    fwrite(&active_cheat_codes, 1, sizeof(uint32_t), cheat_state_file);
+    fclose(cheat_state_file);
+    free(cheat_state_path);
+
+    // Update cache
+    if (cheat_cache.game_path != NULL) {
+        free(cheat_cache.game_path);
+    }
+    cheat_cache.game_path = strdup(game_path);
+    cheat_cache.active_cheat_codes = active_cheat_codes;
+    cheat_cache.is_cached = true;
+}
+
+bool odroid_settings_ActiveGameGenieCodes_is_enabled(char *game_path, int code_index) {
     if (code_index > MAX_CHEAT_CODES) {
         return false;
     }
 
-    if (enable) {
-        persistent_config_ram.cheat_config.active_cheat_codes |= (1<<code_index);
-    } else  {
-        persistent_config_ram.cheat_config.active_cheat_codes &= ~(1<<code_index);
+    return ((read_active_cheats(game_path) >> code_index) & 0x1) == 1;
+}
+
+bool odroid_settings_ActiveGameGenieCodes_set(char *game_path, int code_index, bool enable) {
+    if (code_index > MAX_CHEAT_CODES) {
+        return false;
     }
+
+    uint32_t active_cheat_codes = read_active_cheats(game_path);
+    if (enable) {
+        active_cheat_codes |= (1 << code_index);
+    } else {
+        active_cheat_codes &= ~(1 << code_index);
+    }
+    write_active_cheats(game_path, active_cheat_codes);
 
     return true;
 }

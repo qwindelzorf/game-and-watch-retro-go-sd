@@ -544,14 +544,14 @@ int app_main_nes(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
     const char **active_cheat_codes = NULL;
 #if CHEAT_CODES == 1
     for(int i=0; i<MAX_CHEAT_CODES && i<ACTIVE_FILE->cheat_count; i++) {
-        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->id, i)) {
+        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->path, i)) {
             cheat_count++;
         }
     }
 
     active_cheat_codes = rg_alloc(cheat_count * sizeof(char**), MEM_ANY);
     for(int i=0, j=0; i<MAX_CHEAT_CODES && i<ACTIVE_FILE->cheat_count; i++) {
-        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->id, i)) {
+        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->path, i)) {
             active_cheat_codes[j] = ACTIVE_FILE->cheat_codes[i];
             j++;
         }

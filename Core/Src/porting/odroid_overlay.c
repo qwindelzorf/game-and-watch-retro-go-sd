@@ -1138,11 +1138,11 @@ int odroid_overlay_game_debug_menu(void_callback_t repaint)
 #if CHEAT_CODES == 1
 static bool cheat_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
-    bool is_on = odroid_settings_ActiveGameGenieCodes_is_enabled(CHOSEN_FILE->id, option->id);
+    bool is_on = odroid_settings_ActiveGameGenieCodes_is_enabled(CHOSEN_FILE->path, option->id);
     if (event == ODROID_DIALOG_PREV || event == ODROID_DIALOG_NEXT)
     {
         is_on = is_on ? false : true;
-        odroid_settings_ActiveGameGenieCodes_set(CHOSEN_FILE->id, option->id, is_on);
+        odroid_settings_ActiveGameGenieCodes_set(CHOSEN_FILE->path, option->id, is_on);
     }
     strcpy(option->value, is_on ? curr_lang->s_Cheat_Codes_ON : curr_lang->s_Cheat_Codes_OFF);
     if (event == ODROID_DIALOG_ENTER) {

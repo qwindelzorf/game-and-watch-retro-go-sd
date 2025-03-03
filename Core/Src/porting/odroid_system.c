@@ -133,6 +133,16 @@ char* odroid_system_get_path(emu_path_type_t type, const char *_romPath)
             break;
         }
 
+        case ODROID_PATH_CHEAT_STATE:
+        {
+            char *shortFileName = strdup(fileName);
+            char *ext = strrchr(shortFileName, '.');
+            if (ext) *ext = '\0';
+            sprintf(buffer, "%s%s.state", ODROID_BASE_PATH_CHEATS, fileName);
+            free(shortFileName);
+            break;
+        }
+
         case ODROID_PATH_CHEAT_PCE:
         {
             char *shortFileName = strdup(fileName);

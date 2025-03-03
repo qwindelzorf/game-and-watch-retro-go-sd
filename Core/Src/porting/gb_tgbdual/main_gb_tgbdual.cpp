@@ -473,7 +473,7 @@ void apply_cheat_code(const char *cheatcode) {
 extern "C" void update_cheats_gb() {
     g_gb->get_cheat()->clear();
     for(int i=0; i<MAX_CHEAT_CODES && i<ACTIVE_FILE->cheat_count; i++) {
-        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->id, i)) {
+        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->path, i)) {
             apply_cheat_code(ACTIVE_FILE->cheat_codes[i]);
         }
     }
@@ -520,7 +520,7 @@ void app_main_gb_tgbdual_cpp(uint8_t load_state, uint8_t start_paused, int8_t sa
 
 #if CHEAT_CODES == 1
     for(int i=0; i<MAX_CHEAT_CODES && i<ACTIVE_FILE->cheat_count; i++) {
-        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->id, i)) {
+        if (odroid_settings_ActiveGameGenieCodes_is_enabled(ACTIVE_FILE->path, i)) {
             apply_cheat_code(ACTIVE_FILE->cheat_codes[i]);
         }
     }
