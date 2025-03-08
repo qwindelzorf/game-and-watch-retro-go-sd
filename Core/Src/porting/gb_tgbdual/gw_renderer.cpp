@@ -44,14 +44,6 @@ gw_renderer::gw_renderer(int which)
    which_gb = which;
 }
 
-word gw_renderer::map_color(word gb_col)
-{
-   return ((gb_col&0x001f) << 11) |
-      ((gb_col&0x03e0) <<  1) |
-      ((gb_col&0x0200) >>  4) |
-      ((gb_col&0x7c00) >> 10);
-}
-
 void gw_renderer::refresh() {
    this->snd_render->render(stream, SAMPLES_PER_FRAME);
    gb_pcm_submit(stream, SAMPLES_PER_FRAME);

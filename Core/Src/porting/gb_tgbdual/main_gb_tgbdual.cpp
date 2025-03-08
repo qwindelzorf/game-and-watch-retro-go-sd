@@ -14,6 +14,7 @@ extern "C" {
 #include "appid.h"
 #include "gw_malloc.h"
 #include "main_gb_tgbdual.h"
+#include "heap.hpp"
 
 extern void __libc_init_array(void);
 }
@@ -446,7 +447,7 @@ void apply_cheat_code(const char *cheatcode) {
             // AB    External RAM bank number
             // CD    New Data
             // GHEF  Memory Address (internal or external RAM, A000-DFFF)
-            cheat_dat *cheat = (cheat_dat *)itc_calloc(1,sizeof(cheat_dat));
+            cheat_dat *cheat = (cheat_dat *)heap_alloc_mem(sizeof(cheat_dat));
             cheat->code = ((charToInt(*codepart))<<4) + charToInt(*(codepart+1));
             cheat->dat = (charToInt(*(codepart+2))<<4) + charToInt(*(codepart+3));
             cheat->adr = (charToInt(*(codepart+6))<<12) + (charToInt(*(codepart+7))<<8) +
@@ -457,12 +458,25 @@ void apply_cheat_code(const char *cheatcode) {
             // AB   = New data
             // FCDE = Memory address, XORed by 0F000h
             // GIH  = Check data (can be ignored for our purposes)
-            cheat_dat *cheat = (cheat_dat *)itc_calloc(1,sizeof(cheat_dat));
+            cheat_dat *cheat = (cheat_dat *)heap_alloc_mem(sizeof(cheat_dat));
             word scramble;
             cheat->code = 1;
             cheat->dat = ((charToInt(*codepart))<<4) + charToInt(*(codepart+1));
             scramble   = (charToInt(*(codepart+2))<<12) + (charToInt(*(codepart+3))<<8) +
                          (charToInt(*(codepart+4))<<4) + charToInt(*(codepart+5));
+            cheat->adr = (((scramble&0xF) << 12) ^ 0xF000) | (scramble >> 4);
+            g_gb->get_cheat()->add_cheat(cheat);
+        } else if (codepart_len == 11) {
+            // game genie format: for "ABC-DEF-GHI",
+            // AB   = New data
+            // FCDE = Memory address, XORed by 0F000h
+            // GIH  = Check data (can be ignored for our purposes)
+            cheat_dat *cheat = (cheat_dat *)heap_alloc_mem(sizeof(cheat_dat));
+            word scramble;
+            cheat->code = 1;
+            cheat->dat = ((charToInt(*codepart))<<4) + charToInt(*(codepart+1));
+            scramble   = (charToInt(*(codepart+2))<<12) + (charToInt(*(codepart+4))<<8) +
+                         (charToInt(*(codepart+5))<<4) + charToInt(*(codepart+6));
             cheat->adr = (((scramble&0xF) << 12) ^ 0xF000) | (scramble >> 4);
             g_gb->get_cheat()->add_cheat(cheat);
         }
