@@ -59,7 +59,7 @@ _estack = _stack_top;    /* end of RAM */
 _Heap_Size = 32 * 1024;     /* required amount of heap */
 
 _Stack_Redzone_Size = 256;  /* size of stack overflow protection */
-_Min_Stack_Size = 20 * 1024; /* required amount of stack */
+_Min_Stack_Size = 24 * 1024; /* required amount of stack */
 
 
 /* Useful for scripts */
@@ -130,6 +130,86 @@ SECTIONS
     *(.lcd2)
     __ram_uc_end__ = .;
   } > RAM_UC
+
+  .sd_fonts_cp1251_greybeard : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1251_greybeard))
+  } > CORES
+
+  .sd_fonts_cp1251_sans_serif_bold : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1251_sans_serif_bold))
+  } > CORES
+
+  .sd_fonts_cp1251_sans_serif : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1251_sans_serif))
+  } > CORES
+
+  .sd_fonts_cp1251_serif_bold : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1251_serif_bold))
+  } > CORES
+
+  .sd_fonts_cp1251_serif : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1251_serif))
+  } > CORES
+
+  .sd_fonts_cp1252_greybeard : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_greybeard))
+  } > CORES
+
+  .sd_fonts_cp1252_haeberli12 : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_haeberli12))
+  } > CORES
+
+  .sd_fonts_cp1252_rock12 : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_rock12))
+  } > CORES
+
+  .sd_fonts_cp1252_sans_serif_bold : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_sans_serif_bold))
+  } > CORES
+
+  .sd_fonts_cp1252_sans_serif : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_sans_serif))
+  } > CORES
+
+  .sd_fonts_cp1252_serif_bold : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_serif_bold))
+  } > CORES
+
+  .sd_fonts_cp1252_serif_cjk : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_serif_cjk))
+  } > CORES
+
+  .sd_fonts_cp1252_serif : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_serif))
+  } > CORES
+
+  .sd_fonts_cp1252_unbalanced : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_cp1252_unbalanced))
+  } > CORES
+
+  .sd_fonts_unicode_katakana : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_unicode_katakana))
+  } > CORES
+
+  .sd_fonts_unicode_kanji : {
+    . = ALIGN(4);
+    KEEP(*(.sd_fonts_unicode_kanji))
+  } > CORES
 
   .overlay_nes __RAM_EMU_START__ : {
     . = ALIGN(4);

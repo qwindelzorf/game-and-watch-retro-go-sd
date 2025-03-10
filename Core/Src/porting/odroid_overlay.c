@@ -392,7 +392,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
 
     uint16_t max_left = 0;
     uint16_t max_right = 0;
-    uint16_t max_width = header? i18n_get_text_width(header, curr_lang) : 0;
+    uint16_t max_width = header? i18n_get_text_width(header) : 0;
     uint16_t max_height = 0;
     bool had_right = false;
     bool had_extent = false;
@@ -405,8 +405,8 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     {
         if (options[i].value[0])
         {
-            i_left[i] = i18n_get_text_width(options[i].label, curr_lang);
-            i_right[i] = i18n_get_text_width(options[i].value, curr_lang);
+            i_left[i] = i18n_get_text_width(options[i].label);
+            i_right[i] = i18n_get_text_width(options[i].value);
             i_width[i] = i_left[i] + i_right[i] + cen_space; //center space
             had_right = true;
             if (max_left < i_left[i])
@@ -422,7 +422,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         {
             i_left[i] = 0;
             i_right[i] = 0;
-            i_width[i] = i18n_get_text_width(options[i].label, curr_lang);
+            i_width[i] = i18n_get_text_width(options[i].label);
             if (max_width < i_width[i])
                 max_width = i_width[i];
         }
@@ -454,7 +454,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             if (i_right[i] > max_right)
             {
                 i_right[i] = max_right;
-                int linecount = i18n_get_text_lines(options[i].value, max_right, curr_lang);
+                int linecount = i18n_get_text_lines(options[i].value, max_right);
                 if (linecount > 8)
                     linecount = 8;
                 i_height[i] = linecount * i18n_get_text_height() + row_margin * 2;
@@ -465,7 +465,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             if (i_width[i] > max_width)
             {
                 i_width[i] = max_width;
-                int linecount = i18n_get_text_lines(options[i].label, max_width, curr_lang);
+                int linecount = i18n_get_text_lines(options[i].label, max_width);
                 if (linecount > 8)
                     linecount = 8;
                 i_height[i] = linecount * i18n_get_text_height() + row_margin * 2;
@@ -538,7 +538,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
     {
         odroid_overlay_draw_rect(box_x - 1, box_y - 1, box_width + 2, row_height + 8, 1, box_border_color);
         odroid_overlay_draw_fill_rect(box_x, box_y, box_width, row_height + 7, curr_colors->main_c);
-        i18n_draw_text_line(x, box_y + 5, inner_width, header, curr_colors->sel_c, curr_colors->main_c, 0, curr_lang);
+        i18n_draw_text_line(x, box_y + 5, inner_width, header, curr_colors->sel_c, curr_colors->main_c, 0);
         y += row_height + 8;
     }
 
@@ -575,7 +575,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
         {
             if (options[i].id == 0x0F0F0E0E) //color select
             {
-                i18n_draw_text_line(x + line_padding, y + row_margin, max_left, options[i].label, fg, bg, 0, curr_lang);
+                i18n_draw_text_line(x + line_padding, y + row_margin, max_left, options[i].label, fg, bg, 0);
                 uint16_t *color = (uint16_t *)(options[i].value);
                 int c_b_w = (max_right - 2) / 4;
                 for (int j=0; j < 4; j++) {
@@ -592,14 +592,14 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
             {
                 if (options[i].value[0])
                 {
-                    i18n_draw_text_line(x + line_padding, y + row_margin, max_left, options[i].label, fg, bg, 0, curr_lang);
-                    int txt_w = i18n_get_text_width(options[i].value, curr_lang);
+                    i18n_draw_text_line(x + line_padding, y + row_margin, max_left, options[i].label, fg, bg, 0);
+                    int txt_w = i18n_get_text_width(options[i].value);
                     txt_w = (txt_w > max_right) ? max_right : txt_w;
                     i18n_draw_text(
                         x + inner_width - line_padding - txt_w,
                         y + row_margin,
                         txt_w, i_height[i],
-                         options[i].value, fg, bg, 0, curr_lang);
+                         options[i].value, fg, bg, 0);
                     //left,right paint;
                 }
                 else  //single paint;
@@ -608,7 +608,7 @@ void odroid_overlay_draw_dialog(const char *header, odroid_dialog_choice_t *opti
                         y + row_margin,
                         inner_width - 2 * line_padding,
                         i_height[i],
-                        options[i].label, fg, bg, 0, curr_lang);
+                        options[i].label, fg, bg, 0);
 
             }
         }
@@ -1081,8 +1081,8 @@ static void draw_game_status_bar(runtime_stats_t stats)
 
     odroid_overlay_draw_fill_rect(0, 0, ODROID_SCREEN_WIDTH, height, curr_colors->main_c);
     odroid_overlay_draw_fill_rect(0, ODROID_SCREEN_HEIGHT - height, ODROID_SCREEN_WIDTH, height, curr_colors->main_c);
-    i18n_draw_text_line(48, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0, curr_lang);
-    i18n_draw_text_line(0, ODROID_SCREEN_HEIGHT - height + pad_text, ODROID_SCREEN_WIDTH, bottom, curr_colors->sel_c, curr_colors->main_c, 0, curr_lang);
+    i18n_draw_text_line(48, pad_text, width, header, curr_colors->sel_c, curr_colors->main_c, 0);
+    i18n_draw_text_line(0, ODROID_SCREEN_HEIGHT - height + pad_text, ODROID_SCREEN_WIDTH, bottom, curr_colors->sel_c, curr_colors->main_c, 0);
     odroid_overlay_clock(2, 3);
     odroid_overlay_draw_battery(ODROID_SCREEN_WIDTH - 22, ODROID_SCREEN_HEIGHT - 13);
 }
@@ -1444,7 +1444,7 @@ void odroid_overlay_draw_progress_bar(const char *header, uint8_t progress)
         // Draw header text
         int text_x = box_x + box_padding;
         int text_y = y_offset + (header_height - text_height) / 2;
-        i18n_draw_text_line(text_x, text_y, box_width - 2 * box_padding, header, header_color, header_bg_color, 0, curr_lang);
+        i18n_draw_text_line(text_x, text_y, box_width - 2 * box_padding, header, header_color, header_bg_color, 0);
 
         y_offset += header_height;
     }

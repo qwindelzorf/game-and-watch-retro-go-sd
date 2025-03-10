@@ -19,7 +19,6 @@ int en_us_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 
 const lang_t lang_en_us LANG_DATA = {
     .codepage = 1252,
-    .extra_font = NULL,
     .s_LangUI = "Language",
     .s_LangName = "English",
 

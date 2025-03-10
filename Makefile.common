@@ -24,7 +24,7 @@ SD_CARD ?= 1
 # setting EXTFLASH_OFFSET. Useful if the first 1MB are to be preserved.
 EXTFLASH_OFFSET ?= 0
 
-SINGLE_FONT ?= 1
+SINGLE_FONT ?= 0
 
 # Configure Game & Watch target device mario|zelda
 ifneq ($(findstring flash,$(MAKECMDGOALS)),flash)
@@ -1053,6 +1053,7 @@ endif
 # Upload cores to sd card
 SD_FOLDER := sd_content
 CORES_DIR := $(SD_FOLDER)/cores
+FONTS_DIR := $(SD_FOLDER)/fonts
 MAPPERS_DIR := $(CORES_DIR)/mappers
 HOMEBREWS_FOLDER := $(SD_FOLDER)/roms/homebrew
 RELEASE_FOLDER := release
@@ -1064,7 +1065,8 @@ MAPPER_BINS := $(addprefix $(MAPPERS_DIR)/mapper_, $(addsuffix .bin, $(MAPPER_NA
 
 create_sd_folders:
 	$(V)mkdir -p $(SD_FOLDER)
-	$(V)mkdir -p $(SD_FOLDER)/cores
+	$(V)mkdir -p $(CORES_DIR)
+	$(V)mkdir -p $(FONTS_DIR)
 	$(V)mkdir -p $(CORES_DIR)
 	$(V)mkdir -p $(MAPPERS_DIR)
 	$(V)mkdir -p $(SD_FOLDER)/bios
@@ -1099,6 +1101,25 @@ create_sd_data: create_sd_folders $(MAPPER_BINS) $(BUILD_DIR)/$(TARGET)_intflash
 	@$(CP) -O binary --only-section=.overlay_smw $(BUILD_DIR)/$(TARGET).elf "$(HOMEBREWS_FOLDER)/Super Mario World.bin"
 	@$(CP) -O binary --only-section=.coleco_bios_data $(BUILD_DIR)/$(TARGET).elf $(SD_FOLDER)/bios/coleco/coleco.bin
 	@$(CP) -O binary --only-section=.overlay_graphics $(BUILD_DIR)/$(TARGET).elf $(CORES_DIR)/logo.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1251_greybeard $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1251_greybeard.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1251_sans_serif_bold $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1251_sans_serif_bold.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1251_sans_serif $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1251_sans_serif.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1251_serif_bold $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1251_serif_bold.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1251_serif $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1251_serif.bin
+	
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_greybeard $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_greybeard.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_haeberli12 $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_haeberli12.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_rock12 $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_rock12.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_sans_serif_bold $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_sans_serif_bold.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_sans_serif $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_sans_serif.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_serif_bold $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_serif_bold.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_serif_cjk $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_serif_cjk.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_serif $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_serif.bin
+	@$(CP) -O binary --only-section=.sd_fonts_cp1252_unbalanced $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/cp1252_unbalanced.bin
+
+	@$(CP) -O binary --only-section=.sd_fonts_unicode_katakana $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/unicode_katakana.bin
+	@$(CP) -O binary --only-section=.sd_fonts_unicode_kanji    $(BUILD_DIR)/$(TARGET).elf $(FONTS_DIR)/unicode_kanji.bin
+
 	@$(V)cp build/gw_retro_go_intflash.bin $(SD_FOLDER)/update_bank2.bin
 
 flash_sd: CheckTools CheckDirtySubmodules $(BUILD_DIR)/$(TARGET)_intflash.bin create_sd_data

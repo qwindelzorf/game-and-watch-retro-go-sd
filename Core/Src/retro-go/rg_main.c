@@ -170,7 +170,7 @@ static bool GLOBAL_DATA font_update_cb(odroid_dialog_choice_t *option, odroid_di
             font = 0;
         odroid_settings_font_set(font);
     }
-    curr_font = font;
+    set_font(font);
     sprintf(option->value, "%d/%d", font + 1, gui_font_count);
     return event == ODROID_DIALOG_ENTER;
 }

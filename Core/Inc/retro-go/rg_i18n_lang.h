@@ -5,7 +5,6 @@
 typedef struct
 {
     const uint32_t codepage;
-    const char **extra_font; 
     const char *s_LangUI;
     const char *s_LangName;  //used for English name
     // Core\Src\porting\nes-fceu\main_nes_fceu.c ===========================

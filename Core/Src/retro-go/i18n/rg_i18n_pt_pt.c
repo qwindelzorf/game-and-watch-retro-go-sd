@@ -23,7 +23,6 @@ int pt_pt_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 
 const lang_t lang_pt_pt LANG_DATA = {
     .codepage = 1252,
-    .extra_font = NULL,
     .s_LangUI = "Idioma",
     .s_LangName = "Portuguese",
 

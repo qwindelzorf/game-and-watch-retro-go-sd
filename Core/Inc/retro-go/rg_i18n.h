@@ -8,9 +8,11 @@
 
 #define FONT_COUNT 9
 
-extern uint8_t curr_font;
 extern const char* gui_fonts[];
 extern const int gui_font_count;
+
+void set_font(uint8_t font_index);
+uint8_t get_font();
 
 extern lang_t* curr_lang;
 extern const lang_t* gui_lang[];
@@ -18,11 +20,11 @@ extern const int gui_lang_count;
 
 int i18n_get_text_height();
 
-int  i18n_get_text_width(const char *text, const lang_t* lang);
-int  i18n_get_text_lines(const char *text, const int fix_width, const lang_t* lang);
+int  i18n_get_text_width(const char *text);
+int  i18n_get_text_lines(const char *text, const int fix_width);
 
-int  i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, char transparent, const lang_t* lang);
-int  i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_height, const char *text, uint16_t color, uint16_t color_bg, char transparent, const lang_t* lang);
+int  i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, char transparent);
+int  i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_height, const char *text, uint16_t color, uint16_t color_bg, char transparent);
 
 void odroid_overlay_clock(int x_pos, int y_pos);
 

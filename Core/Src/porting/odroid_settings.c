@@ -200,7 +200,7 @@ void odroid_settings_init()
     //set colors;
     curr_colors = (colors_t *)(&gui_colors[persistent_config_ram.colors]);
     //set font
-    curr_font = odroid_settings_font_get();
+    set_font(odroid_settings_font_get());
     //set lang
     curr_lang = (lang_t *)gui_lang[odroid_settings_lang_get()];
 }

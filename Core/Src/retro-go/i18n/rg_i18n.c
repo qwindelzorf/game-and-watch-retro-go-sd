@@ -54,10 +54,57 @@
 #include "odroid_system.h"
 #include "odroid_overlay.h"
 
-#if ((BIG_BANK == 1) && (EXTFLASH_SIZE <= 16*1024*1024)) || SD_CARD == 1
-#define FONT_DATA
+static uint8_t curr_font = 0;
+
+#if SD_CARD == 1
+#define FONT_DATA_CP1251_GREYBEARD __attribute__((section(".sd_fonts_cp1251_greybeard")))
+#define FONT_DATA_CP1251_SANS_SERIF_BOLD __attribute__((section(".sd_fonts_cp1251_sans_serif_bold")))
+#define FONT_DATA_CP1251_SANS_SERIF __attribute__((section(".sd_fonts_cp1251_sans_serif")))
+#define FONT_DATA_CP1251_SERIF_BOLD __attribute__((section(".sd_fonts_cp1251_serif_bold")))
+#define FONT_DATA_CP1251_SERIF __attribute__((section(".sd_fonts_cp1251_serif")))
+
+#define FONT_DATA_CP1252_GREYBEARD __attribute__((section(".sd_fonts_cp1252_greybeard")))
+#define FONT_DATA_CP1252_HAEBERLI12 __attribute__((section(".sd_fonts_cp1252_haeberli12")))
+#define FONT_DATA_CP1252_ROCK12 __attribute__((section(".sd_fonts_cp1252_rock12")))
+#define FONT_DATA_CP1252_SANS_SERIF_BOLD __attribute__((section(".sd_fonts_cp1252_sans_serif_bold")))
+#define FONT_DATA_CP1252_SANS_SERIF __attribute__((section(".sd_fonts_cp1252_sans_serif")))
+#define FONT_DATA_CP1252_SERIF_BOLD __attribute__((section(".sd_fonts_cp1252_serif_bold")))
+#define FONT_DATA_CP1252_SERIF_CJK __attribute__((section(".sd_fonts_cp1252_serif_cjk")))
+#define FONT_DATA_CP1252_SERIF __attribute__((section(".sd_fonts_cp1252_serif")))
+#define FONT_DATA_CP1252_UNBALANCED __attribute__((section(".sd_fonts_cp1252_unbalanced")))
+
+#elif ((BIG_BANK == 1) && (EXTFLASH_SIZE <= 16*1024*1024))
+#define FONT_DATA_CP1251_GREYBEARD
+#define FONT_DATA_CP1251_SANS_SERIF_BOLD
+#define FONT_DATA_CP1251_SANS_SERIF
+#define FONT_DATA_CP1251_SERIF_BOLD
+#define FONT_DATA_CP1251_SERIF
+
+#define FONT_DATA_CP1252_GREYBEARD
+#define FONT_DATA_CP1252_HAEBERLI12
+#define FONT_DATA_CP1252_ROCK12
+#define FONT_DATA_CP1252_SANS_SERIF_BOLD
+#define FONT_DATA_CP1252_SANS_SERIF
+#define FONT_DATA_CP1252_SERIF_BOLD
+#define FONT_DATA_CP1252_SERIF_CJK
+#define FONT_DATA_CP1252_SERIF
+#define FONT_DATA_CP1252_UNBALANCED
 #else
-#define FONT_DATA __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1251_GREYBEARD __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1251_SANS_SERIF_BOLD __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1251_SANS_SERIF __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1251_SERIF_BOLD __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1251_SERIF __attribute__((section(".extflash_font")))
+
+#define FONT_DATA_CP1252_GREYBEARD __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_HAEBERLI12 __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_ROCK12 __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_SANS_SERIF_BOLD __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_SANS_SERIF __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_SERIF_BOLD __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_SERIF_CJK __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_SERIF __attribute__((section(".extflash_font")))
+#define FONT_DATA_CP1252_UNBALANCED __attribute__((section(".extflash_font")))
 #endif
 
 #if ((BIG_BANK == 1) && (EXTFLASH_SIZE <= 16*1024*1024)) || SD_CARD == 1
@@ -79,8 +126,15 @@
 #include "fonts/font_cp1252_haeberli12.h"
 #endif
 
+#if SD_CARD == 1
+//#define FONT_DATA_UNICODE_KATAKANA __attribute__((section(".sd_fonts_unicode_katakana")))
+//#define FONT_DATA_UNICODE_KANJI __attribute__((section(".sd_fonts_unicode_kanji")))
+//#include "fonts/font_unicode_kanji.h"
+//#include "fonts/font_unicode_katakana.h"
+#endif
+
 #if INCLUDED_JA_JP == 1
-#include "fonts/font_cp932_ja_jp.h"
+//#include "fonts/font_cp932_ja_jp.h"
 #endif
 #if INCLUDED_ZH_CN == 1
 #include "fonts/font_cp936_zh_cn.h"
@@ -101,6 +155,181 @@
 #endif
 #endif
 
+// Font cache management
+#define CACHE_SIZE 256  // Stores up to 128 character widths (adjustable)
+#define FONT_CACHE_SIZE 5*1024  // 5KB cache for raw font data
+
+typedef struct {
+    uint32_t codepoint; // Unicode codepoint
+    uint8_t width;      // Cached width of the character
+    bool valid;         // If entry is valid
+    uint8_t *char_data; // Pointer to the character data
+} FontEntry;
+
+static FontEntry *font_cache = NULL/*[CACHE_SIZE]*/;
+static uint16_t cache_index = 0; // Index of the next cache entry
+static uint8_t *font_data_cache = NULL/*[FONT_CACHE_SIZE]*/; // Raw font data buffer
+static uint16_t cache_data_index = 0; // Index of the next cache data entry
+
+// Latin fonts
+const char *font_files[] = {
+    "/fonts/cp1252_serif.bin",
+    "/fonts/cp1252_serif_bold.bin",
+    "/fonts/cp1252_serif_cjk.bin",
+    "/fonts/cp1252_sans_serif.bin",
+    "/fonts/cp1252_sans_serif_bold.bin",
+    "/fonts/cp1252_greybeard.bin",
+    "/fonts/cp1252_unbalanced.bin",
+    "/fonts/cp1252_rock12.bin",
+    "/fonts/cp1252_haeberli12.bin"
+};
+
+// Cyrillic fonts
+const char *font_files_cp1251[] = {
+    "/fonts/cp1251_serif.bin",
+    "/fonts/cp1251_serif_bold.bin",
+    "/fonts/cp1251_serif.bin",
+    "/fonts/cp1251_sans_serif.bin",
+    "/fonts/cp1251_sans_serif_bold.bin",
+    "/fonts/cp1251_greybeard.bin"
+    "/fonts/cp1251_serif_bold.bin",
+    "/fonts/cp1251_serif_bold.bin",
+    "/fonts/cp1251_serif_bold.bin",
+};
+
+const char *get_font_file(uint32_t codepoint) {
+    if (codepoint >= 0x0400 && codepoint <= 0x04FF) {
+        return font_files_cp1251[curr_font];  // Use CP1251 cyrillic font
+    } else if (codepoint >= 0x30A0 && codepoint <= 0x30FF) {
+        printf("Using katakana font codepoint: 0x%lx\n", codepoint);
+        return "fonts/unicode_katakana.bin";  // Use katakana font
+    } else if (codepoint >= 0x4E00 && codepoint <= 0x9FFF) {
+        printf("Using kanji font codepoint: 0x%lx\n", codepoint);
+        return "fonts/unicode_kanji.bin";  // Use kanji font
+    }
+    return font_files[curr_font];  // Use CP1252 latin font
+}
+
+void invalidate_overlapping_entries(uint8_t *start_ptr, uint16_t length) {
+    uint8_t *end_ptr = start_ptr + length;
+
+    for (int i = 0; i < CACHE_SIZE; i++) {
+        if (font_cache[i].valid) {
+            uint8_t *entry_start = font_cache[i].char_data;
+            uint8_t *entry_end = entry_start + (12 * ((font_cache[i].width + 7) / 8));
+
+            // Check if entry's data is inside the overwritten range
+            if (!(entry_end <= start_ptr || entry_start >= end_ptr)) {
+                printf("Invalidating entry %d\n", i);
+                font_cache[i].valid = false;  // Invalidate the entry
+            }
+        }
+    }
+}
+
+void init_font_cache() {
+    memset(font_cache, 0, CACHE_SIZE * sizeof(FontEntry));
+    memset(font_data_cache, 0, FONT_CACHE_SIZE * sizeof(uint8_t));
+    cache_index = 0;
+    cache_data_index = 0;
+}
+
+FontEntry *get_font_data(uint32_t codepoint) {
+    FILE *file;
+
+    if (font_cache == NULL) {
+        font_cache = (FontEntry *)malloc(CACHE_SIZE * sizeof(FontEntry));
+        font_data_cache = (uint8_t *)malloc(FONT_CACHE_SIZE * sizeof(uint8_t));
+        init_font_cache();
+    }
+
+    for (int i = 0; i < CACHE_SIZE; i++) {
+        if (font_cache[i].valid && font_cache[i].codepoint == codepoint) {
+            return &font_cache[i];
+        }
+    }
+//    printf("Font cache miss for codepoint: %c adding @ %d\n", (char)codepoint, cache_index);
+    // Not found, load from SD and add to cache
+    FontEntry *entry = &font_cache[cache_index];
+    entry->codepoint = codepoint;
+    entry->valid = true;
+
+    const char *filename = get_font_file(codepoint);
+    uint16_t char_offset = codepoint;
+    file = fopen(filename, "rb");
+    if (!file) {
+        return NULL;
+    }
+
+    bool is_fixed_width = false;
+    if (codepoint >= 0x410 && codepoint <= 0x44F) {
+        char_offset = codepoint - 0x410 + 0xC0; // 0x400 utf8 codepoint is 0x80 in cp1251 font
+    } else if (codepoint >= 0x30A0 && codepoint <= 0x30FF) {
+        char_offset = codepoint - 0x30A0;
+        entry->width = 12; // Katakana width is 12
+        is_fixed_width = true;
+    } else if (codepoint >= 0x4E00 && codepoint <= 0x9FFF) {
+        char_offset = codepoint - 0x4E00;
+        entry->width = 12; // Kanji width is 12
+        is_fixed_width = true;
+    }
+    if (!is_fixed_width) {
+        fseek(file, char_offset, SEEK_SET);
+        fread(&(entry->width), 1, sizeof(uint8_t), file);
+    }
+    uint32_t char_data_offset;
+    if (is_fixed_width) {
+        char_data_offset = char_offset * ((entry->width + 7) / 8) * i18n_get_text_height();
+    } else {
+        uint16_t char_data_offset_u16;
+        fseek(file, char_offset * 2 + 0x100, SEEK_SET);
+        fread(&char_data_offset_u16, 1, sizeof(uint16_t), file);
+        char_data_offset = char_data_offset_u16;
+        char_data_offset += 0x300; // 0x300 is the offset of the first character in the font file
+    }
+
+    uint16_t data_length = i18n_get_text_height() * ((entry->width + 7) / 8);
+
+    if (cache_data_index + data_length > FONT_CACHE_SIZE) {
+        cache_data_index = 0;
+    }
+
+    // Invalidate overwritten cache data
+    invalidate_overlapping_entries(&font_data_cache[cache_data_index], data_length);
+
+    entry->char_data = &font_data_cache[cache_data_index];
+    fseek(file, char_data_offset, SEEK_SET);
+    fread(&font_data_cache[cache_data_index], 1, data_length, file);
+//    printf("Font data: 0x%lx (is_fixed_width = %d)\n",codepoint, is_fixed_width);
+//    for (int i = 0; i < data_length; i++) {
+//        printf("0x%02X ", font_data_cache[cache_data_index + i]);
+//    }
+//    printf("\n");
+    cache_data_index += data_length;
+
+    fclose(file);
+    cache_index = (cache_index + 1) % CACHE_SIZE;
+    return entry;
+}
+
+// end font cache management
+
+const int gui_font_count = FONT_COUNT;
+
+void set_font(uint8_t font_index) {
+    if (font_index != curr_font) {
+        curr_font = font_index;
+        memset(font_cache, 0, CACHE_SIZE * sizeof(FontEntry));
+        cache_index = 0;
+        cache_data_index = 0;
+    }
+}
+
+uint8_t get_font() {
+    return curr_font;
+}
+
+#if SD_CARD == 0
 #if SINGLE_FONT
 const char *gui_fonts[9] = {
     font_cp1252_Serif, font_cp1252_Serif, font_cp1252_Serif,
@@ -115,13 +344,12 @@ const char *gui_fonts[9] = {
     };
 #endif
 
-
 #if INCLUDED_JA_JP == 1
-const char *ja_jp_fonts[9] = {
+/*const char *ja_jp_fonts[9] = {
     font_cp932_ja_jp,    font_cp932_ja_jp,    font_cp932_ja_jp,
     font_cp932_ja_jp,    font_cp932_ja_jp,    font_cp932_ja_jp,
     font_cp932_ja_jp,    font_cp932_ja_jp,    font_cp932_ja_jp,
-    };
+    };*/
 #endif
 #if INCLUDED_ZH_CN == 1
 const char *zh_cn_fonts[9] = {
@@ -157,6 +385,7 @@ const char *cp1251_fonts[9] = {
     font_cp1251_Sans_serif,    font_cp1251_Sans_serif_Bold,    font_cp1251_Greybeard,
     font_cp1251_Serif_Bold,    font_cp1251_Serif_Bold,    font_cp1251_Serif_Bold,
     };
+#endif
 #endif
 #endif
 
@@ -204,10 +433,6 @@ const char *cp1251_fonts[9] = {
 #endif
 
 static uint16_t overlay_buffer[ODROID_SCREEN_WIDTH * 12 * 2] __attribute__((aligned(4)));
-
-uint8_t curr_font = 0;
-
-const int gui_font_count = FONT_COUNT;
 
 const lang_t *gui_lang[] = {
     &lang_en_us,
@@ -268,6 +493,11 @@ int utf8_decode(const char *str, uint32_t *codepoint) {
     return 0;
 }
 
+#if SD_CARD == 1
+int i18n_get_char_width(uint32_t codepoint) {
+    return get_font_data(codepoint)->width;
+}
+#else
 int i18n_get_char_width(uint32_t codepoint)
 {
     char *font;
@@ -275,7 +505,7 @@ int i18n_get_char_width(uint32_t codepoint)
         font = gui_fonts[curr_font];
         return font[codepoint]; // Basic Latin (ASCII) characters
     } else if (codepoint >= 0x410 && codepoint <= 0x44F) {
-            codepoint = codepoint - 0x410 + 0xC0; // 0x400 utf8 codepoint is 0x80 in cp1251 font
+        codepoint = codepoint - 0x410 + 0xC0; // 0x400 utf8 codepoint is 0x80 in cp1251 font
         font = cp1251_fonts[curr_font];
         return font[codepoint]; // Cyrillic characters
     } else if (codepoint >= 0x4E00 && codepoint <= 0x9FFF) {
@@ -286,13 +516,14 @@ int i18n_get_char_width(uint32_t codepoint)
         return 8; // Default width for other Unicode characters
     }
 }
+#endif
 
 int i18n_get_text_height()
 {
     return 12;
 }
 
-int i18n_get_text_width(const char *text, const lang_t* lang)
+int i18n_get_text_width(const char *text)
 {
     if (!text) return 0;
 
@@ -309,7 +540,7 @@ int i18n_get_text_width(const char *text, const lang_t* lang)
     return width;
 };
 
-int i18n_get_text_lines(const char *text, const int fix_width, const lang_t* lang)
+int i18n_get_text_lines(const char *text, const int fix_width)
 {
     if (text == NULL || text[0] == '\0') return 0;
 
@@ -355,13 +586,165 @@ void odroid_overlay_read_screen_rect(uint16_t x_pos, uint16_t y_pos, uint16_t wi
             overlay_buffer[x + y * width] = dst_img[(y + y_pos) * ODROID_SCREEN_WIDTH + x_pos + x];
 }
 
+#if 0
 int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, char transparent, const lang_t* lang)
 {
     if (text == NULL || text[0] == 0)
         return 0;
     int font_height = 12;
     int x_offset = 0;
+    char realtxt[161];
+    uint8_t cc;
+    bool is_cjk = IS_CJK(lang);
     char *font = gui_fonts[curr_font];
+    char *extra_font = gui_fonts[curr_font];
+    if ((lang->extra_font != NULL) && (lang->extra_font[curr_font] != NULL))
+            extra_font = lang->extra_font[curr_font];
+    
+    if (transparent)
+        odroid_overlay_read_screen_rect(x_pos, y_pos, width, font_height);
+    else
+    {
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < font_height; y++)
+                overlay_buffer[x + y * width] = color_bg;
+    }
+    int w = i18n_get_text_width(text, lang);
+    sprintf(realtxt, "%.*s", 160, text);
+    bool dByte = false;
+    if (w > width)
+    {
+        w = 0;
+        int i = 0;
+        while (w < width)
+        {
+            dByte = false;
+            if (realtxt[i] > 0x80)
+            {
+                if (is_cjk)
+                {
+                    if ((lang->codepage == 932) && (realtxt[i] > 0xa0) && (realtxt[i] < 0xe0))
+                        w += 6;
+                    else if (realtxt[i] < 0xa1)
+                        w += font[realtxt[i]];
+                    {
+                        w += 12;
+                        dByte = true;
+                        i++;
+                    }
+                }
+                else
+                    w += extra_font[realtxt[i]];
+            }
+            else
+                w += font[realtxt[i]];
+            i++;
+        }
+        realtxt[i - (dByte ? 2 : 1)] = 0;
+        // paint end point
+        overlay_buffer[width * (font_height - 3) - 1] = get_darken_pixel(color, 80);
+        overlay_buffer[width * (font_height - 3) - 3] = get_darken_pixel(color, 80);
+        overlay_buffer[width * (font_height - 3) - 6] = get_darken_pixel(color, 80);
+    };
+
+    int text_len = strlen(realtxt);
+
+    for (int i = 0; i < text_len; i++)
+    {
+        uint8_t c1 = realtxt[i];
+        bool ofont = ((c1 > 0x80) && (lang->codepage == 932)) || ((c1 > 0xA0) && is_cjk); 
+        if (! ofont)
+        {
+            char *draw_font = (c1 >= 0x80) ? (is_cjk ? font :extra_font) : font;
+            int cw = draw_font[c1]; // width;
+            if ((x_offset + cw) > width)
+                break;
+            if (cw != 0)
+            {
+                int d_pos = draw_font[c1 * 2 + 0x100] + draw_font[c1 * 2 + 0x101] * 0x100; // data pos
+                int line_bytes = (cw + 7) / 8;
+                for (int y = 0; y < font_height; y++)
+                {
+                    uint32_t *pixels_data = (uint32_t *)&(draw_font[0x300 + d_pos + y * line_bytes]);
+                    int offset = x_offset + (width * y);
+
+                    for (int x = 0; x < cw; x++)
+                    {
+                        if (pixels_data[0] & (1 << x))
+                            overlay_buffer[offset + x] = color;
+                    }
+                }
+            }
+            x_offset += cw;
+        }
+        else
+        {
+            uint32_t location = 0;
+            uint8_t c2 = text[i + 1];
+            bool half = false;
+            if (lang->codepage == 950) // zh_tw
+                location = ((c1 - 0xa1) * 157 + ((c2 > 0xa0) ? (c2 - 0x62) : (c2 - 0x40))) * 24;
+            else if (lang->codepage == 932) // ja_jp
+            {
+                half = (c1 > 0xa0) && (c1 < 0xe0);
+                location = half ? ((c1 - 0xa1) * 12) : ((((c1 <= 0x9F) ? (c1 - 0x81) : (c1 - 0x41)) * 188 + ((c2 >= 0x80) ? (c2 - 0x41) : (c2 - 0x40)) + 32)  * 24 - 12);
+            }
+            else
+                location = ((c1 - 0xa1) * 94 + (c2 - 0xa1)) * 24;
+            for (int y = 0; y < font_height; y++)
+            { // height :12;
+                int offset = x_offset + (width * y);
+                cc = extra_font[location + y * (half ? 1 : 2)];
+
+                if (cc & 0x04)
+                    overlay_buffer[offset + 5] = color;
+                if (cc & 0x08)
+                    overlay_buffer[offset + 4] = color;
+                if (cc & 0x10)
+                    overlay_buffer[offset + 3] = color;
+                if (cc & 0x20)
+                    overlay_buffer[offset + 2] = color;
+                if (cc & 0x40)
+                    overlay_buffer[offset + 1] = color;
+                if (cc & 0x80)
+                    overlay_buffer[offset + 0] = color;
+                
+                if (!half)
+                {
+                    if (cc & 0x01)
+                        overlay_buffer[offset + 7] = color;
+                    if (cc & 0x02)
+                        overlay_buffer[offset + 6] = color;
+
+                    cc = extra_font[location + y * 2 + 1];
+
+                    if (cc & 0x10)
+                        overlay_buffer[offset + 11] = color;
+                    if (cc & 0x20)
+                        overlay_buffer[offset + 10] = color;
+                    if (cc & 0x40)
+                        overlay_buffer[offset + 9] = color;
+                    if (cc & 0x80)
+                        overlay_buffer[offset + 8] = color;
+                }
+            }
+            x_offset += half ? 6 : 12;
+            if (! half)
+                i++;
+        }
+    }
+    odroid_display_write(x_pos, y_pos, width, font_height, overlay_buffer);
+    return font_height;
+}
+#endif
+
+int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const char *text, uint16_t color, uint16_t color_bg, char transparent)
+{
+    if (text == NULL || text[0] == 0)
+        return 0;
+    int font_height = 12;
+    int x_offset = 0;
+//    char *font = gui_fonts[curr_font];
 
     if (transparent)
         odroid_overlay_read_screen_rect(x_pos, y_pos, width, font_height);
@@ -398,6 +781,31 @@ int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const ch
         if (bytes == 0) break; // Invalid sequence
         text += bytes;
 
+        FontEntry *entry = get_font_data(codepoint);
+        if (entry == NULL) {
+//            printf("Font data not found for codepoint: %ld\n", codepoint);
+            continue;
+        }
+        int cw = entry->width;
+        if ((x_offset + cw) > width)
+            break;
+        if (cw != 0) {
+            int line_bytes = (cw + 7) / 8;
+            for (int y = 0; y < font_height; y++)
+            {
+                uint32_t *pixels_data = (uint32_t *)&(entry->char_data[y * line_bytes]);
+                int offset = x_offset + (width * y);
+                for (int x = 0; x < cw; x++)
+                {
+                    if (pixels_data[0] & (1 << x))
+                        overlay_buffer[offset + x] = color;
+                }
+            }
+        }
+        x_offset += cw;
+    }
+
+#if 0
         if (codepoint < 0x100) {
             char *draw_font = font;
             int cw = draw_font[codepoint]; // width;
@@ -445,12 +853,13 @@ int i18n_draw_text_line(uint16_t x_pos, uint16_t y_pos, uint16_t width, const ch
             x_offset += cw;
         }
     }
+#endif
 
     odroid_display_write(x_pos, y_pos, width, font_height, overlay_buffer);
     return font_height;
 }
 
-int i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_height, const char *text, uint16_t color, uint16_t color_bg, char transparent, const lang_t* lang)
+int i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_height, const char *text, uint16_t color, uint16_t color_bg, char transparent)
 {
     int text_len = 1;
     int height = 0;
@@ -463,7 +872,7 @@ int i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_
         x_pos = ODROID_SCREEN_WIDTH + x_pos;
 
     if (width < 1)
-        width = i18n_get_text_width(text, lang);
+        width = i18n_get_text_width(text);
 
     if (width > (ODROID_SCREEN_WIDTH - x_pos))
         width = (ODROID_SCREEN_WIDTH - x_pos);
@@ -501,7 +910,7 @@ int i18n_draw_text(uint16_t x_pos, uint16_t y_pos, uint16_t width, uint16_t max_
         }
         buffer_utf8[buffer_utf8_pos] = 0;
 
-        height += i18n_draw_text_line(x_pos, y_pos + height, width, buffer_utf8, color, color_bg, transparent, lang);
+        height += i18n_draw_text_line(x_pos, y_pos + height, width, buffer_utf8, color, color_bg, transparent);
         pos += strlen(buffer_utf8);
     }
 

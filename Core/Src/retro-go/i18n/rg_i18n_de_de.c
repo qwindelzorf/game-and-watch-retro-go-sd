@@ -23,7 +23,6 @@ int de_de_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 
 const lang_t lang_de_de LANG_DATA = {
     .codepage = 1252,
-    .extra_font = NULL,
     .s_LangUI = "Sprache",
     .s_LangName = "Deutsch",
 

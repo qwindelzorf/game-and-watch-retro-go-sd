@@ -20,7 +20,6 @@ int ko_kr_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 
 const lang_t lang_ko_kr LANG_DATA = {
     .codepage = 949,
-    .extra_font = ko_kr_fonts,
     .s_LangUI = "언어",
     .s_LangName = "Korean",
     //한국어

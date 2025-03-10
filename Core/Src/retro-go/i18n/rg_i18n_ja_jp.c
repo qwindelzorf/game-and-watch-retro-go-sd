@@ -22,7 +22,6 @@ int ja_jp_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 
 const lang_t lang_ja_jp LANG_DATA = {
     .codepage = 932,
-    .extra_font = ja_jp_fonts,
     .s_LangUI = "言語",
     .s_LangName = "Japanese",
     // Core\Src\porting\gb\main_gb.c =======================================

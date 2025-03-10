@@ -25,7 +25,6 @@ int zh_cn_fmt_Time(char *outstr, const char *timefmt, uint16_t hour, uint16_t mi
 
 const lang_t lang_zh_cn LANG_DATA = {
     .codepage = 936,
-    .extra_font = zh_cn_fonts,
     .s_LangUI = "语言",
     .s_LangName = "S_Chinese",
     
