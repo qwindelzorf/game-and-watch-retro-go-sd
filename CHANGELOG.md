@@ -2,10 +2,11 @@
 
 ## What's New
 
-### Version 0.5.0
-- Cheat codes support for GB/GBC/NES/PCE/MSX (check README.md)
-- Enable watchdog during firmware update to prevent locking in case of unexpected problem
-- Fix possible problem when reading large blocks of data using OSPI SD Card adapter (Yota9 design)
+### Version 0.5.1
+- Fix cheat codes for GB/GBC (Game genie codes with '-' were ignored) and fix crash on GBC when cheats are enabled
+- Fix color palette for GB and added palette from original G&W firmware
+- Changed fonts management, it's now possible to switch between different fonts styles
+- Add support for some 3.3v flash chips (require a hardware mod to allow using 3.3v chips)
 
 ## Prerequisites
 To install this version, make sure you have:
