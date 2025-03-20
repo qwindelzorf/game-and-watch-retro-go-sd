@@ -1,262 +1,171 @@
 ![](assets/gnw.gif)
 
-WARNING : This readme is the process of beeing updated for SD Card support info, a lot of information could be wrong or obsolete
+# Nintendo® Game & Watch™ Retro-Go SD
 
-# Support
-You can follow my (sylverb) work on https://www.patreon.com/sylverb
+A comprehensive emulator collection for the Nintendo® Game & Watch™ with SD Card support, allowing you to play your favorite retro games on the go!
 
-***********
-# SD-Card support
+## Table of Contents
+- [Support Development](#support-development)
+- [Features](#features)
+- [Installation](#installation)
+  - [Pre-modded Options](#pre-modded-options)
+  - [Hardware Requirements](#hardware-requirements)
+  - [Installation Steps](#installation-steps)
+- [Supported Systems](#supported-systems)
+  - [Emulators](#emulators)
+  - [SNES Ports](#snes-ports)
+  - [Homebrew Ports](#homebrew-ports)
+- [Controls](#controls)
+  - [Button Mappings](#button-mappings)
+  - [Macros](#macros)
+- [Troubleshooting / FAQ](#troubleshooting--faq)
+- [Cheat Codes](#cheat-codes)
+  - [Cheat codes on NES System](#cheat-codes-on-nes-system)
+  - [Cheat codes on GB System](#cheat-codes-on-gb-system)
+  - [Cheat codes on PCE System](#cheat-codes-on-pce-system)
+  - [Cheat codes on MSX System](#cheat-codes-on-msx-system)
+- [NES Emulator](#nes-emulator)
+- [MSX Emulator](#msx-emulator)
+- [Amstrad CPC6128 Emulator](#amstrad-cpc6128-emulator)
+- [Vectrex/Odyssey2 Emulator](#vectrexodyssey2-emulator)
+- [Homebrew ports](#homebrew-ports)
+  - [The Legend of Zelda: A Link to the Past](#the-legend-of-zelda-a-link-to-the-past)
+    - [Alternate languages](#alternate-languages)
+  - [Super Mario World](#super-mario-world)
+  - [Celeste Classic](#celeste-classic)
+- [Discord, support and discussion](#discord-support-and-discussion)
+- [License](#license)
 
-Features :
-- Allow to store your roms/dsk games in a SD Card (FAT32 or exFat formated) and to play them on your G&W
-- 4 savestate slots by game
-- Covers support (need to create a section to explain how it works)
-- Easy update of Retro-Go SD version
-- Preliminar utf-8 unicode support (only latin and cyrillic characters supported for now)
-- TBC
+## Support Development
+
+You can support the development by donating via [PayPal](https://paypal.me/revlys)
+
+## Features
+
+- 🎮 Support for multiple retro gaming systems
+- 💾 SD Card storage for ROMs and games
+- 💾 4 save state slots per game
+- 🎨 Cover art support
+- 🔄 Easy firmware updates
+- 🌐 Unicode support (Latin and Cyrillic, more to come)
+- 🎯 Cheat code support for multiple systems
+- 🔄 Dual boot capability (original firmware preservation)
 
 Current limitations :
 - Up to 1000 roms/disks will be visible for each system
-- Dual boot (to keep original firmware) is not supported
-- Cheat codes are not supported
 - Disk change is not available for MSX and Amstrad systems
-- TBC
+- CJK characters not yet visible
 
-***********
-# Requirements
+## Installation
 
-The Retro-Go SD code is designed to run with my [bootloader](https://github.com/sylverb/game-and-watch-bootloader).
+### Pre-modded Options
 
-The purpose of this bootloader is to allow installing/updating Retro-Go or anything else from a file on SD Card ! This is a major feature allowing to make sure that anyone will be able to keep his Retro-Go version up to date without the need of a complicated setup for compiling the project and flashing using jtag usb adapter.
+If you prefer professional installation, contact:
+- **Europe**: Sylver ([u/Sylver7667](https://www.reddit.com/user/Sylver7667/) on Reddit, sylver__ on Discord)
+- **USA**: hundshamer ([u/hundshamer](https://www.reddit.com/user/hundshamer/) on Reddit)
 
-***********
-# How to install/update Retro-Go SD
 
-To install/update your version of Retro-Go SD, just download latest release retro-go_update.bin file in [Releases](https://github.com/sylverb/game-and-watch-retro-go-sd/releases) section and copy it to the root folder of the SD Card in your G&W.
-Turn on your G&W and wait for the install/update to be done.
+### Hardware Requirements
 
-# Credits
-This repository is the result of the contribution of several participants :
-- Ducalex : Original [Retro-Go](https://github.com/ducalex/retro-go) for Odroid-Go devices.
-- kbeckmann & stacksmashing : Original hack and [Retro-Go](https://github.com/kbeckmann/game-and-watch-retro-go) port.
-- [Tim Schuerewegen](https://www.schuerewegen.tk/gnw/) : SD Card reader hardware & flex PCB design.
-- [Yota9](https://github.com/yota9) : Another design of SD Card support, but with some issues to be solved.
-- orzeus : [Retro-Go](https://github.com/olderzeus/game-and-watch-retro-go) with major UI refactoring (Covers, ...).
-- [bzhxx](https://github.com/bzhxx) : LCD-Game-Emulator port, Genesis emulator, overclocking and many other things.
-- [Benjamin Sølberg](https://github.com/BenjaminSoelberg) : Tamalib port, many improvements about synchronization of audio and screen.
-- [Brian Pugh](https://github.com/BrianPugh) : [game-and-watch-patch](https://github.com/BrianPugh/game-and-watch-patch), [gnwmanager](https://github.com/BrianPugh/gnwmanager), lots of improvements
-- [Macs](https://github.com/Macs75) : PC Engine improvements
-- [tfmoe__](https://github.com/marian-m12l) : Ports of Zelda 3 and Super Mario World
-- [Sylver Bruneau](https://github.com/sylverb) (me) : Several emulators ports, lots of various improvements, SD Card support.
+To install the hardware mod, you need:
 
-I'm probably missing some people
+- SD Card PCB adapter (Zelda version only for now, Mario version coming soon) : [Gerber file](assets/GnW_SD_v2.zip) (credits to Tim Schuerewegen for initial version and hundshamer for updates to make it easier to install)
 
-***********
-# Emulator collection for Nintendo® Game & Watch™
+   ![](assets/sm_black_top.png)
 
-This is a port of the [retro-go](https://github.com/ducalex/retro-go) emulator collection that runs on the Nintendo® Game & Watch™: Zelda system with SD Card reader installed.
+- 1x MX25U51245GZ4I00 (64MB SPI flash 1.8v) or bigger
+- 1x 0402 100k resistor
+- 2x 0402 1uf
+- 1x RT9193-28GB LDO regulator
+- 1x Micro SD card slot SMD 9Pin ([here](https://www.aliexpress.com/item/1005002829329826.html), [here](https://www.aliexpress.com/item/1005001331379046.html), [here](https://www.aliexpress.com/item/32802051702.html), ...)
 
-Supported emulators:
+### Installation Steps
 
-- Amstrad CPC6128 *beta* (amstrad) (check [Amstrad CPC6128 Emulator](#amstrad-cpc6128-emulator) section for details about the Amstrad CPC6128 emulator)
-- Atari 7800 (a7800)
-- ColecoVision (col)
-- Gameboy / Gameboy Color (gb/gbc)
-- Game & Watch / LCD Games (gw)
-- MSX1/2/2+ (msx) (check [MSX Emulator](#msx-emulator) section for details about MSX emulator)
-- Nintendo Entertainment System (nes) (check [NES Emulator](#nes-emulator) section for details about NES emulator)
-- PC Engine / TurboGrafx-16 (pce)
-- Sega Game Gear (gg)
-- Sega Genesis / Megadrive (md)
-- Sega Master System (sms)
-- Sega SG-1000 (sg)
-- Tamagotchi P1 (tama)
-- Videopac / Odyssey2 (videopac)
-- Watara Supervision (wsv)
+1. **Original Firmware Backup / Unlock**
+   - Install [gnwmanager](https://github.com/BrianPugh/gnwmanager), follow [installation instructions](https://github.com/BrianPugh/gnwmanager/blob/main/tutorials/installation.md)
+   - Connect your JTAG device (ST-Link v2 or others supported devices)
+   - Run `gnwmanager unlock` to backup and unlock the console. Follow instructions on computer's screen with attention.
+   - If you already have a backup, use `gnwmanager unlock --no-backup` to skip the backup steps
 
-Supported SNES game _ports_:
+2. **Patched OFW / Bootloader Installation**
+   - For dual boot (recommended):
+     ```bash
+     gnwmanager flash-patch zelda internal_flash_backup_zelda.bin flash_backup_zelda.bin --bootloader
+     ```
+   - Without dual boot (not recommended):
+     ```bash
+     gnwmanager flash-bootloader bank1
+     ```
 
+3. **Flash Chip Installation**
+   - Install the MX25U51245GZ4I00 flash chip, follow instructions in [this video](https://www.youtube.com/watch?v=mYvK7LyHh1Y) if needed
+   - You can use bootloader to check that your flash chip is correctly installed. Power on the console (and press GAME+Left if patched OFW is installed) to run the bootloader. You should see a screen like this:
+
+      ![Bootloader screen showing flash chip information](assets/bootloader_flash_installed.png)
+
+      > Note: If you installed the recommended 64MB chip, you should see "MX25U51245G (64MB)" on the screen.
+
+4. **SD Card Mod Installation**
+   
+   TBC
+
+5. **Retro-Go-SD Installation**
+   - Format micro SD card as exFAT (recommended) or FAT32
+   - Download latest `retro-go_update.bin` from [releases page](https://github.com/sylverb/game-and-watch-retro-go-sd/releases/latest)
+   - Place the file in the root folder of your SD card
+   - Insert SD card and start the console
+
+      ![](assets/firmware_update.png)
+   - You can start filling the created folders on your sd card with uncompressed roms (in /roms/gb, roms/gbc, roms/nes, ...)
+
+## Supported Systems
+
+### Emulators
+- Amstrad CPC6128 (beta)
+- Atari 7800
+- ColecoVision
+- Gameboy / Gameboy Color
+- Game & Watch / LCD Games
+- MSX1/2/2+
+- Nintendo Entertainment System
+- PC Engine / TurboGrafx-16
+- Sega Game Gear
+- Sega Genesis / Megadrive
+- Sega Master System
+- Sega SG-1000
+- Tamagotchi P1
+- Watara Supervision
+
+### SNES Ports
 - The Legend of Zelda: A Link to the Past
 - Super Mario World
 
-Supported Homebrew _ports_:
-
-- ccleste (a port of Pico-8 version of Celeste Classic)
-
-## Table of Contents
-- [Emulator collection for Nintendo® Game & Watch™](#emulator-collection-for-nintendo-game--watch)
-  - [Table of Contents](#table-of-contents)
-  - [Controls](#controls)
-    - [Macros](#macros)
-  - [Troubleshooting / FAQ](#troubleshooting--faq)
-  - [How to build](#how-to-build)
-    - [Prerequisites](#prerequisites)
-    - [Building](#building)
-    - [Information for developers](#information-for-developers)
-  - [Build and flash using Docker](#build-and-flash-using-docker)
-  - [Backing up and restoring save state files](#backing-up-and-restoring-save-state-files)
-  - [Screenshots](#screenshots)
-  - [Compression support](#compression-support)
-  - [Cheat codes](#cheat-codes)
-    - [Cheat codes on NES System](#cheat-codes-on-nes-system)
-    - [Cheat codes on GB System](#cheat-codes-on-gb-system)
-    - [Cheat codes on PCE System](#cheat-codes-on-pce-system)
-    - [Cheat codes on MSX System](#cheat-codes-on-msx-system)
-  - [Upgrading the flash](#upgrading-the-flash)
-  - [Advanced Flash Examples](#advanced-flash-examples)
-    - [Custom Firmware (CFW)](#custom-firmware-cfw)
-  - [SNES game ports](#snes-game-ports)
-    - [The Legend of Zelda: A Link to the Past](#the-legend-of-zelda-a-link-to-the-past)
-    - [Super Mario World](#super-mario-world)
-  - [Homebrew ports](#homebrew-ports)
-    - [Celeste Classic](#celeste-classic)
-  - [Discord, support and discussion](#discord-support-and-discussion)
-  - [LICENSE](#license)
+### Homebrew Ports
+- Celeste Classic
 
 ## Controls
 
-Buttons are mapped as you would expect for each emulator. `GAME` is mapped to `START`,
-and `TIME` is mapped to `SELECT`. `PAUSE/SET` brings up the emulator menu.
-
-By default, pressing the power-button while in a game will automatically trigger
-a save-state prior to putting the system to sleep. Note that this WILL overwrite
-the previous save-state for the current game.
+### Button Mappings
+- `GAME` → `START`
+- `TIME` → `SELECT`
+- `PAUSE/SET` → Emulator menu
 
 ### Macros
-
-Holding the `PAUSE/SET` button while pressing other buttons have the following actions:
-
 | Button combination    | Action                                                                 |
 | --------------------- | ---------------------------------------------------------------------- |
-| `PAUSE/SET` + `GAME`  | Store a screenshot. (Disabled by default on 1MB flash builds)          |
-| `PAUSE/SET` + `TIME`  | Toggle speedup between 1x and the last non-1x speed. Defaults to 1.5x. |
-| `PAUSE/SET` + `UP`    | Brightness up.                                                         |
-| `PAUSE/SET` + `DOWN`  | Brightness down.                                                       |
-| `PAUSE/SET` + `RIGHT` | Volume up.                                                             |
-| `PAUSE/SET` + `LEFT`  | Volume down.                                                           |
-| `PAUSE/SET` + `B`     | Load state.                                                            |
-| `PAUSE/SET` + `A`     | Save state.                                                            |
-| `PAUSE/SET` + `POWER` | Poweroff WITHOUT save-stating.                                         |
+| `PAUSE/SET` + `GAME`  | Store a screenshot (Disabled by default on 1MB flash builds)          |
+| `PAUSE/SET` + `TIME`  | Toggle speedup (1x/1.5x)                                               |
+| `PAUSE/SET` + `UP`    | Brightness up                                                          |
+| `PAUSE/SET` + `DOWN`  | Brightness down                                                        |
+| `PAUSE/SET` + `RIGHT` | Volume up                                                              |
+| `PAUSE/SET` + `LEFT`  | Volume down                                                            |
+| `PAUSE/SET` + `B`     | Load state                                                             |
+| `PAUSE/SET` + `A`     | Save state                                                             |
+| `PAUSE/SET` + `POWER` | Poweroff without save-state                                            |
 
 ## Troubleshooting / FAQ
 
-- Run `make help` to get a list of options to configure the build, and targets to perform various actions.
-- Do you have any changed files, even if you didn't intentionally change them? Please run `git reset --hard` to ensure an unchanged state.
-- Did you run `git pull` but forgot to update the submodule? Run `git submodule update --init --recursive` to ensure that the submodules are in sync or run `git pull --recurse-submodules` instead.
-- Run `make clean` and then build again. The makefile should handle incremental builds, but please try this first before reporting issues.
-- If you have limited resources on your computer, remove the `-j$(nproc)` flag from the `make` command, i.e. run `make flash`.
-- If you have changed the external flash and are having problems:
-  - If your chip was bought from e.g. ebay, aliexpress or similar places, you might have gotten a fake or bad clone chip. You can set `EXTFLASH_FORCE_SPI=1` to disable quad mode which seems to help for some chips.
-- It is still not working? Try the classic trouble shooting methods: Disconnect power to your debugger and G&W and connect again. Try programming the [Base](https://github.com/ghidraninja/game-and-watch-base) project first to ensure you can actually program your device.
-- Still not working? Ok, head over to #support on the discord and let's see what's going on.
-
-## How to build
-
-### Prerequisites
-
-- You will need version 10 or later of [arm-gcc-none-eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). **10.2.0 and later are known to work well**. Please make sure it's installed either in your PATH, or set the environment variable `GCC_PATH` to the `bin` directory inside the extracted directory (e.g. `/opt/gcc-arm-none-eabi-10-2020-q4-major/bin`, `/Applications/ARM/bin` for macOS).
-- [GnWManager](https://github.com/BrianPugh/gnwmanager) for flashing firmware and managing the filesystem.
-- In order to run this on a Nintendo® Game & Watch™ [you need to first unlock it](https://github.com/ghidraninja/game-and-watch-backup/).
-
-### Building
-
-Note: `make -j8` is used as an example. You may use `make -j$(nproc)` on Linux or `make -j$(sysctl -n hw.logicalcpu)` on Mac, or just write the number of threads you want to use, e.g. `make -j8`.
-
-```bash
-# Configure the debug adapter you want to use.
-# stlink is also the default, but you may set it to something else:
-# export ADAPTER=jlink
-# export ADAPTER=rpi
-export ADAPTER=stlink
-
-# Clone this repo with submodules:
-
-git clone --recurse-submodules https://github.com/sylverb/game-and-watch-retro-go-sd
-
-cd game-and-watch-retro-go-sd
-
-# Install python dependencies
-python3 -m pip install -r requirements.txt
-
-# Place roms in the appropriate folders:
-# cp /path/to/rom.gb ./roms/gb/
-# cp /path/to/rom.nes ./roms/nes/
-# etc. for each rom-emulator combination.
-
-# On a Mac running make < v4 you have to manually download the HAL package by running:
-# make download_sdk
-
-# Build and program external and internal flash.
-# Notes:
-#     * If you are using a modified unit with a larger external flash,
-#       set the EXTFLASH_SIZE_MB to its size in megabytes (MB) (16MB used in the example):
-#           make -j8 EXTFLASH_SIZE_MB=16 flash
-#     * If you have the Zelda version you can set GNW_TARGET=zelda to have the appropriate
-#       flash size and theme set. If you want to stick with the red theme you can set
-#       EXTFLASH_SIZE_MB=4 on your Zelda model.
-
-make -j8 flash
-```
-
-### Information for developers
-
-If you need to change the project settings and generate c-code from stm32cubemx, make sure to not have a dirty working copy as the tool will overwrite files that will need to be perhaps partially reverted. Also update Makefile.common in case new drivers are used.
-
-## Build and flash using Docker
-
-<details>
-  <summary>
-    If you are familiar with Docker and prefer a solution where you don't have to manually install toolchains and so on, expand this section and read on.
-  </summary>
-
-  To reduce the number of potential pitfalls in installation of various software, a Dockerfile is provided containing everything needed to compile and flash retro-go to your Nintendo® Game & Watch™: Super Mario Bros. system. This Dockerfile is written tageting an x86-64 machine running Linux.
-
-  Steps to build and flash from a docker container (running on Linux, e.g. Archlinux or Ubuntu):
-
-  ```bash
-  # Clone this repo
-  git clone --recursive https://github.com/sylverb/game-and-watch-retro-go-sd
-
-  # cd into it
-  cd game-and-watch-retro-go-sd
-
-  # Place roms in the appropriate directory inside ./roms/
-
-  # Build the docker image (takes a while)
-  make docker_build
-
-  # Run the container.
-  # The current directory will be mounted into the container and the current user/group will be used.
-  # In order to be able to flash the device, the container is started with --priviliged and also mounts
-  # in /dev/bus/usb. See Makefile.common for the exact command line that is executed if curious.
-  make docker
-
-  # Build and flash from inside the container:
-  docker@76f83f2fc562:/opt/workdir$ make ADAPTER=stlink EXTFLASH_SIZE_MB=1 -j$(nproc) flash
-  ```
-
-</details>
-
-## Backing up and restoring save state files
-
-Save states can be backed up by running `make flash_saves_backup`.
-
-:exclamation: Note that `INTFLASH_BANK` or `INTFLASH_ADDRESS` must be the same value as when initially flashed. This is best done with `export VARIABLE=value`. Usually, if you only have retro-go installed, then this doesn't need to be specified. If you are dual-booting, then you probably want to specify `INTFLASH_BANK=2`.
-
-This downloads all save states to the local directory `./backup/savestate`. Each save state will be located in `./save_states/<emu>/<rom name>/0`.
-
-After this, it is safe to change roms, pull new code and build & flash the device. If just flashing new firmware/roms while keeping other parameters the same, the save states on-device will persist.
-
-Save states can be restored by running `make flash_saves_restore`. Again, `INTFLASH_BANK` or `INTFLASH_ADDRESS` must be set appropriately.
-
-You can also erase the filesystem (and thusly all saves) by running `make format` while the device is on.
-
-## Screenshots
-
-Screenshots can be captured by pressing `PAUSE/SET` + `GAME`.
-
-Screenshots can be downloaded by running `make dump_screenshot`, and will be saved as a 24-bit RGB PNG to `./screenshot.png`.
+TBC
 
 ## Cheat codes
 
@@ -282,7 +191,7 @@ GOZSXX, Invincibility
 ```
 You can enable / disable each of your codes in the game selection screen.
 
-A collection of codes can be found here: [https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes](https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes).
+A collection of codes can be found [here](https://github.com/martaaay/game-and-watch-retro-go-game-genie-codes).
 
 ### Cheat codes on GB System
 
@@ -330,34 +239,6 @@ _
 You can use blueMSX MCF cheat files with your Game & Watch. A nice collection of patch files is available [Here](http://bluemsx.msxblue.com/rel_download/Cheats.zip).
 Just copy the wanted MCF files in the /cheats/msx/ folder with the same name as the corresponding rom/dsk file.
 On MSX system, you can enable/disable cheats while playing. Just press the Pause/Set button and choose "Cheat Codes" menu to choose which cheats you want to enable or disable.
-
-## Upgrading the flash
-
-The Nintendo® Game & Watch™ comes with a 1MB external flash. This can be upgraded.
-
-The flash operates at 1.8V so make sure the one you change to also matches this.
-
-The recommended flash to upgrade to is MX25U12835FM2I-10G. It's 16MB, the commands are compatible with the stock firmware and it's also the largest flash that comes in the same package as the original.
-
-:exclamation: Make sure to backup and unlock your device before changing the external flash. The backup process requires the external flash to contain the original data.
-
-## Advanced Flash Examples
-
-### Custom Firmware (CFW)
-In order to install both the CFW (modified stock rom) and retro-go at the same time, a [patched version of openocd](https://github.com/kbeckmann/ubuntu-openocd-git-builder) needs to be installed and used.
-
-In this example, we'll be compiling retro-go to be used with a 64MB (512Mb) `MX25U51245GZ4I00` flash chip and [custom firmware](https://github.com/BrianPugh/game-and-watch-patch). The internal custom firmware will be located at `0x08000000`, which corresponds to `INTFLASH_BANK=1`. The internal retro-go firmware will be flashed to `0x08100000`, which corresponds to `INTFLASH_BANK=2`. The configuration of custom firmware described below won't use any extflash, so no `EXTFLASH_OFFSET` is specified. We can now build and flash the firmware with the following command:
-
-```bash
-make clean
-make -j8 EXTFLASH_SIZE_MB=64 INTFLASH_BANK=2 flash
-```
-
-To flash the custom firmware, [follow the CFW README](https://github.com/BrianPugh/game-and-watch-patch#retro-go). But basically, after you install the dependencies and place the correct files in the directory, run:
-```bash
-# In the game-and-watch-patch folder
-make PATCH_PARAMS="--internal-only" flash_patched_int
-```
 
 ## NES Emulator
 
@@ -409,23 +290,26 @@ Vectrex/Odyssey2 is provided by a modified version of o2em emulator.
 Support is currently in development so it's unstable, has lots of bugs and it's not really playable.
 To play, you need a bios file, for now rename your bios file to bios.bin and put it in the roms/vectrex folder
 
-## SNES game ports
+## Homebrew ports
 
-Some SNES game have been _ported_ to the G&W.
+Some homebrew/SNES games have been _ported_ to the G&W.
 
 ### The Legend of Zelda: A Link to the Past
 
-To play The Legend of Zelda: A Link to the Past, you need to copy the zelda3_assets.dat file in /roms/homebrew/ folder of your sd card.
-the zelda3_assets.dat file can be generated by doing the following steps :
+To play The Legend of Zelda: A Link to the Past, you need to generate the zelda3_assets.dat file by following these steps :
 - copy zelda3.sfc (USA version, sha1 = '6d4f10a8b10e10dbe624cb23cf03b88bb8252973') rom to external/zelda3/tables/
 - run 'make -C external/zelda3 tables/zelda3_assets.dat' command
-The file zelda3_assets.dat will be created in external/smw.
+
+The file zelda3_assets.dat will be created in external/smw. Copy the zelda3_assets.dat file in /roms/homebrew/ folder of your sd card.
 
 If you want to create zelda3_assets.dat file with several languages, the steps are :
 - copy all zelda3_xx.sfc files (including us zelda3.sfc) from languages you want to include (check names and sha1 below)
 - go in tables folder : 'cd external/zelda3/tables'
 - for each rom run this command : 'python3 restool.py --extract-dialogue -r ./zelda3_xx.sfc' (replace _xx with real rom names)
 - run the command to build assets file : 'python3 restool.py --extract-from-rom --languages=fr,fr-c,de,en,es,pl,pt,nl' (adapt the languages list to fit the languages you did provide)
+
+The file zelda3_assets.dat will be created in external/smw. Copy the zelda3_assets.dat file in /roms/homebrew/ folder of your sd card.
+
 When playing, you'll be able to change current language by going in the options menu.
 
 Due to the limited set of buttons (especially on the Mario console), the controls are peculiar:
@@ -505,19 +389,14 @@ Some features can be configured with flags:
 | ------------- | ------------- |
 | `LIMIT_30FPS` | Limit to 30 fps for improved stability.<br>Enabled by default.<br>Disabling this flag will result in unsteady framerate and stuttering. |
 
-## Homebrew ports
-
-Some homebrew games have been _ported_ to the G&W.
-
 ### Celeste Classic
 
-This is a port of the Pico-8 version of Celeste Classic.
-To enable this port, add a `roms/homebrew/Celeste.png` file.
+This is a port of the Pico-8 version of Celeste Classic. Not a Pico-8 emulator.
 
 ## Discord, support and discussion 
 
 Please join the [Discord](https://discord.gg/vVcwrrHTNJ).
 
-## LICENSE
+## License
 
-This project is licensed under the GPLv2. Some components are also available under the MIT license. Respective copyrights apply to each component.
+This project is licensed under the GPLv2. Some components are available under the MIT license. Respective copyrights apply to each component.
