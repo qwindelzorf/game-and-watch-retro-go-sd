@@ -35,6 +35,12 @@ void odroid_input_read_gamepad(odroid_gamepad_state_t* out_state)
             case SDLK_RIGHT:
                 out_state->values[ODROID_INPUT_RIGHT] = 1;
                 break;
+            case SDLK_q:
+                out_state->values[ODROID_INPUT_X] = 1;
+                break;
+            case SDLK_s:
+                out_state->values[ODROID_INPUT_Y] = 1;
+                break;
             case SDLK_ESCAPE:
                 exit(1);
                 break;
@@ -67,6 +73,12 @@ void odroid_input_read_gamepad(odroid_gamepad_state_t* out_state)
                 break;
             case SDLK_RIGHT:
                 out_state->values[ODROID_INPUT_RIGHT] = 0;
+                break;
+            case SDLK_q:
+                out_state->values[ODROID_INPUT_X] = 0;
+                break;
+            case SDLK_s:
+                out_state->values[ODROID_INPUT_Y] = 0;
                 break;
             default:
                 break;

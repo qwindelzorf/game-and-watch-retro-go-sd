@@ -8,7 +8,7 @@ int16_t audiobuffer_dma[AUDIO_BUFFER_LENGTH * 2] __attribute__((section(".audio"
 dma_transfer_state_t dma_state;
 uint32_t dma_counter;
 
-uint16_t audiobuffer_length = AUDIO_BUFFER_LENGTH;
+static uint16_t audiobuffer_full_length = AUDIO_BUFFER_LENGTH * 2;
 
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai) {
     dma_counter++;
@@ -20,8 +20,11 @@ void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai) {
     dma_state = DMA_TRANSFER_STATE_TC;
 }
 
+// returns length of active buffer
 uint16_t audio_get_buffer_length() {
-    return audiobuffer_length;
+    bool isFirstHalf = (dma_state == DMA_TRANSFER_STATE_HF) ? true : false;
+
+    return isFirstHalf ? audiobuffer_full_length/2 : (audiobuffer_full_length+1)/2;
 }
 
 uint16_t audio_get_buffer_size() {
@@ -29,37 +32,45 @@ uint16_t audio_get_buffer_size() {
 }
 
 int16_t *audio_get_active_buffer(void) {
-    size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audiobuffer_length;
+    size_t offset = (dma_state == DMA_TRANSFER_STATE_HF) ? 0 : audiobuffer_full_length/2;
 
     return &audiobuffer_dma[offset];
 }
 
 int16_t *audio_get_inactive_buffer(void) {
-    size_t offset = (dma_state == DMA_TRANSFER_STATE_TC) ? 0 : audiobuffer_length;
+    size_t offset = (dma_state == DMA_TRANSFER_STATE_TC) ? 0 : audiobuffer_full_length/2;
 
     return &audiobuffer_dma[offset];
 }
 
 void audio_clear_active_buffer() {
-    memset(audio_get_active_buffer(), 0, audiobuffer_length * sizeof(audiobuffer_dma[0]));
+    bool isFirstHalf = (dma_state == DMA_TRANSFER_STATE_HF) ? true : false;
+
+    memset(audio_get_active_buffer(), 0, (isFirstHalf ? audiobuffer_full_length/2 : (audiobuffer_full_length+1)/2) * sizeof(audiobuffer_dma[0]));
 }
 
 void audio_clear_inactive_buffer() {
-    memset(audio_get_inactive_buffer(), 0, audiobuffer_length * sizeof(audiobuffer_dma[0]));
+    bool isFirstHalf = (dma_state == DMA_TRANSFER_STATE_HF) ? true : false;
+
+    memset(audio_get_inactive_buffer(), 0, (isFirstHalf ? (audiobuffer_full_length+1)/2 : audiobuffer_full_length/2) * sizeof(audiobuffer_dma[0]));
 }
 
 void audio_clear_buffers() {
     memset(audiobuffer_dma, 0, sizeof(audiobuffer_dma));
 }
 
-void audio_set_buffer_length(uint16_t length) {
-    audiobuffer_length = length;
+static void audio_set_buffer_full_length(uint16_t full_length) {
+    audiobuffer_full_length = full_length;
 }
 
 void audio_start_playing(uint16_t length) {
+    audio_start_playing_full_length(length*2);
+}
+
+void audio_start_playing_full_length(uint16_t full_length) {
     audio_clear_buffers();
-    audio_set_buffer_length(length);
-    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, audiobuffer_length * 2);
+    audio_set_buffer_full_length(full_length);
+    HAL_SAI_Transmit_DMA(&hsai_BlockA1, (uint8_t *) audiobuffer_dma, full_length);
 }
 
 void audio_stop_playing() {

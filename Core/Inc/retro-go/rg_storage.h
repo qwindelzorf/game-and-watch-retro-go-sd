@@ -69,4 +69,7 @@ bool rg_storage_exists(const char *path);
 bool rg_storage_mkdir(const char *dir);
 bool rg_storage_scandir(const char *path, rg_scandir_cb_t *callback, void *arg, uint32_t flags);
 rg_stat_t rg_storage_stat(const char *path);
-size_t rg_storage_copy_file_to_ram(char *file_path, char *ram_dest);
+
+typedef void (*progress_ram_cb)(uint8_t progress);
+
+size_t rg_storage_copy_file_to_ram(char *file_path, uint8_t *ram_dest, void (*progress_ram_cb)(uint8_t progress));

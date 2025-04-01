@@ -157,6 +157,7 @@ const lang_t lang_fr_fr LANG_DATA = {
     .s_Theme_CoverLightV = "Mix V",
     .s_Theme_CoverLightH = "Mix H",
     .s_Caching_Game = "Mise en cache du jeu",
+    .s_Loading_Ram = "Chargement en RAM",
     //=====================================================================
 
     // Core\Src\retro-go\rg_emulators.c ====================================

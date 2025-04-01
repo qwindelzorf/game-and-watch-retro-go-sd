@@ -7,6 +7,8 @@ Core/Inc/rom_info.h
 Core/Inc/gittag.h
 roms
 
+release
+
 .mxproject
 
 saveflash.ld
@@ -17,6 +19,7 @@ linux/loaded_gb_rom.c
 linux/loaded_nes_rom.c
 linux/loaded_o2em_rom.c
 linux/loaded_a2600_rom.c
+linux/loaded_pkmini_rom.c
 
 save_states
 

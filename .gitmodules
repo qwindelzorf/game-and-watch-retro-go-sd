@@ -51,3 +51,6 @@
 [submodule "external/firmware_update"]
 	path = external/firmware_update
 	url = https://github.com/sylverb/firmware_update
+[submodule "external/PokeMini-go"]
+	path = external/PokeMini-go
+	url = https://github.com/sylverb/PokeMini-go.git

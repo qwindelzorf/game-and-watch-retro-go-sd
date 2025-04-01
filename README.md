@@ -29,7 +29,7 @@ A comprehensive emulator collection for the Nintendo® Game & Watch™ with SD C
 - [NES Emulator](#nes-emulator)
 - [MSX Emulator](#msx-emulator)
 - [Amstrad CPC6128 Emulator](#amstrad-cpc6128-emulator)
-- [Vectrex/Odyssey2 Emulator](#vectrexodyssey2-emulator)
+- [Pokémon Mini Emulator](#pokémon-mini-emulator)
 - [Homebrew ports](#homebrew-ports)
   - [The Legend of Zelda: A Link to the Past](#the-legend-of-zelda-a-link-to-the-past)
     - [Alternate languages](#alternate-languages)
@@ -143,6 +143,7 @@ To install the hardware mod, you need:
 - MSX1/2/2+
 - Nintendo Entertainment System
 - PC Engine / TurboGrafx-16
+- Pokémon Mini
 - Sega Game Gear
 - Sega Genesis / Megadrive
 - Sega Master System
@@ -186,7 +187,7 @@ To install the hardware mod, you need:
 
 - Can you add [new system name] support ?
 
-   Maybe ... Probably not ! G&W system is very limited, it has only about 1MB of RAM free for code + dynamic ressources for each emulator. Most of the time emulators have to be deeply optimized to reduce their memory use so they can fit. Each emulator port is a challenge and some have failed already (fake-08, picodrive, ) ...
+   Maybe ... Probably not ! G&W system is very limited, it has only about 1MB of RAM free for code + dynamic ressources for each emulator. Most of the time emulators have to be deeply optimized to reduce their memory use so they can fit. Each emulator port is a challenge and some have failed already (fake-08, picodrive, ...).
 
 ## Cheat codes
 
@@ -310,6 +311,9 @@ Note that the Amstrad CPC6128 support is done using caprice32 emulator, any game
 Vectrex/Odyssey2 is provided by a modified version of o2em emulator.
 Support is currently in development so it's unstable, has lots of bugs and it's not really playable.
 To play, you need a bios file, for now rename your bios file to bios.bin and put it in the roms/vectrex folder
+
+# Pokémon Mini Emulator
+https://github.com/libretro/PokeMini was used for porting. You can provide a bios file in /bios/mini/bios.min file, but it's optional : if no bios file is provided, an integrated open source bios will be used.
 
 ## Homebrew ports
 

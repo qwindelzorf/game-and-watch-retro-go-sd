@@ -1483,4 +1483,19 @@ uint8_t *odroid_overlay_cache_file_in_flash(const char *file_path, uint32_t *fil
                                progress_cb);
 }
 
+size_t odroid_overlay_cache_file_in_ram(const char *file_path, uint8_t *dest_address)
+{
+    void progress_cb(uint8_t progress)
+    {
+        lcd_sleep_while_swap_pending();
+
+        odroid_overlay_draw_progress_bar(curr_lang->s_Loading_Ram, progress);
+
+        // Show
+        lcd_swap();
+    }
+
+    return rg_storage_copy_file_to_ram(file_path, dest_address, progress_cb);
+}
+
 #endif

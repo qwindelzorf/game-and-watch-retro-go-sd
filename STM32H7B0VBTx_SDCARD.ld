@@ -636,6 +636,28 @@ INCLUDE build/fceumm_mappers.ld
   }
   _OVERLAY_TAMA_BSS_SIZE = SIZEOF(.overlay_tama_bss);
 
+  .overlay_pkmini __RAM_EMU_START__ : {
+    . = ALIGN(4);
+    __ram_emu_pkmini_start__ = .;
+    build/pkmini/*.o (.data .data* .text .text* .rodata .rodata*)
+    . = ALIGN(4);
+    _OVERLAY_PKMINI_LOAD_END = .;
+  } AT > CORES
+  _OVERLAY_PKMINI_LOAD_START = LOADADDR(.overlay_pkmini);
+  _OVERLAY_PKMINI_SIZE = SIZEOF(.overlay_pkmini);
+
+  .overlay_pkmini_bss _OVERLAY_PKMINI_LOAD_END : {
+    . = ALIGN(4);
+    _OVERLAY_PKMINI_BSS_START = .;
+    build/pkmini/*.o (.bss .bss*)
+    . = ALIGN(4);
+    build/pkmini/*.o (COMMON)
+    __ram_emu_pkmini_end__ = .;
+    _OVERLAY_PKMINI_BSS_END = .;
+    ASSERT(ABSOLUTE(_OVERLAY_PKMINI_BSS_END) < __RAM_EMU_END__, "Error: PKMINI BSS overflow");
+  }
+  _OVERLAY_PKMINI_BSS_SIZE = SIZEOF(.overlay_pkmini_bss);
+
   .overlay_graphics : {
     . = ALIGN(4);
     KEEP(*(.sdcard_logo))

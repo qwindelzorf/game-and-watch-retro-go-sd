@@ -30,6 +30,7 @@
 #include "main_videopac.h"
 #include "main_celeste.h"
 #include "main_tama.h"
+#include "main_pkmini.h"
 #include "main_a2600.h"
 #include "rg_rtc.h"
 #include "heap.hpp"
@@ -48,7 +49,7 @@ static retro_emulator_file_t *shared_files = NULL;
 #define COVERFLOW 0
 #endif /* COVERFLOW */
 // Increase when adding new emulators
-#define MAX_EMULATORS 19
+#define MAX_EMULATORS 17
 static retro_emulator_t emulators[MAX_EMULATORS];
 static rom_system_t systems[MAX_EMULATORS];
 static int emulators_count = 0;
@@ -671,13 +672,13 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
     if((strcmp(system_name, "Nintendo Gameboy") == 0) ||
        (strcmp(system_name, "Nintendo Gameboy Color") == 0)) {
 #if FORCE_GNUBOY == 1
-        if (rg_storage_copy_file_to_ram("/cores/gb.bin", (char *)&__RAM_EMU_START__)) {
+        if (odroid_overlay_cache_file_in_ram("/cores/gb.bin", (uint8_t *)&__RAM_EMU_START__)) {
             memset(&_OVERLAY_GB_BSS_START, 0x0, (size_t)&_OVERLAY_GB_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_GB_SIZE);
             app_main_gb(load_state, start_paused, save_slot);
         }
 #else
-        if (rg_storage_copy_file_to_ram("/cores/tgb.bin", (char *)&__RAM_EMU_START__)) {
+        if (odroid_overlay_cache_file_in_ram("/cores/tgb.bin", (uint8_t *)&__RAM_EMU_START__)) {
             memset(&_OVERLAY_TGB_BSS_START, 0x0, (size_t)&_OVERLAY_TGB_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_TGB_SIZE);
 
@@ -689,13 +690,13 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 #endif
     } else if(strcmp(system_name, "Nintendo Entertainment System") == 0) {
 #if FORCE_NOFRENDO == 1
-        if (rg_storage_copy_file_to_ram("/cores/nes.bin", (char *)&__RAM_EMU_START__)) {
+        if (odroid_overlay_cache_file_in_ram("/cores/nes.bin", (uint8_t *)&__RAM_EMU_START__)) {
             memset(&_OVERLAY_NES_BSS_START, 0x0, (size_t)&_OVERLAY_NES_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_NES_SIZE);
             app_main_nes(load_state, start_paused, save_slot);
         }
 #else
-        if (rg_storage_copy_file_to_ram("/cores/nes_fceu.bin", (char *)&__RAM_FCEUMM_START__)) {
+        if (odroid_overlay_cache_file_in_ram("/cores/nes_fceu.bin", (uint8_t *)&__RAM_FCEUMM_START__)) {
             memset(&_OVERLAY_NES_FCEU_BSS_START, 0x0, (size_t)&_OVERLAY_NES_FCEU_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_NES_FCEU_SIZE);
             app_main_nes_fceu(load_state, start_paused, save_slot);
@@ -705,7 +706,7 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
               strcmp(system_name, "Sega Game Gear") == 0     ||
               strcmp(system_name, "Sega SG-1000") == 0       ||
               strcmp(system_name, "Colecovision") == 0 ) {
-        if (rg_storage_copy_file_to_ram("/cores/sms.bin", (char *)&__RAM_EMU_START__)) {
+        if (odroid_overlay_cache_file_in_ram("/cores/sms.bin", (uint8_t *)&__RAM_EMU_START__)) {
             memset(&_OVERLAY_SMS_BSS_START, 0x0, (size_t)&_OVERLAY_SMS_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_SMS_SIZE);
             if (! strcmp(system_name, "Colecovision")) app_main_smsplusgx(load_state, start_paused, save_slot, SMSPLUSGX_ENGINE_COLECO);
@@ -714,38 +715,38 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
             else                                            app_main_smsplusgx(load_state, start_paused, save_slot, SMSPLUSGX_ENGINE_OTHERS);
         }
     } else if(strcmp(system_name, "Game & Watch") == 0 ) {
-        if (rg_storage_copy_file_to_ram("/cores/gw.bin", (char *)&__RAM_EMU_START__)) {
+        if (odroid_overlay_cache_file_in_ram("/cores/gw.bin", (uint8_t *)&__RAM_EMU_START__)) {
             memset(&_OVERLAY_GW_BSS_START, 0x0, (size_t)&_OVERLAY_GW_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_GW_SIZE);
             app_main_gw(load_state, save_slot);
         }
     } else if(strcmp(system_name, "PC Engine") == 0) {
-      if (rg_storage_copy_file_to_ram("/cores/pce.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/pce.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_PCE_BSS_START, 0x0, (size_t)&_OVERLAY_PCE_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_PCE_SIZE);
         app_main_pce(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "MSX") == 0) {
-      if (rg_storage_copy_file_to_ram("/cores/msx.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/msx.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_MSX_BSS_START, 0x0, (size_t)&_OVERLAY_MSX_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_MSX_SIZE);
         app_main_msx(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "Watara Supervision") == 0) {
-      if (rg_storage_copy_file_to_ram("/cores/wsv.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/wsv.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_WSV_BSS_START, 0x0, (size_t)&_OVERLAY_WSV_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_WSV_SIZE);
         app_main_wsv(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "Sega Genesis") == 0)  {
-      if (rg_storage_copy_file_to_ram("/cores/md.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/md.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_MD_BSS_START, 0x0, (size_t)&_OVERLAY_MD_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_MD_SIZE);
         app_main_gwenesis(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "Atari 2600") == 0) {
 #ifdef ENABLE_EMULATOR_A2600
-      if (rg_storage_copy_file_to_ram("/cores/a2600.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/a2600.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_A2600_BSS_START, 0x0, (size_t)&_OVERLAY_A2600_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_A2600_SIZE);
 
@@ -756,27 +757,27 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
       }
 #endif
     } else if(strcmp(system_name, "Atari 7800") == 0)  {
-      if (rg_storage_copy_file_to_ram("/cores/a7800.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/a7800.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_A7800_BSS_START, 0x0, (size_t)&_OVERLAY_A7800_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_A7800_SIZE);
         app_main_a7800(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "Amstrad CPC") == 0)  {
-      if (rg_storage_copy_file_to_ram("/cores/amstrad.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/amstrad.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_AMSTRAD_BSS_START, 0x0, (size_t)&_OVERLAY_AMSTRAD_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_AMSTRAD_SIZE);
         app_main_amstrad(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "Philips Vectrex") == 0)  {
 #ifdef ENABLE_EMULATOR_VIDEOPAC
-      if (rg_storage_copy_file_to_ram("/cores/videopac.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/videopac.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_VIDEOPAC_BSS_START, 0x0, (size_t)&_OVERLAY_VIDEOPAC_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_VIDEOPAC_SIZE);
         app_main_videopac(load_state, start_paused, save_slot);
       }
 #endif
     } else if(strcmp(system_name, "Homebrew") == 0)  {
-      if (rg_storage_copy_file_to_ram(ACTIVE_FILE->path, (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, (uint8_t *)&__RAM_EMU_START__)) {
         if (strcmp(newfile->name,"celeste") == 0) {
             memset(&_OVERLAY_CELESTE_BSS_START, 0x0, (size_t)&_OVERLAY_CELESTE_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_CELESTE_SIZE);
@@ -804,10 +805,16 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 #endif
       }
     } else if(strcmp(system_name, "Tamagotchi") == 0) {
-      if (rg_storage_copy_file_to_ram("/cores/tama.bin", (char *)&__RAM_EMU_START__)) {
+      if (odroid_overlay_cache_file_in_ram("/cores/tama.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_TAMA_BSS_START, 0x0, (size_t)&_OVERLAY_TAMA_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_TAMA_SIZE);
         app_main_tama(load_state, start_paused, save_slot);
+      }
+    } else if(strcmp(system_name, "Pokemon Mini") == 0) {
+      if (odroid_overlay_cache_file_in_ram("/cores/pkmini.bin", (uint8_t *)&__RAM_EMU_START__)) {
+        memset(&_OVERLAY_PKMINI_BSS_START, 0x0, (size_t)&_OVERLAY_PKMINI_BSS_SIZE);
+        SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_PKMINI_SIZE);
+        app_main_pkmini(load_state, start_paused, save_slot);
       }
     }
 
@@ -850,97 +857,8 @@ void emulators_init()
     add_emulator("Amstrad CPC", "amstrad", "dsk", RG_LOGO_PAD_AMSTRAD, RG_LOGO_HEADER_AMSTRAD, GAME_DATA);
 //    add_emulator("Philips Vectrex", "videopac", "bin", "o2em-go", 0, &pad_gb, &header_gb); // TODO : change graphics
     add_emulator("Tamagotchi", "tama", "b", RG_LOGO_PAD_TAMA, RG_LOGO_HEADER_TAMA, NO_GAME_DATA);
+    add_emulator("Pokemon Mini", "mini", "min", RG_LOGO_PAD_TAMA, RG_LOGO_HEADER_TAMA, NO_GAME_DATA);
     add_emulator("Homebrew", "homebrew", "bin", RG_LOGO_EMPTY, RG_LOGO_HEADER_HOMEBREW, NO_GAME_DATA);
-
-#if 0
-#if !( defined(ENABLE_EMULATOR_GB) || defined(ENABLE_EMULATOR_NES) || defined(ENABLE_EMULATOR_SMS) || defined(ENABLE_EMULATOR_GG) || defined(ENABLE_EMULATOR_COL) || defined(ENABLE_EMULATOR_SG1000) || defined(ENABLE_EMULATOR_PCE) || defined(ENABLE_EMULATOR_GW) || defined(ENABLE_EMULATOR_MSX) || defined(ENABLE_EMULATOR_WSV) || defined(ENABLE_EMULATOR_MD) || defined(ENABLE_EMULATOR_A7800) || defined(ENABLE_EMULATOR_AMSTRAD) || defined(ENABLE_EMULATOR_VIDEOPAC) || defined(ENABLE_HOMEBREW)|| defined(ENABLE_HOMEBREW_ZELDA3) || defined(ENABLE_HOMEBREW_SMW) || defined(ENABLE_EMULATOR_TAMA) || defined(ENABLE_EMULATOR_A2600))
-    // Add gameboy as a placeholder in case no emulator is built.
-    add_emulator("Nintendo Gameboy", "gb", "gb", "tgbdual-go", 0, &pad_gb, &header_gb);
-#endif
-
-
-#ifdef ENABLE_EMULATOR_GB
-    add_emulator("Nintendo Gameboy", "gb", "gb", "tgbdual-go", 0, &pad_gb, &header_gb);
-    // add_emulator("Nintendo Gameboy Color", "gbc", "gbc", "gnuboy-go", 0, logo_gbc, header_gbc);
-#endif
-
-#ifdef ENABLE_EMULATOR_NES
-    add_emulator("Nintendo Entertainment System", "nes", "nes", "nofrendo-go", 16, &pad_nes, &header_nes);
-#endif
-    
-#ifdef ENABLE_EMULATOR_GW
-    add_emulator("Game & Watch", "gw", "gw", "LCD-Game-Emulator", 0, &pad_gw, &header_gw);
-#endif
-
-#ifdef ENABLE_EMULATOR_PCE
-    add_emulator("PC Engine", "pce", "pce", "pce-go", 0, &pad_pce, &header_pce);
-#endif
-
-#ifdef ENABLE_EMULATOR_GG
-    add_emulator("Sega Game Gear", "gg", "gg", "smsplusgx-go", 0, &pad_gg, &header_gg);
-#endif
-
-#ifdef ENABLE_EMULATOR_SMS
-    add_emulator("Sega Master System", "sms", "sms", "smsplusgx-go", 0, &pad_sms, &header_sms);
-#endif
-
-#ifdef ENABLE_EMULATOR_MD
-    add_emulator("Sega Genesis", "md", "md", "GnWesis", 0, &pad_gen, &header_gen);
-#endif
-
-#ifdef ENABLE_EMULATOR_SG1000
-    add_emulator("Sega SG-1000", "sg", "sg", "smsplusgx-go", 0, &pad_sg1000, &header_sg1000);
-#endif
-
-#ifdef ENABLE_EMULATOR_COL
-    add_emulator("Colecovision", "col", "col", "smsplusgx-go", 0, &pad_col, &header_col);
-#endif
-
-#ifdef ENABLE_EMULATOR_MSX
-    add_emulator("MSX", "msx", "msx", "blueMSX", 0, &pad_msx, &header_msx);
-#endif
-
-#ifdef ENABLE_EMULATOR_WSV
-    add_emulator("Watara Supervision", "wsv", "wsv", "potator", 0, &pad_wsv, &header_wsv);
-#endif
-
-#ifdef ENABLE_EMULATOR_A2600
-    add_emulator("Atari 2600", "a2600", "a2600", "stella2014-go", 0, &pad_a7800, &header_a7800); // TODO : add specific gfx^M
-#endif
-
-#ifdef ENABLE_EMULATOR_A7800
-    add_emulator("Atari 7800", "a7800", "a7800", "prosystem-go", 0, &pad_a7800, &header_a7800);
-#endif
-
-#ifdef ENABLE_EMULATOR_AMSTRAD
-    add_emulator("Amstrad CPC", "amstrad", "amstrad", "caprice32", 0, &pad_amstrad, &header_amstrad);
-#endif
-
-#ifdef ENABLE_HOMEBREW_ZELDA3
-    add_emulator("Zelda3", "zelda3", "zelda3", "zelda3", 0, &pad_snes, &header_zelda3);
-#endif
-
-#ifdef ENABLE_HOMEBREW_SMW
-    add_emulator("SMW", "smw", "smw", "smw", 0, &pad_snes, &header_smw);
-#endif
-
-#ifdef ENABLE_EMULATOR_VIDEOPAC
-    add_emulator("Philips Vectrex", "videopac", "bin", "o2em-go", 0, &pad_gb, &header_gb); // TODO Sylver : change graphics
-#endif
-
-#ifdef ENABLE_HOMEBREW
-    add_emulator("Homebrew", "homebrew", "bin", "", 0, &pad_homebrew, &header_homebrew);
-#endif
-
-#ifdef ENABLE_EMULATOR_TAMA
-    add_emulator("Tamagotchi", "tama", "b", "tamalib", 0, &pad_tama, &header_tama);
-#endif
-
-    // add_emulator("ColecoVision", "col", "col", "smsplusgx-go", 0, logo_col, header_col);
-    // add_emulator("PC Engine", "pce", "pce", "huexpress-go", 0, logo_pce, header_pce);
-    // add_emulator("Atari Lynx", "lnx", "lnx", "handy-go", 64, logo_lnx, header_lnx);
-    // add_emulator("Atari 2600", "a26", "a26", "stella-go", 0, logo_a26, header_a26);
-#endif
 }
 
 bool emulator_is_file_valid(retro_emulator_file_t *file)

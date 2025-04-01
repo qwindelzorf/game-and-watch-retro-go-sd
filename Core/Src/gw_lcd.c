@@ -254,6 +254,14 @@ void lcd_set_refresh_rate(uint32_t frequency) {
   else if (frequency == 50) {
     plln = 10;
     pllr = 32;
+  }
+  else if (frequency == 72) {
+    plln = 9;
+    pllr = 20;
+  }
+  else if (frequency == 75) {
+    plln = 15;
+    pllr = 32;
   } else {
     //  printf("wrong lcd refresh rate; 50Hz or 60Hz only\n");
     //  assert(0);

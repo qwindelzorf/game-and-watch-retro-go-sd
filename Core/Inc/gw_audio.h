@@ -29,6 +29,7 @@ void audio_clear_inactive_buffer(void);
 void audio_clear_buffers(void);
 void audio_set_buffer_length(uint16_t length);
 void audio_start_playing(uint16_t length);
+void audio_start_playing_full_length(uint16_t length);
 void audio_stop_playing(void);
 
 #endif

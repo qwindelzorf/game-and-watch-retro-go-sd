@@ -758,6 +758,34 @@ $(CORE_TAMA)/tamalib.c \
 Core/Src/porting/tama/state_tama.c \
 Core/Src/porting/tama/main_tama.c
 
+PKMINI_C_SOURCES = 
+
+CORE_PKMINI = external/PokeMini-go
+PKMINI_C_SOURCES += \
+$(CORE_PKMINI)/freebios/freebios.c \
+$(CORE_PKMINI)/source/CommandLine.c \
+$(CORE_PKMINI)/source/Hardware.c \
+$(CORE_PKMINI)/source/Joystick.c \
+$(CORE_PKMINI)/source/MinxAudio.c \
+$(CORE_PKMINI)/source/MinxColorPRC.c \
+$(CORE_PKMINI)/source/MinxCPU_CE.c \
+$(CORE_PKMINI)/source/MinxCPU_CF.c \
+$(CORE_PKMINI)/source/MinxCPU_SP.c \
+$(CORE_PKMINI)/source/MinxCPU_XX.c \
+$(CORE_PKMINI)/source/MinxCPU.c \
+$(CORE_PKMINI)/source/MinxIO.c \
+$(CORE_PKMINI)/source/MinxIRQ.c \
+$(CORE_PKMINI)/source/MinxLCD.c \
+$(CORE_PKMINI)/source/MinxPRC.c \
+$(CORE_PKMINI)/source/MinxTimers.c \
+$(CORE_PKMINI)/source/Multicart.c \
+$(CORE_PKMINI)/source/PMCommon.c \
+$(CORE_PKMINI)/source/PokeMini.c \
+$(CORE_PKMINI)/source/Video_x3.c \
+$(CORE_PKMINI)/source/Video.c \
+$(CORE_PKMINI)/resource/PokeMini_ColorPal.c \
+Core/Src/porting/pkmini/main_pkmini.c
+
 CELESTE_C_SOURCES = 
 
 CORE_CCLESTE = external/ccleste-go
@@ -1023,12 +1051,22 @@ TAMA_C_INCLUDES +=  \
 -I$(CORE_TAMA) \
 -I./
 
+PKMINI_C_INCLUDES +=  \
+-ICore/Inc \
+-ICore/Src/porting/lib \
+-Iretro-go-stm32/components/odroid \
+-I$(CORE_PKMINI)/source \
+-I$(CORE_PKMINI)/resource \
+-I$(CORE_PKMINI)/freebios \
+-I$(CORE_PKMINI)/libretro/libretro-common/include \
+-I./
+
 include Makefile.common
 
 
 $(BUILD_DIR)/$(TARGET)_extflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
-	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_nes_fceu -j .overlay_gb -j .overlay_tgb -j .overlay_sms -j .overlay_col -j .overlay_pce -j .overlay_msx -j .overlay_gw -j .overlay_wsv -j .overlay_md -j .overlay_a2600 -j .overlay_a7800 -j .overlay_amstrad -j .overlay_zelda3 -j .overlay_smw -j .overlay_videopac -j .overlay_celeste -j .overlay_tama $< $(BUILD_DIR)/$(TARGET)_extflash.bin
+	$(V)$(BIN) -j ._itcram_hot -j ._ram_exec -j ._extflash -j .overlay_nes -j .overlay_nes_fceu -j .overlay_gb -j .overlay_tgb -j .overlay_sms -j .overlay_col -j .overlay_pce -j .overlay_msx -j .overlay_gw -j .overlay_wsv -j .overlay_md -j .overlay_a2600 -j .overlay_a7800 -j .overlay_amstrad -j .overlay_zelda3 -j .overlay_smw -j .overlay_videopac -j .overlay_celeste -j .overlay_tama -j .overlay_pkmini $< $(BUILD_DIR)/$(TARGET)_extflash.bin
 
 $(BUILD_DIR)/$(TARGET)_intflash.bin: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	$(V)$(ECHO) [ BIN ] $(notdir $@)
