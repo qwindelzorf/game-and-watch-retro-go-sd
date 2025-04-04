@@ -2,8 +2,8 @@
 
 ## What's New
 
-### Version 0.5.2
-- Fix regression in GB/GBC color palette management
+### Version 0.6.0
+- Add support for Pokémon mini console (put roms in /roms/mini)
 
 ## Prerequisites
 To install this version, make sure you have:
