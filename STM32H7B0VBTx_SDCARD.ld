@@ -255,13 +255,11 @@ INCLUDE build/fceumm_mappers.ld
     . = ALIGN(4);
     build/nes_fceu/*.o (COMMON)
     . = ALIGN(4);
-    _NES_FCEU_ROM_UNPACK_BUFFER = .;
     _OVERLAY_NES_FCEU_BSS_END = .;
     __ram_emu_nes_fceu_end__ = .;
     ASSERT(ABSOLUTE(_OVERLAY_NES_FCEU_BSS_END) < __RAM_EMU_END__, "Error: NES_FCEU BSS overflow");
   }
   _OVERLAY_NES_FCEU_BSS_SIZE = SIZEOF(.overlay_nes_fceu_bss);
-  _NES_FCEU_ROM_UNPACK_BUFFER_SIZE = __RAM_EMU_START__ + __RAM_EMU_LENGTH__ - _NES_FCEU_ROM_UNPACK_BUFFER;
 
   .overlay_gb __RAM_EMU_START__ : {
     . = ALIGN(4);

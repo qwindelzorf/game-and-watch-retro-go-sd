@@ -250,7 +250,7 @@ uint8_t *store_file_in_flash(const char *file_path, uint32_t *file_size_p, bool 
 {
     if (metadata == NULL)
     {
-        metadata = ram_calloc(1, sizeof(Metadata));
+        metadata = calloc(1, sizeof(Metadata));
     }
     initialize_flash_pointer();
     // TODO : append file modification time to filepath for crc32
@@ -260,11 +260,15 @@ uint8_t *store_file_in_flash(const char *file_path, uint32_t *file_size_p, bool 
 
     if (is_file_in_flash(file_crc32, &flash_address, file_size_p))
     {
+        free(metadata);
+        metadata = NULL;
         return (uint8_t *)flash_address;
     }
 
     if (!circular_flash_write(file_path, file_size_p, &flash_address, byte_swap, progress_cb))
     {
+        free(metadata);
+        metadata = NULL;
         return NULL;
     }
 
@@ -295,5 +299,7 @@ uint8_t *store_file_in_flash(const char *file_path, uint32_t *file_size_p, bool 
 
     save_metadata();
     wdog_refresh();
+    free(metadata);
+    metadata = NULL;
     return (uint8_t *)flash_address;
 }

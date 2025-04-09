@@ -48,7 +48,7 @@ static bool LoadState(const char *savePathName) {
         return false;
     }
 
-    size_t read = fread(save_buffer, sizeof(save_buffer), 1, file);
+    fread(save_buffer, sizeof(save_buffer), 1, file);
 
     fclose(file);
 
@@ -131,11 +131,23 @@ static size_t getromdata(unsigned char **data) {
         return n_decomp_bytes;
     }
     else
-#endif
     {
         *data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }
+#elif SD_CARD == 1
+    ram_start = (uint32_t)&_OVERLAY_A7800_BSS_END;
+    uint32_t size = ACTIVE_FILE->size;
+    if (size > ram_get_free_size()) {
+        *data = odroid_overlay_cache_file_in_flash(ACTIVE_FILE->path, &size, false);
+    } else {
+        *data = ram_malloc(size);
+        if (*data != NULL) {
+            odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, *data);
+        }
+    }
+    return size;
+#endif
 }
 
 static void display_ResetPalette(void)

@@ -15,6 +15,8 @@ extern "C" {
 #include "gw_malloc.h"
 #include "main_gb_tgbdual.h"
 #include "heap.hpp"
+#include "odroid_overlay.h"
+#include "rg_storage.h"
 
 extern void __libc_init_array(void);
 }
@@ -510,6 +512,7 @@ void app_main_gb_tgbdual_cpp(uint8_t load_state, uint8_t start_paused, int8_t sa
     odroid_system_init(APPID_GB, GB_AUDIO_FREQUENCY);
     odroid_system_emu_init(&LoadState, &SaveState, &Screenshot, NULL);
 
+#if SD_CARD == 0
     // To optimize free memory for bank caching, we make sure that maximum
     // data will be set in itc ram. If RAM size info tell that we need
     // to allocate 32KB of GB extended ram, we disable itc allocation to
@@ -517,12 +520,56 @@ void app_main_gb_tgbdual_cpp(uint8_t load_state, uint8_t start_paused, int8_t sa
     // by using them for the 32KB Gameboy RAM and the game extended ram
     if (ROM_DATA[0x149] != 3) // Ram size info
         heap_itc_alloc(true);
+#elif SD_CARD == 1
+    uint8_t ram_size = 0;
+    uint8_t is_gbcolor = 0;
+    FILE *file = fopen(ACTIVE_FILE->path,"rb");
+    if (file) {
+        fseek(file, 0x149, SEEK_SET);
+        fread(&ram_size, 1, 1, file);
+        fseek(file, 0x143, SEEK_SET);
+        fread(&is_gbcolor, 1, 1, file);
+        is_gbcolor = !((is_gbcolor & 0x80) == 0);
+        fclose(file);
+    }
+#endif
 
     render = new gw_renderer(0);
     g_gb   = new gb(render, true, true);
 
+// TODO : load rom from sd card (in ram or in flash)
+#if SD_CARD == 1
+    // We have to determine if the sram will be allocated in itc ram or in standard ram
+    // to know how much standard ram is really available
+	static const int tbl_sram[]={1,1,1,4,16,8};//0と1は保険
+    size_t reserved_size = 0;
+    if (is_gbcolor) {
+        if (ram_size >= 3)
+            reserved_size = 0x2000*tbl_sram[ram_size];
+    } else {
+        if (ram_size >= 4)
+            reserved_size = 0x2000*tbl_sram[ram_size];
+    }
+
+    byte *data = NULL;
+    uint32_t size = 0;
+    size = ACTIVE_FILE->size;
+    printf("is_gbcolor: %d ram_size: %d\n", is_gbcolor, ram_size);
+    printf("free mem: %d reserved_size: %d\n", heap_free_mem(), reserved_size);
+    if (size > (heap_free_mem() - reserved_size)) {
+        data = (byte *)odroid_overlay_cache_file_in_flash(ACTIVE_FILE->path, &size, false);
+    } else {
+        data = (byte *)heap_alloc_mem(size);
+        if (data != NULL) {
+            odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, (uint8_t *)data);
+        }
+    }
+    if (!g_gb->load_rom(data, size, NULL, 0, true))
+        return;
+#else
     if (!g_gb->load_rom((byte *)ROM_DATA, ROM_DATA_LENGTH, NULL, 0, true))
         return;
+#endif
 
     if (load_state) {
         odroid_system_emu_load_state(save_slot);

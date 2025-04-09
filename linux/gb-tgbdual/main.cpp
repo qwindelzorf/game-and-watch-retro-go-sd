@@ -39,6 +39,7 @@ extern unsigned int ROM_DATA_LENGTH;
 #include <cmath>
 #include "gb_core/gb.h"
 #include "linux_renderer.h"
+#include "heap.hpp"
 
 #define APP_ID 20
 
@@ -87,6 +88,17 @@ static int16_t *audio_out_buffer     = NULL;
 static size_t audio_out_buffer_size  = 0;
 static size_t audio_out_buffer_pos   = 0;
 static size_t audio_batch_frames_max = (1 << 16);
+
+extern "C" void heap_itc_alloc(bool itc) {
+    printf("heap_itc_alloc %d\n", itc);
+}
+
+extern "C" void *heap_alloc_mem(size_t s) {
+    printf("heap_alloc_mem %zu\n", s);
+    void *ptr = (void *)malloc(s);
+
+    return ptr;
+}
 
 // SDL
 SDL_Window *window;
@@ -205,7 +217,7 @@ int init_window(int width, int height)
     return 0;
 }
 
-static bool SaveState(char *savePathName, char *sramPathName)
+static bool SaveState(const char *savePathName)
 {
     int total_size = g_gb->get_state_size();
     printf("SaveState %d\n",total_size);
@@ -221,7 +233,7 @@ static bool SaveState(char *savePathName, char *sramPathName)
     return 0;
 }
 
-static bool LoadState(char *savePathName, char *sramPathName)
+static bool LoadState(const char *savePathName)
 {
     FILE* pFile;
     int size = g_gb->get_state_size();
@@ -280,10 +292,10 @@ int input_read_gamepad()
                 run_loop = false;
                 break;
             case SDLK_F3:
-                SaveState(NULL, NULL);
+                SaveState(NULL);
                 break;
             case SDLK_F4:
-                LoadState(NULL, NULL);
+                LoadState(NULL);
                 break;
             case SDLK_p:
                 index_palette++;
@@ -392,7 +404,7 @@ int main()
     printf("tgbdual-go\n");
 	// sets framebuffer1 as active buffer
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
-    odroid_system_emu_init(&LoadState, &SaveState, NULL);
+    odroid_system_emu_init(&LoadState, &SaveState, NULL, NULL);
 
     init_window(WIDTH, HEIGHT);
 
@@ -404,8 +416,11 @@ int main()
 	printf("!!!!!!!!!!!! new gb\n");
     g_gb   = new gb(render, true, true);
 
+    printf("load rom\n");
    if (!g_gb->load_rom((byte *)ROM_DATA, ROM_DATA_LENGTH, NULL, 0, true))
       return -1;
+
+    printf("load rom done\n");
 
     g_gb->get_lcd()->set_palette(0);
 

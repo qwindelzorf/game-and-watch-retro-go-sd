@@ -163,13 +163,10 @@ static void SetPixelOffset(void)
 
 static int load_rom()
 {
-    uint32_t size;
+    uint32_t size = ACTIVE_FILE->size;
     uint8_t* buffer;
 	// Free existing color information
 	PokeMini_FreeColorInfo();
-
-    rg_stat_t stat = rg_storage_stat(ACTIVE_FILE->path);
-    size = stat.size;
 
 	// Check if size is valid
 	if ((size <= 0x2100) || (size > 0x200000))

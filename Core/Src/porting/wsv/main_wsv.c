@@ -9,6 +9,9 @@
 #ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
 #endif
+#include "gw_malloc.h"
+#include "rg_storage.h"
+#include "odroid_overlay.h"
 #include "appid.h"
 #include "bilinear.h"
 #include "rg_i18n.h"
@@ -480,11 +483,23 @@ size_t wsv_getromdata(unsigned char **data) {
         return n_decomp_bytes;
     }
     else
-#endif
     {
         *data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }
+#elif SD_CARD == 1
+    ram_start = (uint32_t)&_OVERLAY_WSV_BSS_END;
+    uint32_t size = ACTIVE_FILE->size;
+    if (size > ram_get_free_size()) {
+        *data = odroid_overlay_cache_file_in_flash(ACTIVE_FILE->path, &size, false);
+    } else {
+        *data = ram_malloc(size);
+        if (*data != NULL) {
+            odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, *data);
+        }
+    }
+    return size;
+#endif
 }
 
 int app_main_wsv(uint8_t load_state, uint8_t start_paused, int8_t save_slot)

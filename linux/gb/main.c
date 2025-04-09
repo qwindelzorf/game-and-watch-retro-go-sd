@@ -148,7 +148,7 @@ void pcm_submit(void)
 void init(void)
 {
     odroid_system_init(APP_ID, AUDIO_SAMPLE_RATE);
-    odroid_system_emu_init(&LoadState, &SaveState, NULL);
+    odroid_system_emu_init(&LoadState, &SaveState, NULL, NULL);
 
     // Hack: Use the same buffer twice
     update1.buffer = fb_data;

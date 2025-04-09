@@ -31,6 +31,13 @@ void ahb_init() {
   current_ahb_pointer = (uint32_t)(&__ahbram_end__);
 }
 
+size_t ram_get_free_size() {
+  assert(ram_start != 0); // We are not supposed to ram alloc without initializing ram start pointer
+  if (current_ram_pointer == 0)
+    current_ram_pointer = (ram_start + 3) & ~0x03; // Make sure pointers are always 32 bits aligned;
+  return ((uint32_t)&__RAM_EMU_END__) - current_ram_pointer;
+}
+
 void *ram_malloc(size_t size) {
   assert(ram_start != 0); // We are not supposed to ram alloc without initializing ram start pointer
   if (current_ram_pointer == 0)

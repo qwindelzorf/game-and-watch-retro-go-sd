@@ -18,6 +18,8 @@
 #include "driver.h"
 #include "video.h"
 #include "gw_malloc.h"
+#include "odroid_overlay.h"
+#include "rg_storage.h"
 
 #define NES_WIDTH  256
 #define NES_HEIGHT 240
@@ -185,8 +187,6 @@ static void *Screenshot()
     return lcd_get_active_buffer();
 }
 
-// TODO: Move to lcd.c/h
-extern LTDC_HandleTypeDef hltdc;
 unsigned dendy = 0;
 
 static uint16_t palette565[256];
@@ -444,12 +444,12 @@ static void update_sound_nes(int32_t *sound, uint16_t size) {
 
 static size_t nes_getromdata(unsigned char **data)
 {
-    wdog_refresh();
-    unsigned char *dest = (unsigned char *)&_NES_FCEU_ROM_UNPACK_BUFFER;
 #ifndef GNW_DISABLE_COMPRESSION
+    wdog_refresh();
+    unsigned char *dest = (unsigned char *)&_OVERLAY_NES_FCEU_BSS_END;
     /* src pointer to the ROM data in the external flash (raw or LZ4) */
     const unsigned char *src = ROM_DATA;
-    uint32_t available_size = (uint32_t)&_NES_FCEU_ROM_UNPACK_BUFFER_SIZE;
+    uint32_t available_size = (uint32_t)0x00080010; // Max size of a compressedNES ROM
 
     if(strcmp(ROM_EXT, "lzma") == 0){
         size_t n_decomp_bytes;
@@ -459,24 +459,34 @@ static size_t nes_getromdata(unsigned char **data)
         return n_decomp_bytes;
     }
     else
-#endif
     {
-#if defined(FCEU_LOW_RAM)
         // FDS disks has to be stored in ram for games
         // that want to write to the disk
         if (ROM_DATA_LENGTH <= 262000) {
             memcpy(dest, ROM_DATA, ROM_DATA_LENGTH);
             *data = (unsigned char *)dest;
             ram_start = (uint32_t)dest + ROM_DATA_LENGTH;
-        } else 
-#endif
-        {
+        } else {
             *data = (unsigned char *)ROM_DATA;
             ram_start = (uint32_t)dest;
         }
 
         return ROM_DATA_LENGTH;
     }
+#elif SD_CARD == 1
+    ram_start = (uint32_t)&_OVERLAY_NES_FCEU_BSS_END;
+    uint32_t size = 0;
+    size = ACTIVE_FILE->size;
+    if (size > ram_get_free_size()) {
+        *data = odroid_overlay_cache_file_in_flash(ACTIVE_FILE->path, &size, false);
+    } else {
+        *data = ram_malloc(size);
+        if (*data != NULL) {
+            odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, *data);
+        }
+    }
+    return size;
+#endif
 }
 
 static bool palette_update_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)

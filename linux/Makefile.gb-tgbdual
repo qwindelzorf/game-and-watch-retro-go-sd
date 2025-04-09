@@ -51,6 +51,8 @@ C_DEFS =  \
 C_INCLUDES =  \
 -I. \
 -I./gb-tgbdual \
+-I../Core/Inc/retro-go \
+-I../Core/Inc/ \
 -I../Core/Src/porting/lib \
 -I../Core/Src/porting/lib/lzma \
 -I../Core/Inc/porting/gb_tgbdual \
@@ -58,7 +60,9 @@ C_INCLUDES =  \
 -I../retro-go-stm32/components/lupng \
 -I../external/tgbdual-go \
 -I../external/tgbdual-go/gb_core \
--I../external/tgbdual-go/libretro
+-I../external/tgbdual-go/libretro \
+-I/opt/homebrew/include/
+
 
 CXX_INCLUDES =  \
 -I. \

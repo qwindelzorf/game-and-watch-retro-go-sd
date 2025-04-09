@@ -22,8 +22,7 @@
 #ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
 #endif
-#include "rg_i18n.h"
-#include "gui.h"
+#include "gw_malloc.h"
 
 //#define PCE_SHOW_DEBUG
 //#define XBUF_WIDTH 	(480 + 32)
@@ -352,11 +351,23 @@ pce_osd_getromdata(unsigned char **data)
         return n_decomp_bytes;
     }
     else
-#endif
     {
         *data = (unsigned char *)ROM_DATA;
         return ROM_DATA_LENGTH;
     }
+#elif SD_CARD == 1
+    ram_start = (uint32_t)&_OVERLAY_PCE_BSS_END;
+    uint32_t size = ACTIVE_FILE->size;
+    if (size > ram_get_free_size()) {
+        *data = odroid_overlay_cache_file_in_flash(ACTIVE_FILE->path, &size, false);
+    } else {
+        *data = ram_malloc(size);
+        if (*data != NULL) {
+            odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, *data);
+        }
+    }
+    return size;
+#endif
 }
 
 void LoadCartPCE() {
