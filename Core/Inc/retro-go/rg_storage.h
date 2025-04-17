@@ -73,3 +73,5 @@ rg_stat_t rg_storage_stat(const char *path);
 typedef void (*progress_ram_cb)(uint8_t progress);
 
 size_t rg_storage_copy_file_to_ram(char *file_path, uint8_t *ram_dest, void (*progress_ram_cb)(uint8_t progress));
+
+bool rg_storage_get_adjacent_files(const char *path, char *prev_path, char *next_path);

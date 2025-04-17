@@ -55,7 +55,6 @@ You can support the development by donating via [PayPal](https://paypal.me/revly
 
 Current limitations :
 - Up to 1000 roms/disks will be visible for each system
-- Disk change is not available for MSX and Amstrad systems
 - CJK characters not yet visible
 
 ## Installation
@@ -287,7 +286,7 @@ The system needs bios files to be in the roms/msx_bios folder. Check roms/msx_bi
 What is supported :
 - MSX1/2/2+ system are supported. MSX Turbo-R will probably not work on the G&W.
 - ROM cartridges images : roms have to be named with rom, mx1 or mx2 extension.
-- Disks images : disks images have to be named with dsk extension. Due to memory constraints, disks images are read only. Multiple disks games are supported and user can change the current disk using the "Pause/Options/Change Dsk" menu.
+- Disks images : disks images have to be named with dsk extension. Multiple disks games are supported and user can change the current disk using the "Pause/Options/Change Dsk" menu.
 - Cheat codes support (MCF files in old or new format as described [Here](http://www.msxblue.com/manual/trainermcf_c.htm))
 - The file roms/msx_bios/msxromdb.xml contains control profiles for some games, it allows to configure controls in the best way for some games. If a game has no control profile defined in msxromdb.xml, then controls will be configured as joystick emulation mode.
 - Sometimes games require the user to enter his name using the keyboard, and some games like Metal Gear 1/2 are using F1-F5 keys to acces items/radio/... menus. It is possible to virtually press these keys using the "Pause/Options/Press Key" menu.
@@ -300,8 +299,8 @@ Amstrad CPC6128 system is a computer with a keyboard and disk drive.
 
 What is supported :
 - Amstrad CPC6128 system is the only supported system. CPC464 could be added if there is any interest in doing this. Note that CPC464+/6128+ systems are not supported (running a around 40% of their normal speed so it has been removed)
-- Disks images : disks images have to be named with dsk extension. Due to memory constraints, disks images are read only. Multiple disks games are supported and user can change the current disk using the "Pause/Options/Change Dsk" menu.  Both standard and extended dsk format are supported, moreover a compression mechanism specific to the G&W has been implemented to reduce the size of disk images. Disk compression is automatically handled during the build process.
-- Normally when the amstrad system starts, it will wait the user to enter a run"file or |CPM command to load the content of the disk. As it's not very friendly, the emulator is detecting the name of the file to run and enter automatically the right commant at startup
+- Disks images : disks images have to be named with dsk extension. Due to memory constraints, disks images are read only. Multiple disks games are supported and user can change the current disk using the "Pause/Options/Change Dsk" menu.  Both standard and extended dsk format are supported.
+- Normally when the amstrad system starts, it will wait the user to enter a run"file or |CPM command to load the content of the disk. As it's not very friendly, the emulator is detecting the name of the file to run and enter automatically the right command at startup
 - Sometimes games require the user to enter his name using the keyboard. It is possible to virtually press these keys using the "Pause/Options/Press Key" menu.
 - Amstrad screen resolution is 384x272 pixels while G&W resolution is 320x240. The standard screen mode (with no scaling) will show the screen without the borders which will be ok in most cases, but in some cases games are using borders to show some content. If you want to see the whole Amstrad screen on the G&W, set options/scaling to "fit".
 

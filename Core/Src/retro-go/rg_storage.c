@@ -241,3 +241,81 @@ size_t rg_storage_copy_file_to_ram(char *file_path, uint8_t *ram_dest, void (*pr
 
     return total_written;
 }
+
+bool rg_storage_get_adjacent_files(const char *path, char *prev_path, char *next_path) {
+    CHECK_PATH(path);
+    
+    // Get directory and extension
+    char *dir = strdup(path);
+    char *last_slash = strrchr(dir, '/');
+    if (!last_slash) {
+        free(dir);
+        return false;
+    }
+    *last_slash = '\0';
+    
+    const char *ext = rg_extension(path);
+    if (!ext) {
+        free(dir);
+        return false;
+    }
+    
+    const char *current_basename = rg_basename(path);
+    char best_prev[RG_PATH_MAX] = {0};
+    char best_next[RG_PATH_MAX] = {0};
+    bool need_prev = prev_path != NULL;
+    bool need_next = next_path != NULL;
+    
+    DIR dir_obj;
+    FILINFO fno;
+    FRESULT res = f_opendir(&dir_obj, dir);
+    if (res != FR_OK) {
+        free(dir);
+        return false;
+    }
+    
+    // Single pass to find previous and next files
+    while (true) {
+        wdog_refresh();
+        res = f_readdir(&dir_obj, &fno);
+        if (res != FR_OK || fno.fname[0] == 0) break;
+        
+        // Skip directories and hidden files
+        if (fno.fattrib & AM_DIR || fno.fname[0] == '.') continue;
+        
+        const char *file_ext = rg_extension(fno.fname);
+        if (file_ext && strcasecmp(file_ext, ext) == 0) {
+            // Compare with current file to determine if it's a better match
+            int cmp = strcasecmp(fno.fname, current_basename);
+            
+            // For previous file: we want the highest file that's still lower than current
+            if (need_prev && cmp < 0) {
+                // If we don't have a previous file yet, or this one is higher than our current best
+                if (!best_prev[0] || strcasecmp(fno.fname, best_prev + strlen(dir) + 1) > 0) {
+                    sprintf(best_prev, "%s/%s", dir, fno.fname);
+                }
+            }
+            
+            // For next file: we want the lowest file that's still higher than current
+            if (need_next && cmp > 0) {
+                // If we don't have a next file yet, or this one is lower than our current best
+                if (!best_next[0] || strcasecmp(fno.fname, best_next + strlen(dir) + 1) < 0) {
+                    sprintf(best_next, "%s/%s", dir, fno.fname);
+                }
+            }
+        }
+    }
+    
+    f_closedir(&dir_obj);
+    
+    // Copy results to output buffers, using current path if no match found
+    if (need_prev) {
+        strcpy(prev_path, best_prev[0] ? best_prev : path);
+    }
+    if (need_next) {
+        strcpy(next_path, best_next[0] ? best_next : path);
+    }
+    
+    free(dir);
+    return true;
+}

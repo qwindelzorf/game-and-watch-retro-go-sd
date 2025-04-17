@@ -18,7 +18,6 @@
 #define AUDIO_BUFFER_LENGTH_AMSTRAD  (AMSTRAD_SAMPLE_RATE / AMSTRAD_FPS)
 
 #define AMSTRAD_DISK_EXTENSION "dsk"
-#define AMSTRAD_DISK_EXTENSION_COMPRESSED "cdk"
 
 static void blit(uint8_t *src_fb, uint16_t *framebuffer);
 
@@ -193,10 +192,9 @@ static int selected_palette_index = 0;
 static char controls_name[10];
 static int selected_controls_index = 0;
 
-#if 0
 static char disk_name[128];
-#endif
-static int selected_disk_index = 0;
+//static int selected_disk_index = 0;
+static char current_disk_path[255] = {0};
 
 #if SD_CARD == 1
 char DISKA_NAME[256] = "\0";
@@ -274,6 +272,7 @@ extern int cap32_save_state(FILE *file);
 extern int cap32_load_state(FILE *file);
 
 static bool SaveState(const char *savePathName) {
+    int selected_disk_index = 0; // Dummy value for compatibility with old savestates
     // Show disk icon when saving state
     uint16_t *dest = lcd_get_inactive_buffer();
     uint16_t idx = 0;
@@ -302,6 +301,7 @@ static bool SaveState(const char *savePathName) {
     fwrite(&amstrad_button_time_key, 4, 1, file);
     fwrite(&amstrad_button_start_key, 4, 1, file);
     fwrite(&amstrad_button_select_key, 4, 1, file);
+    fwrite(current_disk_path, 255, 1, file);
     fclose(file);
 
     return true;
@@ -317,6 +317,7 @@ static bool LoadState(const char *savePathName) {
     fread(readin_header, 1, 8, file);
     // Check for header
     if (memcmp(headerString, readin_header, sizeof(readin_header)) == 0) { 
+        int selected_disk_index; // Dummy variable for compatibility with old savestates
         cap32_load_state(file);
         fread(&selected_palette_index, 4, 1, file);
         fread(&selected_disk_index, 4, 1, file);
@@ -328,6 +329,10 @@ static bool LoadState(const char *savePathName) {
         fread(&amstrad_button_time_key, 4, 1, file);
         fread(&amstrad_button_start_key, 4, 1, file);
         fread(&amstrad_button_select_key, 4, 1, file);
+        if (fread(current_disk_path, 255, 1, file) > 0) {
+            detach_disk(0);
+            attach_disk(current_disk_path, 0);
+        }
     }
     fclose(file);
     return true;
@@ -602,44 +607,25 @@ static bool update_keyboard_cb(odroid_dialog_choice_t *option, odroid_dialog_eve
     return event == ODROID_DIALOG_ENTER;
 }
 
-#if 0
 static bool update_disk_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
-    char game_name[128];
-    int disk_count = 0;
-    int max_index = 0;
-    retro_emulator_file_t *disk_file = NULL;
-    const rom_system_t *amstrad_system = rom_manager_system(&rom_mgr, "Amstrad CPC");
-    disk_count = rom_get_ext_count(amstrad_system, AMSTRAD_DISK_EXTENSION);
-    if (disk_count > 0)
-    {
-        max_index = disk_count - 1;
-    }
-    else
-    {
-        max_index = 0;
-    }
+    char new_game_name[255];
 
-    if (event == ODROID_DIALOG_PREV)
-    {
-        selected_disk_index = selected_disk_index > 0 ? selected_disk_index - 1 : max_index;
-    }
-    if (event == ODROID_DIALOG_NEXT)
-    {
-        selected_disk_index = selected_disk_index < max_index ? selected_disk_index + 1 : 0;
-    }
-
-    disk_file = (retro_emulator_file_t *)rom_get_ext_file_at_index(amstrad_system, AMSTRAD_DISK_EXTENSION, selected_disk_index);
-    if (disk_count > 0)
-    {
-        sprintf(game_name, "%s.%s", disk_file->name, disk_file->ext);
+    if (event == ODROID_DIALOG_PREV) {
+        rg_storage_get_adjacent_files(current_disk_path, new_game_name, NULL);
+        strcpy(current_disk_path, new_game_name);
         detach_disk(0);
-        attach_disk_buffer((char *)disk_file->address, 0);
+        attach_disk(current_disk_path, 0);
     }
-    strcpy(option->value, disk_file->name);
+    if (event == ODROID_DIALOG_NEXT) {
+        rg_storage_get_adjacent_files(current_disk_path, NULL, new_game_name);
+        strcpy(current_disk_path, new_game_name);
+        detach_disk(0);
+        attach_disk(current_disk_path, 0);
+    }
+    strcpy(option->value, rg_basename(current_disk_path));
     return event == ODROID_DIALOG_ENTER;
 }
-#endif
 
 static bool update_palette_cb(odroid_dialog_choice_t *option, odroid_dialog_event_t event, uint32_t repeat)
 {
@@ -713,14 +699,12 @@ static void createOptionMenu(odroid_dialog_choice_t *options)
     options[index].enabled = 1;
     options[index].update_cb = &update_palette_cb;
     index++;
-#if 0
     options[index].id = 100;
     options[index].label = curr_lang->s_amd_Change_Dsk;
     options[index].value = disk_name;
     options[index].enabled = 1;
     options[index].update_cb = &update_disk_cb;
     index++;
-#endif
     options[index].id = 100;
     options[index].label = curr_lang->s_amd_Controls;
     options[index].value = controls_name;
@@ -1069,8 +1053,6 @@ void app_main_amstrad(uint8_t load_state, uint8_t start_paused, int8_t save_slot
     int disk_load_result = 0;
     int load_result = 0;
 
-    selected_disk_index = -1;
-
     // Create RGB8 to RGB565 table
     for (int i = 0; i < 256; i++)
     {
@@ -1120,8 +1102,8 @@ void app_main_amstrad(uint8_t load_state, uint8_t start_paused, int8_t save_slot
 #else
     if (0 == strcmp(ACTIVE_FILE->ext, AMSTRAD_DISK_EXTENSION))
     {
-        disk_load_result = attach_disk(ACTIVE_FILE->path, 0);
-        printf("attach_disk %d\n", disk_load_result);
+        strcpy(current_disk_path, ACTIVE_FILE->path);
+        attach_disk(current_disk_path, 0);
     }
 #endif
 
