@@ -261,28 +261,6 @@ INCLUDE build/fceumm_mappers.ld
   }
   _OVERLAY_NES_FCEU_BSS_SIZE = SIZEOF(.overlay_nes_fceu_bss);
 
-  .overlay_gb __RAM_EMU_START__ : {
-    . = ALIGN(4);
-    __ram_emu_gb_start__ = .;
-    build/gnuboy/*.o (.data .data* .text .text* .rodata .rodata*)
-    . = ALIGN(4);
-    _OVERLAY_GB_LOAD_END = .;
-  } AT > CORES
-  _OVERLAY_GB_LOAD_START = LOADADDR(.overlay_gb);
-  _OVERLAY_GB_SIZE = SIZEOF(.overlay_gb);
-
-  .overlay_gb_bss _OVERLAY_GB_LOAD_END : {
-    . = ALIGN(4);
-    _OVERLAY_GB_BSS_START = .;
-    build/gnuboy/*.o (COMMON)
-    . = ALIGN(4);
-    build/gnuboy/*.o (.bss .bss*)
-    _OVERLAY_GB_BSS_END = .;
-    __ram_emu_gb_end__ = .;
-    ASSERT(ABSOLUTE(_OVERLAY_GB_BSS_END) < __RAM_EMU_END__, "Error: GB BSS overflow");
-  }
-  _OVERLAY_GB_BSS_SIZE = SIZEOF(.overlay_gb_bss);
-
   .overlay_tgb __RAM_EMU_START__ : {
     . = ALIGN(4);
     __ram_emu_tgb_start__ = .;

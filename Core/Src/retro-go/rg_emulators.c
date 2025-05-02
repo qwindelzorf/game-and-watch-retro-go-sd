@@ -13,7 +13,6 @@
 #include "rom_manager.h"
 #include "gw_lcd.h"
 #include "main.h"
-#include "main_gb.h"
 #include "main_gb_tgbdual.h"
 #include "main_nes.h"
 #include "main_nes_fceu.h"
@@ -671,13 +670,6 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
     if((strcmp(system_name, "Nintendo Gameboy") == 0) ||
        (strcmp(system_name, "Nintendo Gameboy Color") == 0)) {
-#if FORCE_GNUBOY == 1
-        if (odroid_overlay_cache_file_in_ram("/cores/gb.bin", (uint8_t *)&__RAM_EMU_START__)) {
-            memset(&_OVERLAY_GB_BSS_START, 0x0, (size_t)&_OVERLAY_GB_BSS_SIZE);
-            SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_GB_SIZE);
-            app_main_gb(load_state, start_paused, save_slot);
-        }
-#else
         if (odroid_overlay_cache_file_in_ram("/cores/tgb.bin", (uint8_t *)&__RAM_EMU_START__)) {
             memset(&_OVERLAY_TGB_BSS_START, 0x0, (size_t)&_OVERLAY_TGB_BSS_SIZE);
             SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_TGB_SIZE);
@@ -687,7 +679,6 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
             app_main_gb_tgbdual(load_state, start_paused, save_slot);
         }
-#endif
     } else if(strcmp(system_name, "Nintendo Entertainment System") == 0) {
 #if FORCE_NOFRENDO == 1
         if (odroid_overlay_cache_file_in_ram("/cores/nes.bin", (uint8_t *)&__RAM_EMU_START__)) {
