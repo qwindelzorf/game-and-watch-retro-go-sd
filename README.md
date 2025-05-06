@@ -186,6 +186,11 @@ To install the hardware mod, you need:
 
 ## FAQ
 
+- I'd like to play Zelda 3 in French/Italian/German/... How to change language ?
+
+   First follow the steps to create a zelda3_assets.dat file including wanted languages.
+   Load Zelda 3, press Pause/Set button to enter menu, select Options, select Language line and press left/right to change current language. Text for Player Select/Create/... is always in English, but dialogs will be in selected language. Do not change language when a dialog is shown on the screen, it can cause some issues.
+
 - Can you add [new system name] support ?
 
    Maybe ... Probably not ! G&W system is very limited, it has only about 1MB of RAM free for code + dynamic ressources for each emulator. Most of the time emulators have to be deeply optimized to reduce their memory use so they can fit. Each emulator port is a challenge and some have failed already (fake-08, picodrive, ...).
