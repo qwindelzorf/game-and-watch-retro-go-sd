@@ -17,6 +17,7 @@ extern "C"
 #ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
 #endif
+#include "heap.hpp"
 
 extern void __libc_init_array(void);
 }
@@ -51,14 +52,22 @@ static int paddle_digital_sensitivity = 50;
 
 #define AUDIO_A2600_SAMPLE_RATE 31400
 
-static bool LoadState(char *savePathName, char *sramPathName, int slot)
+static bool LoadState(const char *savePathName)
 {
-    return 0;
+    Serializer in(savePathName, true);
+    if(!in.isValid()) {
+        return false;  // Failed to open file for reading
+    }
+    return stateManager.loadState(in);
 }
 
-static bool SaveState(char *savePathName, char *sramPathName, int slot)
+static bool SaveState(const char *savePathName)
 {
-    return 0;
+    Serializer out(savePathName, false);
+    if(!out.isValid()) {
+        return false;  // Failed to open file for writing
+    }
+    return stateManager.saveState(out);
 }
 
 uint8_t a2600_y_offset = 0;
@@ -70,9 +79,11 @@ char a2600_display_mode[10];
 uint8_t a2600_difficulty;
 bool a2600_fastscbios = false;
 
-#define ROM_BUFF_LENGTH 131072 // 128kB
+#ifndef GNW_DISABLE_COMPRESSION
 // Memory to handle compressed roms
+#define ROM_BUFF_LENGTH 131072 // 128kB
 static uint8_t rom_memory[ROM_BUFF_LENGTH];
+#endif
 
 static size_t getromdata(unsigned char **data) {
 #ifndef GNW_DISABLE_COMPRESSION
@@ -90,8 +101,16 @@ static size_t getromdata(unsigned char **data) {
         return ROM_DATA_LENGTH;
     }
 #else
-    *data = (unsigned char *)ROM_DATA;
-    return ROM_DATA_LENGTH;
+    uint32_t size = ACTIVE_FILE->size;
+//    if (size > (heap_free_mem())) {
+        *data = (uint8_t *)odroid_overlay_cache_file_in_flash(ACTIVE_FILE->path, &size, false);
+//    } else {
+//        *data = (uint8_t *)heap_alloc_mem(size);
+//        if (data != NULL) {
+//            odroid_overlay_cache_file_in_ram(ACTIVE_FILE->path, (uint8_t *)data);
+//        }
+//    }
+    return size;
 #endif
 }
 
@@ -105,7 +124,12 @@ void fill_stella_config()
      * Byte 4 : Control swap
      * Byte 5 : difficulty
      */
-    a2600_y_offset = ACTIVE_FILE->extra[1];
+    a2600_y_offset = 0;//ACTIVE_FILE->extra[1];
+    a2600_height = 213;
+    strcpy(a2600_control, ""); // Joystick
+    strcpy(a2600_display_mode, "NTSC");
+    a2600_difficulty = 0;
+/*
     if (ACTIVE_FILE->extra[2] > 0)
     {
         a2600_height = ACTIVE_FILE->extra[2] + 213;
@@ -187,6 +211,7 @@ void fill_stella_config()
         break;
     }
     a2600_difficulty = ACTIVE_FILE->extra[5];
+*/
 }
 void update_joystick(odroid_gamepad_state_t *joystick)
 {
@@ -320,6 +345,8 @@ void app_main_a2600_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_sl
 
     // Load the cart
     string cartType = "";
+    cartType = "AUTO";
+/*
     switch (ACTIVE_FILE->extra[0])
     {
     case 0:
@@ -356,7 +383,7 @@ void app_main_a2600_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_sl
         cartType = "16IN1";
         break;
     }
-
+*/
     printf("cartType = %s\n", cartType.c_str());
     string cartId;
     settings = new Settings(&osystem);

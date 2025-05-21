@@ -174,13 +174,13 @@ static bool circular_flash_write(const char *file_path,
     uint32_t flash_write_base = get_extflash_base();
 
     // If there is not enough space available, write the file at the beginning of the flash
-    if (flash_write_pointer - flash_write_base + *data_size > OSPI_GetFlashSize())
+    if (flash_write_pointer - flash_write_base + *data_size > OSPI_GetFlashSize() - get_ofw_extflash_size())
     {
         flash_write_pointer = flash_write_base;
     }
 
     // Data are larger than flash size ... Abort
-    if (flash_write_pointer - flash_write_base + *data_size > OSPI_GetFlashSize())
+    if (flash_write_pointer - flash_write_base + *data_size > OSPI_GetFlashSize() - get_ofw_extflash_size())
     {
         fclose(file);
         return false;
