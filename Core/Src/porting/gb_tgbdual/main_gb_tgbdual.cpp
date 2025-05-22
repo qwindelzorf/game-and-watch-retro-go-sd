@@ -12,7 +12,7 @@ extern "C" {
 #include "common.h"
 #include "rom_manager.h"
 #include "appid.h"
-#include "gw_malloc.h"
+#include "cpp_init_array.h"
 #include "main_gb_tgbdual.h"
 #include "heap.hpp"
 #include "odroid_overlay.h"
@@ -21,7 +21,7 @@ extern "C" {
 extern void __libc_init_array(void);
 }
 
-void gb_process_blit();
+static void gb_process_blit();
 
 #define GB_WIDTH (160)
 #define GB_HEIGHT (144)
@@ -51,11 +51,11 @@ void gb_process_blit();
 // GB Palettes
 int index_palette = 0;
 
-gb *g_gb;
-gw_renderer *render;
+static gb *g_gb = nullptr;
+static gw_renderer *render = nullptr;
 
-static uint16_t *tgb_buffer;
-bool tgb_drawFrame;
+static uint16_t *tgb_buffer = nullptr;
+bool tgb_drawFrame = false;
 
 // --- MAIN
 
@@ -339,7 +339,7 @@ static inline void screen_blit_jth(uint16_t *buffer) {
     }
 }
 
-void gb_process_blit()
+static void gb_process_blit()
 {
     odroid_display_scaling_t scaling = odroid_display_get_scaling_mode();
     odroid_display_filter_t filtering = odroid_display_get_filter_mode();
@@ -506,6 +506,7 @@ extern "C" void update_cheats_gb() {
 
 void app_main_gb_tgbdual_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 {
+    printf("app_main_gb_tgbdual_cpp\n");
     char palette_values[16];
     odroid_gamepad_state_t joystick;
 
@@ -624,7 +625,8 @@ void app_main_gb_tgbdual_cpp(uint8_t load_state, uint8_t start_paused, int8_t sa
 extern "C" void app_main_gb_tgbdual(uint8_t load_state, uint8_t start_paused, uint8_t save_slot)
  {
  	// Call static c++ constructors now, *after* OSPI and other memory is copied
- 	__libc_init_array();
+    // Do not use __libc_init_array() as it will not work with the overlay
+    cpp_init_array(__init_array_tgb_start__, __init_array_tgb_end__);
 
  	app_main_gb_tgbdual_cpp(load_state, start_paused,save_slot);
  }

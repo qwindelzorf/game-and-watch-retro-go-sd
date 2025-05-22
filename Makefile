@@ -19,6 +19,7 @@ ROMS_VIDEOPAC :=
 # C sources
 C_SOURCES =  \
 Core/Src/bilinear.c \
+Core/Src/cpp_init_array.c \
 Core/Src/gw_buttons.c \
 Core/Src/gw_lcd.c \
 Core/Src/gw_audio.c \
@@ -623,7 +624,6 @@ Core/Src/porting/gwenesis/main_gwenesis.c
 A2600_C_SOURCES =
 A2600_CXX_SOURCES =
 
-ifneq ($(strip $(ROMS_A2600)),)
 CORE_A2600 = external/stella2014-go
 A2600_C_SOURCES += \
 $(CORE_A2600)/stella/src/emucore/DefPropsBin.c
@@ -690,7 +690,6 @@ $(CORE_A2600)/stella/src/emucore/Paddles.cxx \
 $(CORE_A2600)/stella/src/emucore/TrackBall.cxx \
 $(CORE_A2600)/stella/src/emucore/StellaGenesis.cxx \
 $(CORE_A2600)/stella/src/emucore/StellaKeyboard.cxx
-endif
 
 A7800_C_SOURCES = 
 

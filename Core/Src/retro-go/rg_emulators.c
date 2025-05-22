@@ -48,7 +48,7 @@ static retro_emulator_file_t *shared_files = NULL;
 #define COVERFLOW 0
 #endif /* COVERFLOW */
 // Increase when adding new emulators
-#define MAX_EMULATORS 17
+#define MAX_EMULATORS 18
 static retro_emulator_t emulators[MAX_EMULATORS];
 static rom_system_t systems[MAX_EMULATORS];
 static int emulators_count = 0;
@@ -736,7 +736,6 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
         app_main_gwenesis(load_state, start_paused, save_slot);
       }
     } else if(strcmp(system_name, "Atari 2600") == 0) {
-#ifdef ENABLE_EMULATOR_A2600
       if (odroid_overlay_cache_file_in_ram("/cores/a2600.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_A2600_BSS_START, 0x0, (size_t)&_OVERLAY_A2600_BSS_SIZE);
         SCB_CleanDCache_by_Addr((uint32_t *)&__RAM_EMU_START__, (size_t)&_OVERLAY_A2600_SIZE);
@@ -746,7 +745,6 @@ void emulator_start(retro_emulator_file_t *file, bool load_state, bool start_pau
 
         app_main_a2600(load_state, start_paused, save_slot);
       }
-#endif
     } else if(strcmp(system_name, "Atari 7800") == 0)  {
       if (odroid_overlay_cache_file_in_ram("/cores/a7800.bin", (uint8_t *)&__RAM_EMU_START__)) {
         memset(&_OVERLAY_A7800_BSS_START, 0x0, (size_t)&_OVERLAY_A7800_BSS_SIZE);
@@ -843,10 +841,10 @@ void emulators_init()
     add_emulator("Colecovision", "col", "col", RG_LOGO_PAD_COL, RG_LOGO_HEADER_COL, NO_GAME_DATA);
     add_emulator("Watara Supervision", "wsv", "wsv sv bin", RG_LOGO_PAD_WSV, RG_LOGO_HEADER_WSV, NO_GAME_DATA);
     add_emulator("MSX", "msx", "dsk rom mx1 mx2", RG_LOGO_PAD_MSX, RG_LOGO_HEADER_MSX, NO_GAME_DATA);
-//    add_emulator("Atari 2600", "a2600", "a26 bin", RG_LOGO_PAD_A2600, RG_LOGO_HEADER_A2600, GAME_DATA);
+    add_emulator("Atari 2600", "a2600", "a26 bin", RG_LOGO_PAD_A2600, RG_LOGO_HEADER_A2600, NO_GAME_DATA);
     add_emulator("Atari 7800", "a7800", "a78", RG_LOGO_PAD_A7800, RG_LOGO_HEADER_A7800, NO_GAME_DATA);
     add_emulator("Amstrad CPC", "amstrad", "dsk", RG_LOGO_PAD_AMSTRAD, RG_LOGO_HEADER_AMSTRAD, NO_GAME_DATA);
-//    add_emulator("Philips Vectrex", "videopac", "bin", "o2em-go", 0, &pad_gb, &header_gb); // TODO : change graphics
+//    add_emulator("Philips Vectrex", "videopac", "bin", RG_LOGO_PAD_VIDEOPAC, RG_LOGO_HEADER_AMSTRAD, NO_GAME_DATA); // TODO : change graphics
     add_emulator("Tamagotchi", "tama", "b", RG_LOGO_PAD_TAMA, RG_LOGO_HEADER_TAMA, NO_GAME_DATA);
     add_emulator("Pokemon Mini", "mini", "min", RG_LOGO_PAD_PKMINI, RG_LOGO_HEADER_PKMINI, NO_GAME_DATA);
     add_emulator("Homebrew", "homebrew", "bin", RG_LOGO_EMPTY, RG_LOGO_HEADER_HOMEBREW, NO_GAME_DATA);

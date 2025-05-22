@@ -134,3 +134,9 @@ extern uint8_t *_PCE_ROM_UNPACK_BUFFER;
 extern uint8_t _PCE_ROM_UNPACK_BUFFER_SIZE;
 
 extern void * __RAM_END__[];
+
+/* C++ init array constructors */
+extern void (* __init_array_tgb_start__[])(void);
+extern void (* __init_array_tgb_end__[])(void);
+extern void (* __init_array_a2600_start__[])(void);
+extern void (* __init_array_a2600_end__[])(void);

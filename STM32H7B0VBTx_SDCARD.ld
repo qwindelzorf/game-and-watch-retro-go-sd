@@ -264,6 +264,9 @@ INCLUDE build/fceumm_mappers.ld
   .overlay_tgb __RAM_EMU_START__ : {
     . = ALIGN(4);
     __ram_emu_tgb_start__ = .;
+    __init_array_tgb_start__ = .;
+    KEEP(build/tgbdual/*.o(.init_array*))
+    __init_array_tgb_end__ = .;
     build/tgbdual/*.o (.data .data* .text .text* .text.* .rodata .rodata* .ARM.extab.text.* .ARM.exidx.text.* )
     . = ALIGN(4);
     _OVERLAY_TGB_LOAD_END = .;
@@ -427,6 +430,9 @@ INCLUDE build/fceumm_mappers.ld
   .overlay_a2600 __RAM_EMU_START__ : {
     . = ALIGN(4);
     __ram_emu_a2600_start__ = .;
+    __init_array_a2600_start__ = .;
+    KEEP(build/a2600/*.o(.init_array*))
+    __init_array_a2600_end__ = .;
     build/a2600/*.o (.data .data* .text .text* .rodata .rodata* .ARM.extab.text.* .ARM.exidx.text.*)
     . = ALIGN(4);
     _OVERLAY_A2600_LOAD_END = .;

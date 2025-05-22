@@ -13,10 +13,11 @@ extern "C"
 #include "common.h"
 #include "rom_manager.h"
 #include "appid.h"
-#include "gw_malloc.h"
+#include "cpp_init_array.h"
 #ifndef GNW_DISABLE_COMPRESSION
 #include "lzma.h"
 #endif
+#include "heap.hpp"
 #include "DefPropsBin.h"
 
 extern void __libc_init_array(void);
@@ -53,6 +54,7 @@ static int paddle_digital_sensitivity = 50;
 #define AUDIO_A2600_SAMPLE_RATE 31400
 
 static void blend_frames_16(uInt8 *stella_fb, int width, int height);
+static void blit();
 
 static bool LoadState(const char *savePathName)
 {
@@ -78,7 +80,7 @@ static void *Screenshot()
 
     lcd_clear_active_buffer();
 
-    blend_frames_16(console->tia().currentFrameBuffer(), console->tia().width(), console->tia().height());
+    blit();
 
     return lcd_get_active_buffer();
 }
@@ -296,11 +298,12 @@ static void sound_store(int16_t *audio_out_buf, uint16_t length)
     }
 }
 
-void blit()
+static void blit()
 {
+    blend_frames_16(console->tia().currentFrameBuffer(), console->tia().width(), console->tia().height());
 }
 
-void app_main_a2600_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
+static void app_main_a2600_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 {
     size_t offset;
     odroid_gamepad_state_t joystick;
@@ -395,7 +398,7 @@ void app_main_a2600_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_sl
 
         tia.update();
 
-        blend_frames_16(tia.currentFrameBuffer(), videoWidth, videoHeight);
+        blit();
         common_ingame_overlay();
         osystem.sound().processFragment(sampleBuffer, tiaSamplesPerFrame);
 
@@ -411,7 +414,8 @@ void app_main_a2600_cpp(uint8_t load_state, uint8_t start_paused, int8_t save_sl
 extern "C" int app_main_a2600(uint8_t load_state, uint8_t start_paused, int8_t save_slot)
 {
     // Call static c++ constructors now, *after* OSPI and other memory is copied
-    __libc_init_array();
+    // Do not use __libc_init_array() as it will not work with the overlay
+    cpp_init_array(__init_array_a2600_start__, __init_array_a2600_end__);
 
     app_main_a2600_cpp(load_state, start_paused, save_slot);
 
