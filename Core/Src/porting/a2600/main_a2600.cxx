@@ -247,18 +247,16 @@ static void convert_palette(const uint32_t *palette32, uint16_t *palette16)
 
 static void blend_frames_16(uInt8 *stella_fb, int width, int height)
 {
-    if (width > 320)
-        width = 320;
-    if (height > 240)
-        height = 240;
+    // Width is always 160, we will stretch it to 320
+    if (height > GW_LCD_HEIGHT)
+        height = GW_LCD_HEIGHT;
 
     const uint32_t *palette32 = console->getPalette(0);
     uint16_t *palette16 = currentPalette16;
     uInt8 *in = stella_fb;
     uint16_t *out = (uint16_t *)lcd_get_active_buffer();
     int x, y;
-    int xoffset = (320 - width) / 2;
-    int yoffset = (240 - height) / 2;
+    int yoffset = (GW_LCD_HEIGHT - height) / 2;
 
     /* If palette has changed, re-cache converted
      * RGB565 values */
@@ -268,26 +266,15 @@ static void blend_frames_16(uInt8 *stella_fb, int width, int height)
         convert_palette(palette32, palette16);
     }
 
-    /*   for (y=0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-          *(out+y*320+x) = *(palette16 + *(in++));
-        }
-       }*/
-
     for (y = yoffset; y < height + yoffset; y++)
     {
         for (x = 0; x < width; x++)
         {
-            *(out + y * 320 + 2 * x) = *(palette16 + *(in++));
-            *(out + y * 320 + 2 * x + 1) = *(out + y * 320 + 2 * x);
+            uint16_t color = *(palette16 + *(in++));
+            *(out + y * GW_LCD_WIDTH + 2 * x) = color;
+            *(out + y * GW_LCD_WIDTH + 2 * x + 1) = color;
         }
     }
-    /*   for (y=yoffset; y < height+yoffset; y++) {
-        for (x = 0; x < width; x++) {
-          *(out+y*320+2*x) = *(palette16 + *(in++));
-          *(out+y*320+2*x+1) = *(out+y*320+2*x);
-        }
-       }*/
 }
 
 static void sound_store()
