@@ -159,7 +159,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                 // Create BMP header for 320x240 RGB565
                 uint8_t bmp_header[66] = {
                     0x42, 0x4D,             // BM signature
-                    0x36, 0x84, 0x01, 0x00, // File size (66 + 320x240x2 = 153666 = 0x25842)
+                    0x42, 0x58, 0x02, 0x00, // File size (66 + 320x240x2 = 153666 = 0x25842)
                     0x00, 0x00,             // Reserved
                     0x00, 0x00,             // Reserved
                     0x42, 0x00, 0x00, 0x00, // Data offset (66 bytes)
@@ -169,7 +169,7 @@ void common_emu_input_loop(odroid_gamepad_state_t *joystick, odroid_dialog_choic
                     0x01, 0x00,             // Planes = 1
                     0x10, 0x00,             // BitCount = 16
                     0x03, 0x00, 0x00, 0x00, // Compression = BI_BITFIELDS
-                    0x00, 0x84, 0x01, 0x00, // Image size = 153600
+                    0x00, 0x58, 0x02, 0x00, // Image size = 153600
                     0x00, 0x00, 0x00, 0x00, // X pixels per meter
                     0x00, 0x00, 0x00, 0x00, // Y pixels per meter
                     0x00, 0x00, 0x00, 0x00, // Colors used
