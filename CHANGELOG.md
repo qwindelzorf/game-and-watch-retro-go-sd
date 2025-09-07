@@ -2,9 +2,9 @@
 
 ## What's New
 
-### Version 0.7.1
-- Add Screenshot by pressing GAME+PAUSE buttons
-screenshots are saved in /screenshots folder as BMP files
+### Version 0.7.2
+- NES : Fix savestate issue with mappers 19, 210 and 539
+- MSX : Fix SCC issue with some disk games
 
 ## Prerequisites
 To install this version, make sure you have:
