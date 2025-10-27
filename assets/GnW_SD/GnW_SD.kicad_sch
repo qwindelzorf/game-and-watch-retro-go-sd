@@ -1823,6 +1823,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C28323"
+			(at 169.418 123.444 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "e4b97901-5b78-45be-825e-5f56339cfcbc")
 		)
@@ -2591,6 +2600,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C28323"
+			(at 115.316 127.254 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "c602fb8f-bf85-4d6e-8dd5-9a75346ccc83")
 		)
@@ -2661,6 +2679,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C25271"
+			(at 130.81 126.9999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "0c3f691f-bfab-4fdd-915a-d8b5656f7d93")
 		)
@@ -2723,6 +2750,15 @@
 		)
 		(property "Description" "Unpolarized capacitor"
 			(at 158.75 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C1804"
+			(at 160.274 123.444 0)
 			(effects
 				(font
 					(size 1.27 1.27)
