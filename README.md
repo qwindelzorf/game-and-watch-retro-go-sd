@@ -7,6 +7,7 @@ A comprehensive emulator collection for the Nintendo® Game & Watch™ with SD C
 ## Table of Contents
 - [Support Development](#support-development)
 - [Features](#features)
+- [SD Card KiCad Project]
 - [Installation](#installation)
   - [Pre-modded Options](#pre-modded-options)
   - [Hardware Requirements](#hardware-requirements)
@@ -57,6 +58,13 @@ Current limitations :
 - Up to 1000 roms/disks will be visible for each system
 - CJK characters not yet visible
 
+## SD Card KiCad Project
+
+![](assets/GnW_SD/GnW_SD_z1_front.png)
+   
+This is a remake of the original GnW SD Adapter based on the gerbers from the [upstream repo](https://github.com/sylverb/game-and-watch-retro-go-sd/raw/refs/heads/main/assets/GnW_SD_v2.zip). Parts have been changed and the board redesigned for easy production from JLCpcb. 
+Credits to Tim Schuerewegen for initial version and hundshamer for updates to make it easier to install.
+
 ## Installation
 
 ### Pre-modded Options
@@ -70,15 +78,8 @@ If you prefer professional installation, contact:
 
 To install the hardware mod, you need:
 
-- SD Card flex PCB adapter (Zelda version only for now, Mario version coming soon) : [Gerber file](https://github.com/sylverb/game-and-watch-retro-go-sd/raw/refs/heads/main/assets/GnW_SD_v2.zip) (credits to Tim Schuerewegen for initial version and hundshamer for updates to make it easier to install)
-
-   ![](assets/sm_black_top.png)
-
+- SD Card flex PCB adapter [SD Card KiCad Project] which can be ordered complete from JLCpcb
 - 1x MX25U51245GZ4I00 (64MB SPI flash 1.8v) or bigger
-- 1x 0402 100k resistor (0805 will fit too)
-- 2x 0402 1uf (0805 will fit too)
-- 1x RT9193-28GB LDO regulator
-- 1x Micro SD card slot SMD 9Pin ([here](https://www.aliexpress.com/item/1005002829329826.html), [here](https://www.aliexpress.com/item/1005001331379046.html), [here](https://www.aliexpress.com/item/32802051702.html), ...)
 
 ### Installation Steps
 
